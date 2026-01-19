@@ -1,0 +1,339 @@
+
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <title>Pianoackordverktyg – HL-Spec V3.5</title>
+  <style>
+    /* ... (samma CSS som tidigare, förkortad här) ... */
+    body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
+    /* ... (resten av CSS) ... */
+    .note-red { color: red !important; font-weight: bold; }
+    .piano.r3-size { height: 90px; }
+    .piano.r2b-size { height: 130px; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- Vänsterkolumn R1 -->
+  <div id="r1">
+    <div id="r1-title">Pianoackord (R1)</div>
+    <div id="r1-rows"></div>
+    <div id="r1-help">
+	
+<! *** hjälptext Layoutöversikt: ***!><br>
+<pre>
++--------+---------+---------+
+|        |  R2A    |  R2B    |
+|  R1    |(text)   |(analys) |
+|        +---------+---------+
+|        |        R3         |
+|        |  (ackordslista)   |
++--------+-------------------+
+</pre>
+
+      <! *** hjälptext RAM R1 är till vänster. RAM R2A är till höger om R2B R3 är till höger om R1 och under både R2A och R2B ***!><br>
+	  <! *** hjälptext Presentera i Ascii format webbsida layout ***!><br>
+	  <! *** hjälptext I R2A Skriv in ackord i fälten till vänster, ett per rad. ***!><br>
+      <! *** hjälptext I R2A Använd standardnotation, t.ex. C, Dm, Fmaj7, G7, A#. ***!><br>
+      <! *** Blank ***!><br>
+      <! *** hjälptex Du kan klistra in flera ackord i textfältet ovan och ladda in dem automatiskt. ***!><br>
+      <! *** hjälptex Tryck på 'Ladda alla' R2A till R1 för att visa alla ackord i listan. ***!><br>
+      <! *** hjälptex Tryck på 'Rensa alla' R2A för R2A att tömma alla fält snabbt. ***!><br>
+      <! *** hjälptex Klicka på 'OK' för att bekräfta ett ackord, eller 'X' för att ta bort det. ***!><br>
+      <! *** hjälptex Om ett ackord inte känns igen, kontrollera stavningen och försök igen. ***!><br>
+      <! *** hjälptex Du kan analysera ackord genom att klicka på knapparna i ackordslistan. ***!><br>
+      <! *** hjälptex Pianografiken visar vilka tangenter som ingår i varje ackord. ***!><br>
+      <! *** blank ***!><br>
+	  
+    </div>
+    <div id="r1-controls">
+      <button id="btn-load-all">Ladda alla</button>
+      <button id="btn-clear-all">Rensa alla</button>
+    </div>
+    <div id="r1-footer">
+      HL‑Spec V3.5
+    </div>
+  </div>
+  <!-- Högerdel -->
+  <div id="right">
+    <div id="top-row">
+      <!-- R2A -->
+      <div id="r2a">
+        <div><strong>R2A – Textinmatning</strong></div>
+        <textarea id="r2a-text" spellcheck="false"></textarea>
+        <div id="r2a-controls">
+          <button id="btn-r2a-load">Ladda</button>
+          <button id="btn-r2a-clear">Rensa</button>
+        </div>
+      </div>
+      <!-- R2B -->
+      <div id="r2b">
+        <div id="r2b-title"><strong>R2B – Analys</strong></div>
+        <div id="r2b-label"></div>
+        <div id="r2b-piano"></div>
+        <div style="margin-top:6px;">
+          <button id="btn-r2b-clear">Rensa</button>
+        </div>
+      </div>
+    </div>
+    <!-- R3 -->
+    <div id="r3">
+      <div><strong>R3 – Ackordslista</strong></div>
+      <div id="r3-rows"></div>
+    </div>
+  </div>
+</div>
+<script>
+  // HL-Spec V3.5 triader
+  const R1_ROWS = 28;
+  const R3_ROWS = 28;
+  const rootToTriad = {
+    'C': ['C','E','G'],
+    'C#': ['C#','F','G#'],
+    'D': ['D','F#','A'],
+    'D#': ['D#','G','A#'],
+    'E': ['E','G#','B'],
+    'F': ['F','A','C'],
+    'F#': ['F#','A#','C#'],
+    'G': ['G','B','D'],
+    'G#': ['G#','C','D#'],
+    'A': ['A','C#','E'],
+    'A#': ['A#','D','F'],
+    'B': ['B','D#','F#']
+  };
+
+  function getRootFromChordLabel(label) {
+    if (!label) return '';
+    label = label.trim();
+    if (!label) return '';
+    let root = label[0].toUpperCase();
+    if (label.length > 1 && (label[1] === '#' || label[1] === 'b')) {
+      root += label[1];
+    }
+    return root;
+  }
+
+  // Skapa R1-rader
+  function createR1() {
+    const container = document.getElementById('r1-rows');
+    for (let i = 0; i < R1_ROWS; i++) {
+      const row = document.createElement('div');
+      row.className = 'r1-row';
+      const label = document.createElement('div');
+      label.className = 'r1-label';
+      label.textContent = 'A' + (i + 1);
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'r1-input';
+      input.dataset.index = i;
+      const okBtn = document.createElement('button');
+      okBtn.textContent = 'OK';
+      okBtn.className = 'r1-btn';
+      okBtn.onclick = updateR3FromR1;
+      const xBtn = document.createElement('button');
+      xBtn.textContent = 'X';
+      xBtn.className = 'r1-btn';
+      xBtn.onclick = () => { input.value = ''; updateR3FromR1(); };
+      row.appendChild(label);
+      row.appendChild(input);
+      row.appendChild(okBtn);
+      row.appendChild(xBtn);
+      container.appendChild(row);
+    }
+  }
+  function getR1Values() {
+    return Array.from(document.querySelectorAll('.r1-input'))
+      .map(i => i.value.trim());
+  }
+  function setR1Values(values) {
+    document.querySelectorAll('.r1-input').forEach((inp, i) => {
+      inp.value = values[i] || '';
+    });
+  }
+
+  // Parser för R2A
+  function normalizeChordToken(token) {
+    if (!token) return '';
+    token = token.trim();
+    return token[0].toUpperCase() + token.slice(1);
+  }
+  function isValidChord(token) {
+    const root = getRootFromChordLabel(token);
+    return !!rootToTriad[root];
+  }
+  function loadFromR2A() {
+    const text = document.getElementById('r2a-text').value;
+    const lines = text.split(/\r?\n/);
+    const r1Values = Array(R1_ROWS).fill('');
+    let idx = 0;
+    for (let i = 0; i < lines.length && idx < R1_ROWS; i++) {
+      if ((i + 1) % 2 === 0) continue;
+      const tokens = lines[i].split(/\s+/);
+      for (let t of tokens) {
+        if (idx >= R1_ROWS) break;
+        const norm = normalizeChordToken(t);
+        if (!norm) continue;
+        if (!isValidChord(norm)) continue;
+        r1Values[idx++] = norm;
+      }
+    }
+    setR1Values(r1Values);
+    updateR3FromR1();
+  }
+
+  // Pianografik
+  function renderPiano(label, octaves, sizeClass) {
+    const root = getRootFromChordLabel(label);
+    const notes = rootToTriad[root] || [];
+    const red = new Set(notes);
+    const white = ['C','D','E','F','G','A','B'];
+    const whiteWidth = 28;
+    const octaveWidth = white.length * whiteWidth;
+    const totalWidth = octaveWidth * octaves;
+    let whiteHtml = '';
+    let blackHtml = '';
+    for (let o = 0; o < octaves; o++) {
+      const base = o * octaveWidth;
+      white.forEach(n => {
+        const cls = red.has(n) ? 'note-red' : '';
+        whiteHtml += `<div class="white-key"><span class="${cls}">${n}</span></div>`;
+      });
+      blackHtml += `
+        <div class="black-key" style="left:${base + 20}px;"><span class="${red.has('C#')?'note-red':''}">C#</span></div>
+        <div class="black-key" style="left:${base + 48}px;"><span class="${red.has('D#')?'note-red':''}">D#</span></div>
+        <div class="black-key" style="left:${base + 104}px;"><span class="${red.has('F#')?'note-red':''}">F#</span></div>
+        <div class="black-key" style="left:${base + 132}px;"><span class="${red.has('G#')?'note-red':''}">G#</span></div>
+        <div class="black-key" style="left:${base + 160}px;"><span class="${red.has('A#')?'note-red':''}">A#</span></div>
+      `;
+    }
+    return `
+      <div class="piano ${sizeClass}" style="width:${totalWidth}px;">
+        <div class="white-keys" style="width:${totalWidth}px;">${whiteHtml}</div>
+        <div class="black-keys" style="width:${totalWidth}px;">${blackHtml}</div>
+      </div>
+    `;
+  }
+
+  // Skapa R3-rader
+  function createR3() {
+    const container = document.getElementById('r3-rows');
+    for (let r = 0; r < R3_ROWS; r++) {
+      const row = document.createElement('div');
+      row.className = 'r3-row';
+      const chordsDiv = document.createElement('div');
+      chordsDiv.className = 'r3-chords';
+      const pianoDiv = document.createElement('div');
+      pianoDiv.className = 'r3-piano';
+      pianoDiv.innerHTML = renderPiano('', 1, 'r3-size');
+      const btnDiv = document.createElement('div');
+      btnDiv.className = 'r3-buttons';
+      const lbl = document.createElement('div');
+      lbl.className = 'r3-btn-label';
+      lbl.textContent = 'Triad / Tertrad / Invers';
+      const btnRow = document.createElement('div');
+      btnRow.className = 'r3-btn-row';
+      const tri = document.createElement('button');
+      tri.className = 'circle-btn';
+      tri.title = 'Triad';
+      const tet = document.createElement('button');
+      tet.className = 'circle-btn';
+      tet.title = 'Tertrad';
+      const inv = document.createElement('button');
+      inv.className = 'circle-btn';
+      inv.title = 'Invers/Alt';
+      btnRow.appendChild(tri);
+      btnRow.appendChild(tet);
+      btnRow.appendChild(inv);
+      btnDiv.appendChild(lbl);
+      btnDiv.appendChild(btnRow);
+      row.appendChild(chordsDiv);
+      row.appendChild(pianoDiv);
+      row.appendChild(btnDiv);
+      container.appendChild(row);
+    }
+  }
+
+  // Uppdatera R3 från R1
+  function updateR3FromR1() {
+    const vals = getR1Values();
+    const rows = document.querySelectorAll('.r3-row');
+    let idx = 0;
+    const maxPerRow = 8;
+    rows.forEach(row => {
+      const chordsDiv = row.querySelector('.r3-chords');
+      chordsDiv.innerHTML = '';
+      let count = 0;
+      while (idx < vals.length && count < maxPerRow) {
+        const chord = vals[idx++];
+        if (!chord) continue;
+        const label = document.createElement('div');
+        label.className = 'r3-chord-label';
+        label.textContent = chord;
+        label.dataset.chord = chord;
+        chordsDiv.appendChild(label);
+        count++;
+      }
+      const first = chordsDiv.querySelector('.r3-chord-label');
+      const chordName = first ? first.dataset.chord : '';
+      row.querySelector('.r3-piano').innerHTML = renderPiano(chordName, 1, 'r3-size');
+    });
+    attachR3Buttons();
+  }
+
+  // Knappar i R3 → R2B
+  function attachR3Buttons() {
+    const rows = document.querySelectorAll('.r3-row');
+    rows.forEach(row => {
+      const buttons = row.querySelectorAll('.circle-btn');
+      const labels = row.querySelectorAll('.r3-chord-label');
+      function firstChord() {
+        for (let l of labels) {
+          if (l.dataset.chord) return l.dataset.chord;
+        }
+        return '';
+      }
+      if (buttons.length < 3) return;
+      buttons[0].onclick = () => {
+        const c = firstChord();
+        if (c) setR2B(c + ' (Triad)', c);
+      };
+      buttons[1].onclick = () => {
+        const c = firstChord();
+        if (c) setR2B(c + ' (Tertrad)', c);
+      };
+      buttons[2].onclick = () => {
+        const c = firstChord();
+        if (c) setR2B(c + ' (Invers/Alt)', c);
+      };
+    });
+  }
+
+  // Visa ackord i R2B
+  function setR2B(label, chord) {
+    document.getElementById('r2b-label').textContent = label;
+    document.getElementById('r2b-piano').innerHTML = renderPiano(chord, 3, 'r2b-size');
+  }
+  function clearR2B() {
+    document.getElementById('r2b-label').textContent = '';
+    document.getElementById('r2b-piano').innerHTML = '';
+  }
+
+  // Init
+  createR1();
+  createR3();
+  document.getElementById('btn-load-all').onclick = updateR3FromR1;
+  document.getElementById('btn-clear-all').onclick = () => {
+    setR1Values(Array(R1_ROWS).fill(''));
+    updateR3FromR1();
+    clearR2B();
+  };
+  document.getElementById('btn-r2a-load').onclick = loadFromR2A;
+  document.getElementById('btn-r2a-clear').onclick = () => {
+    document.getElementById('r2a-text').value = '';
+  };
+  document.getElementById('btn-r2b-clear').onclick = clearR2B;
+  updateR3FromR1();
+</script>
+</body>
+</html>
