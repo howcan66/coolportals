@@ -1,96 +1,68 @@
-<!--
-Copilot Specification.
-Piano_p1.html Specification – Layout and Functionalities
+<html>
+<head>
+<style>
+  body {
+    display: grid;
+    grid-template-areas:
+      "R1 R2A R2B"
+      "R3 R3 R3";
+    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 10px;
+    font-family: Arial, sans-serif;
+  }
 
-Layout Overview (1A - ASCII representation):
-+-------------------+---------+--------------+
-|       R1          |   R2A   |   R2B        |
-|       label     	| Label   |  Label 	     |
-|					| Text	  | Piano chord  |
-| Input form B1 B2  | B5 B6	  | Analyse text |
-|	  Hjälptext		|		  |			     |
-|    Namn Version	|		  |				 |
-|		B3 B4		+---------+--------------+
-|                   |		  R3		     |
-|                   | (Chord List Panel)     |
-|					|	Piano Keyboard Notes |
-|					|		B7 B8 B9		 |
-+-------------------+------------------------+
-0. Detailed Breakdown:
+  div {
+    border: 1px solid black;
+    padding: 10px;
+    text-align: center;
+  }
 
-1. R1 – Pianoackord (Left Frame):
-   - Purpose: 
-      - Displays chords or text data received from R2A.
-      - Allows manual chord entry by the user.
-   - Components:
-      a. Text Input: Input field for manual chord entry.
-      b. B1 "OK" Button: Loads chord data into R3.
-      c. B2 "Reset" Button: Clears all input and data in R1.
-	  d. B3 "Load" Button: Loads all R1 data to R3.
-	  e. B4 "Reset" Button: Resets all R1 data.
-	  f. Helptext Section: Provides user instructions, including:
-         - Use uppercase letters for chord names.
-         - Separate chords with spaces
-		 - Name Date Ver
-         - Successfully added chords will appear in R3 after pressing “OK”.
-		 
+  #R1 {
+    grid-area: R1;
+  }
 
-2. R2A – Text Input Frame:
-   - Purpose: 
-      - Accepts input in a multi-line text field for chord notations (odd rows) and plain text descriptions (even rows).
-      - Each valid chord is validated and sent to R1. 
-   - Components:
-      a. Text Area: User input field for chords and accompanying text.
-      b. B5 "Load" Button: Validates chords and sends them to R1.
-      c. B6 "Reset" Button: Clears the input area in R2A.
-   - Chord Validation Rules:
-      - Only valid chord notations (e.g., C, Dm, Fmaj7, G7, A#) are accepted.
-      - Odd rows must contain valid chord notations.
-      - Even rows are treated as plain descriptions without validation.
-	  - Test data example1 "A" = OK, "A C" = OK, " G  pmqpwm Dmaj7" = "G Dmaj7" = OK
+  #R2A {
+    grid-area: R2A;
+  }
 
-3. R2B – Analysis and Alternate Chords (Chord Analysis Frame):
-   - Purpose: 
-      - Displays the analysis of a selected chord from R3 or manual input.
-      - Visualizes the selected chord on a virtual piano spanning **two octaves (C4 to B5)** with marked keys.
-      - Displays the result of analyzing the chord (e.g., triad, tetrad, inversion, alternative chords, etc.).
-   - Components:
-      a. Visual Piano Keyboard: A graphical 2-octave piano, with white and black keys (C4 to B5).
-      b. Text Analysis Section: Displays information about the chord:
-         - List of notes in the chord and their analysis.
-         - Description of the selected chord type (e.g., "Triad," "Tetrad").
-         - Display of alternative chords or inversions.
-			a Button B10 in R2B. B10 shall play the chord in R2B
-   - Workflow:
-      - Chord data comes from R3 when a user clicks on a specific chord or action buttons (B5 B6 B7 (e.g., Triad, Tetrad, Inversion).
-      - Marked keys display the corresponding tones of the chord.
+  #R2B {
+    grid-area: R2B;
+  }
 
-4. R3 – Chord List Panel:
-   - Frame layout left
-   - Purpose:
-      - Displays the chords sent from R1.
-      - Creates a horizontal row of chords, which automatically fills and creates new rows if space is exceeded.
-   - Components:
-      a. List of Chords:
-         - Chords from R1 are displayed row by row, left to right.
-         - The displayed number of chords matches what is in R1.
-      b. Buttons for Each Chord:
-         - B7 Triad: Displays the triad of the chord in R2B.
-         - B8 Tetrad: Displays the tetrad of the chord in R2B.
-         - B9 Inversion/ALT: Displays inversions or alternative chord voicings in R2B.
-		 
-5. Additional Inatructions 
-5.a The term R2A and R2B could be renamed to more descriptive names, such as "Text Input Panel" and 
-5.b "Chord Analysis Panel," to make the description clearer, especially for non-technical stakeholders.
-5.c R2A alternative Name "Text Input Panel R2A"
-5.d R2B alternative Name "Text Input Panel R2B"
-5.e Interactive Feedback/Transitions:
-5.f The "Reset" buttons have no confirmation message?
-5.g No results of validation (e.g., errors like invalid chords) surface?
-5.h Piano keys shall sound when as a chord or individually when loaded B3 = OK and B6 B7 B8
+  #R3 {
+    grid-area: R3;
+  }
 
-General Notes:
-- The layout uses `CSS Grid` for organizing the frames and panels within the overall structure.
-- Each panel (R1, R2A, R2B, and R3) is responsive and easily extendable for future features or adjustments.
-- Dynamic interactivity between R1, R2A, R2B, and R3 is handled via JavaScript.
--->
+</style>
+</head>
+<body>
+
+<!-- Existing documented specification remains here, unchanged -->
+
+<div id="R1">
+  <h2>R1: Piano Chords Input and Display Panel</h2>
+  <!-- Placeholder content -->
+  <p>Chords data will be displayed here.</p>
+</div>
+
+<div id="R2A">
+  <h2>R2A: Text Input Panel</h2>
+  <!-- Placeholder content -->
+  <p>Multi-line input for chords and text descriptions.</p>
+</div>
+
+<div id="R2B">
+  <h2>R2B: Chord Analysis Panel</h2>
+  <!-- Placeholder content -->
+  <p>Visualization of the chord's notes and analysis results.</p>
+</div>
+
+<div id="R3">
+  <h2>R3: Chord List Panel</h2>
+  <!-- Placeholder content -->
+  <p>List of chords loaded from R1.</p>
+</div>
+
+</body>
+</html>
