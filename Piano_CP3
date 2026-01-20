@@ -1,141 +1,30 @@
-<!--
-Copilot Specification.
-Piano_p1.html Specification – Layout and Functionalities
+----
 
-Layout Overview (1A - ASCII representation):
-+-------------------+---------+--------------+
-|       R1          |   R2A   |   R2B        |
-|       label     	| Label   |  Label 	     |
-|					| Text	  | Piano chord  |
-| Input form B1 B2  | B5 B6	  | Analyse text |
-|	  Hjälptext		|		  |			     |
-|    Namn Version	|		  |				 |
-|		B3 B4		+---------+--------------+
-|                   |		  R3		     |
-|                   | (Chord List Panel)     |
-|					|	Piano Keyboard Notes |
-|					|		B7 B8 B9		 |
-+-------------------+------------------------+
-0. Detailed Breakdown:
+## Inversion Logic and Playback
 
-1. R1 – Pianoackord (Left Frame):
-   - Purpose: 
-      - Displays chords or text data received from R2A.
-      - Allows manual chord entry by the user.
-   - Components:
-      a. Text Input: Input field for manual chord entry.
-      b. B1 "OK" Button: Loads chord data into R3.
-      c. B2 "Reset" Button: Clears all input and data in R1.
-	  d. B3 "Load" Button: Loads all R1 data to R3.
-	  e. B4 "Reset" Button: Resets all R1 data.
-	  f. Helptext Section: Provides user instructions, including:
-         - Use uppercase letters for chord names.
-         - Separate chords with spaces
-		 - Name Date Ver
-         - Successfully added chords will appear in R3 after pressing “OK”.
-		 
+### Inversion Logic
+Inversion logic allows for the generation of distinct voicings by rearranging the notes of a chord. By moving the root note to another position within the chord, alternative harmonic structures can be produced. This technology is particularly essential for creating variations of chords such as:
+- **Root Position:** No inversions.
+- **First Inversion:** Root note is moved to the top of the chord.
+- **Second Inversion:** The second note is moved to the top of the chord.
+- Example: C Major (C-E-G) becomes:
+  - Root Position: C, E, G
+  - First Inversion: E, G, C
+  - Second Inversion: G, C, E
 
-2. R2A – Text Input Frame:
-   - Purpose: 
-      - Accepts input in a multi-line text field for chord notations (odd rows) and plain text descriptions (even rows).
-      - Each valid chord is validated and sent to R1. 
-   - Components:
-      a. Text Area: User input field for chords and accompanying text.
-      b. B5 "Load" Button: Validates chords and sends them to R1.
-      c. B6 "Reset" Button: Clears the input area in R2A.
-   - Chord Validation Rules:
-      - Only valid chord notations (e.g., C, Dm, Fmaj7, G7, A#) are accepted.
-      - Odd rows must contain valid chord notations.
-      - Even rows are treated as plain descriptions without validation.
-	  - Test data example1 "A" = OK, "A C" = OK, " G  pmqpwm Dmaj7" = "G Dmaj7" = OK
+**Panels Associated:**
+- **R1 (Piano Entry Panel):** Manual entry of chords with inversion possibilities.
+- **R3 (Chord List Panel):** Includes buttons for different inversions (B9).
+- **R2B (Chord Analysis Panel):** Highlights keys and displays notes for the chosen inversion.
 
-3. R2B – Analysis and Alternate Chords (Chord Analysis Frame):
-   - Purpose: 
-      - Displays the analysis of a selected chord from R3 or manual input.
-      - Visualizes the selected chord on a virtual piano spanning **two octaves (C4 to B5)** with marked keys.
-      - Displays the result of analyzing the chord (e.g., triad, tetrad, inversion, alternative chords, etc.).
-   - Components:
-      a. Visual Piano Keyboard: A graphical 2-octave piano, with white and black keys (C4 to B5).
-      b. Text Analysis Section: Displays information about the chord:
-         - List of notes in the chord and their analysis.
-         - Description of the selected chord type (e.g., "Triad," "Tetrad").
-         - Display of alternative chords or inversions.
-			a Button B10 in R2B. B10 shall play the chord in R2B
-   - Workflow:
-      - Chord data comes from R3 when a user clicks on a specific chord or action buttons (B5 B6 B7 (e.g., Triad, Tetrad, Inversion).
-      - Marked keys display the corresponding tones of the chord.
+### Playback Feature
+Real-time playback allows users to hear the chords, individual notes, or chord sequences they input or generate:
+- **Play Chord Button (B10):** Upon clicking, the system generates audio for the suggested chord or inversion.
+- **Interactive Keyboard:** Users can manually interact with the virtual 2-octave piano on-screen to play individual notes.
 
-4. R3 – Chord List Panel:
-   - Frame layout left
-   - Purpose:
-      - Displays the chords sent from R1.
-      - Creates a horizontal row of chords, which automatically fills and creates new rows if space is exceeded.
-   - Components:
-      a. List of Chords:
-         - Chords from R1 are displayed row by row, left to right.
-         - The displayed number of chords matches what is in R1.
-      b. Buttons for Each Chord:
-         - B7 Triad: Displays the triad of the chord in R2B.
-         - B8 Tetrad: Displays the tetrad of the chord in R2B.
-         - B9 Inversion/ALT: Displays inversions or alternative chord voicings in R2B.
-		 
-5. Additional Inatructions 
-5.a The term R2A and R2B could be renamed to more descriptive names, such as "Text Input Panel" and 
-5.b "Chord Analysis Panel," to make the description clearer, especially for non-technical stakeholders.
-5.c R2A alternative Name "Text Input Panel R2A"
-5.d R2B alternative Name "Text Input Panel R2B"
-5.e Interactive Feedback/Transitions:
-5.f The "Reset" buttons have no confirmation message?
-5.g No results of validation (e.g., errors like invalid chords) surface?
-5.h Piano keys shall sound when as a chord or individually when loaded B3 = OK and B6 B7 B8
+**Panels Associated:**
+- **R1 (Piano Entry Panel):** Sends the chord data for playback upon clicking the "OK" or "Load" button.
+- **R2A (Text Input Panel):** Valid chord data from text input can be sent for playback.
+- **R2B (Chord Analysis Panel):** Displays the visual and interactive playback of the selected chord.
 
-6 Change as required
-6.a R1 – Pianoackord (Left Frame)
-Missing functionality to send validated and entered chord data to R3 on button actions (e.g., "OK" or "Load").
-"Reset All" button does not reset the entire R1 section (including help text or other related areas).
-
-6.R2A – Text Input Frame
-Missing validation for chord notations: No Validation Now
-Odd rows must validate as chord notations: 
-Insert changed code, update complete file, comment: inserted, whole file kept integrity
-
-Even rows are treated as plain text without validation: Not Implemented Now
-Insert changed code, update complete file, comment: inserted, whole file kept integrity
-
-Missing functionality to send validated chords from odd rows to R1: Insert changed code, update complete file, comment: inserted, whole file kept integrity
-Insert changed code, update complete file, comment: inserted, whole file kept integrity
-
-Missing feedback for detected invalid chords (e.g., invalid entries are ignored, but the user is not notified):
-Not done Now
-
-6.R3 – Chord List Panel
-Missing chord buttons:
-Insert changed code, update complete file, comment: inserted, whole file kept integrity
-
-B7 (Triad), B8 (Tetrad), and B9 (Inversion/ALT) buttons for each chord are not implemented.
-Insert changed code, update complete file, comment: inserted, whole file kept integrity
-
-Missing functionality to automatically populate the chord list in R3 from validated data in R1.
-Insert changed code, update complete file, comment: inserted, whole file kept integrity
-
-Missing click functionality for chord buttons:
-Insert changed code, update complete file, comment: inserted, whole file kept integrity
-
-Clicking on any chord or its associated buttons does not send data to R2B for analysis.
-Insert changed code, update complete file, comment: inserted, whole file kept integrity
-
-6.R2B – Analysis and Alternate Chords Frame
-Missing chord analysis functionality:
-No logic to display "Notes in Chord," "Chord Type," and "Alternatives" when a chord is selected.
-Missing interactive piano:
-Functionality to highlight corresponding keys for the selected chord (from R3 or R1) is not implemented.
-Missing link with R3 or R1 actions:
-No workflow to dynamically update R2B when chords are sent from R3 or R1.
-Let me know if you'd like me to elaborate further or assist in implementing these missing features!
-All Insert changed code, update complete file, comment: inserted, whole file kept integrity
-
-General Notes:
-- The layout uses `CSS Grid` for organizing the frames and panels within the overall structure.
-- Each panel (R1, R2A, R2B, and R3) is responsive and easily extendable for future features or adjustments.
-- Dynamic interactivity between R1, R2A, R2B, and R3 is handled via JavaScript.
--->
+----
