@@ -1,0 +1,170 @@
+<!--
+Copilot Specification.
+Piano_p1.html Specification – Layout and Functionalities
+
+Layout Overview (1A - ASCII representation):
++-------------------+---------+---------+
+|                   |   R2A   |   R2B   |
+|       R1          |  (Text) | (Analysis|
+|                   +---------+---------+
+|                   |                 R3|
+|                   | (Chord List Panel)|
++-------------------+-------------------+
+
+Detailed Breakdown:
+
+1. R1 – Pianoackord (Left Frame):
+   - Purpose: 
+      - Displays chords or text data received from R2A.
+      - Allows manual chord entry by the user.
+   - Components:
+      a. Text Input: Input field for manual chord entry.
+      b. "OK" Button: Loads chord data into R3.
+      c. "Reset" Button: Clears all input and data in R1.
+      d. Helptext Section: Provides user instructions, including:
+         - Use uppercase letters for chord names.
+         - Separate chords with spaces.
+         - Successfully added chords will appear in R3 after pressing “OK”.
+
+2. R2A – Text Input Frame:
+   - Purpose: 
+      - Accepts input in a multi-line text field for chord notations (odd rows) and plain text descriptions (even rows).
+      - Each valid chord is validated and sent to R1. 
+   - Components:
+      a. Text Area: User input field for chords and accompanying text.
+      b. "Load" Button: Validates chords and sends them to R1.
+      c. "Reset" Button: Clears the input area in R2A.
+   - Chord Validation Rules:
+      - Only valid chord notations (e.g., C, Dm, Fmaj7, G7, A#) are accepted.
+      - Odd rows must contain valid chord notations.
+      - Even rows are treated as plain descriptions without validation.
+
+3. R2B – Analysis and Alternate Chords (Chord Analysis Frame):
+   - Purpose: 
+      - Displays the analysis of a selected chord from R3 or manual input.
+      - Visualizes the selected chord on a virtual piano spanning **two octaves (C4 to B5)** with marked keys.
+      - Displays the result of analyzing the chord (e.g., triad, tetrad, inversion, alternative chords, etc.).
+   - Components:
+      a. Visual Piano Keyboard: A graphical 2-octave piano, with white and black keys (C4 to B5).
+      b. Text Analysis Section: Displays information about the chord:
+         - List of notes in the chord and their analysis.
+         - Description of the selected chord type (e.g., "Triad," "Tetrad").
+         - Display of alternative chords or inversions.
+   - Workflow:
+      - Chord data comes from R3 when a user clicks on a specific chord or action button (e.g., Triad, Tetrad, Inversion).
+      - Marked keys display the corresponding tones of the chord.
+
+4. R3 – Chord List Panel:
+   - Purpose:
+      - Displays the chords sent from R1.
+      - Creates a horizontal row of chords, which automatically fills and creates new rows if space is exceeded.
+   - Components:
+      a. List of Chords:
+         - Chords from R1 are displayed row by row, left to right.
+         - The displayed number of chords matches what is in R1.
+      b. Buttons for Each Chord:
+         - Triad: Displays the triad of the chord in R2B.
+         - Tetrad: Displays the tetrad of the chord in R2B.
+         - Inversion/ALT: Displays inversions or alternative chord voicings in R2B.
+      c. Visual Piano Option: A one-octave piano to visualize the chord in R3 (optional).
+   - Workflow:
+      - When a button (e.g., "Triad") is clicked, R3 sends the data to R2B for analysis and visualization.
+      - Every update to R1 (e.g., adding or removing a chord) is mirrored in R3 to keep the panels synchronized.
+
+General Notes:
+- The layout uses `CSS Grid` for organizing the frames and panels within the overall structure.
+- Each panel (R1, R2A, R2B, and R3) is responsive and easily extendable for future features or adjustments.
+- Dynamic interactivity between R1, R2A, R2B, and R3 is handled via JavaScript.
+- R3 serves as an intermediary for displaying chords and interacting with analysis & visualization tools (in R2B).
+
+End of Specification.
+-->
+Klicka på "Commit new file" för att spara filen i din repository.
+Om du hellre vill att jag skapar och levererar en fil som du kan ladda ner, låt mig veta så gör jag det också! 😊
+
+Make these code changes?
+Copilot_piano.html
+
+HTML
+<!--
+Copilot Specification.
+Piano_p1.html Specification – Layout and Functionalities
+
+Layout Overview (1A - ASCII representation):
++-------------------+---------+---------+
+|                   |   R2A   |   R2B   |
+|       R1          |  (Text) | (Analysis|
+|                   +---------+---------+
+|                   |                 R3|
+|                   | (Chord List Panel)|
++-------------------+-------------------+
+
+Detailed Breakdown:
+
+1. R1 – Pianoackord (Left Frame):
+   - Purpose: 
+      - Displays chords or text data received from R2A.
+      - Allows manual chord entry by the user.
+   - Components:
+      a. Text Input: Input field for manual chord entry.
+      b. "OK" Button: Loads chord data into R3.
+      c. "Reset" Button: Clears all input and data in R1.
+      d. Helptext Section: Provides user instructions, including:
+         - Use uppercase letters for chord names.
+         - Separate chords with spaces.
+         - Successfully added chords will appear in R3 after pressing “OK”.
+
+2. R2A – Text Input Frame:
+   - Purpose: 
+      - Accepts input in a multi-line text field for chord notations (odd rows) and plain text descriptions (even rows).
+      - Each valid chord is validated and sent to R1. 
+   - Components:
+      a. Text Area: User input field for chords and accompanying text.
+      b. "Load" Button: Validates chords and sends them to R1.
+      c. "Reset" Button: Clears the input area in R2A.
+   - Chord Validation Rules:
+      - Only valid chord notations (e.g., C, Dm, Fmaj7, G7, A#) are accepted.
+      - Odd rows must contain valid chord notations.
+      - Even rows are treated as plain descriptions without validation.
+
+3. R2B – Analysis and Alternate Chords (Chord Analysis Frame):
+   - Purpose: 
+      - Displays the analysis of a selected chord from R3 or manual input.
+      - Visualizes the selected chord on a virtual piano spanning **two octaves (C4 to B5)** with marked keys.
+      - Displays the result of analyzing the chord (e.g., triad, tetrad, inversion, alternative chords, etc.).
+   - Components:
+      a. Visual Piano Keyboard: A graphical 2-octave piano, with white and black keys (C4 to B5).
+      b. Text Analysis Section: Displays information about the chord:
+         - List of notes in the chord and their analysis.
+         - Description of the selected chord type (e.g., "Triad," "Tetrad").
+         - Display of alternative chords or inversions.
+   - Workflow:
+      - Chord data comes from R3 when a user clicks on a specific chord or action button (e.g., Triad, Tetrad, Inversion).
+      - Marked keys display the corresponding tones of the chord.
+
+4. R3 – Chord List Panel:
+   - Purpose:
+      - Displays the chords sent from R1.
+      - Creates a horizontal row of chords, which automatically fills and creates new rows if space is exceeded.
+   - Components:
+      a. List of Chords:
+         - Chords from R1 are displayed row by row, left to right.
+         - The displayed number of chords matches what is in R1.
+      b. Buttons for Each Chord:
+         - Triad: Displays the triad of the chord in R2B.
+         - Tetrad: Displays the tetrad of the chord in R2B.
+         - Inversion/ALT: Displays inversions or alternative chord voicings in R2B.
+      c. Visual Piano Option: A one-octave piano to visualize the chord in R3 (optional).
+   - Workflow:
+      - When a button (e.g., "Triad") is clicked, R3 sends the data to R2B for analysis and visualization.
+      - Every update to R1 (e.g., adding or removing a chord) is mirrored in R3 to keep the panels synchronized.
+
+General Notes:
+- The layout uses `CSS Grid` for organizing the frames and panels within the overall structure.
+- Each panel (R1, R2A, R2B, and R3) is responsive and easily extendable for future features or adjustments.
+- Dynamic interactivity between R1, R2A, R2B, and R3 is handled via JavaScript.
+- R3 serves as an intermediary for displaying chords and interacting with analysis & visualization tools (in R2B).
+
+End of Specification.
+-->
+Please confirm you want Copilot to make this change in the howcan66/repository-name repository on branch main.
