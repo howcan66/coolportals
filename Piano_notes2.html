@@ -60,11 +60,13 @@ Layout Overview (1A - ASCII representation):
          - List of notes in the chord and their analysis.
          - Description of the selected chord type (e.g., "Triad," "Tetrad").
          - Display of alternative chords or inversions.
+			a Button B10 in R2B. B10 shall play the chord in R2B
    - Workflow:
       - Chord data comes from R3 when a user clicks on a specific chord or action buttons (B5 B6 B7 (e.g., Triad, Tetrad, Inversion).
       - Marked keys display the corresponding tones of the chord.
 
 4. R3 – Chord List Panel:
+   - Frame layout left
    - Purpose:
       - Displays the chords sent from R1.
       - Creates a horizontal row of chords, which automatically fills and creates new rows if space is exceeded.
@@ -76,10 +78,19 @@ Layout Overview (1A - ASCII representation):
          - B7 Triad: Displays the triad of the chord in R2B.
          - B8 Tetrad: Displays the tetrad of the chord in R2B.
          - B9 Inversion/ALT: Displays inversions or alternative chord voicings in R2B.
+		 
+5. Additional Inatructions 
+5.a The term R2A and R2B could be renamed to more descriptive names, such as "Text Input Panel" and 
+5.b "Chord Analysis Panel," to make the description clearer, especially for non-technical stakeholders.
+5.c R2A alternative Name "Text Input Panel R2A"
+5.d R2B alternative Name "Text Input Panel R2B"
+5.e Interactive Feedback/Transitions:
+5.f The "Reset" buttons have no confirmation message?
+5.g No results of validation (e.g., errors like invalid chords) surface?
+5.h Piano keys shall sound when as a chord or individually when loaded B3 = OK and B6 B7 B8
 
 General Notes:
 - The layout uses `CSS Grid` for organizing the frames and panels within the overall structure.
 - Each panel (R1, R2A, R2B, and R3) is responsive and easily extendable for future features or adjustments.
 - Dynamic interactivity between R1, R2A, R2B, and R3 is handled via JavaScript.
-
 -->
