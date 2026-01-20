@@ -34,47 +34,47 @@
     <div id="r1-rows"></div>
     <div id="r1-help">
       <!-- Intruction Help Layout: -->
-      <!-- +--------+---------+---------+ --!>
-      <!-- |        |  R2A    |  R2B    | --!>
-      <!-- |  R1    |(text)   |(analys) | --!>
-      <!-- |        +---------+---------+ --!>
-      <!-- |        |        R3         | --!>
-      <!-- |        |  (ackordslista)   | --!>
-      <!-- +--------+-------------------+ --!>
+      <!-- +--------+---------+---------+ -->
+      <!-- |        |  R2A    |  R2B    | -->
+      <!-- |  R1    |(text)   |(analys) | -->
+      <!-- |        +---------+---------+ -->
+      <!-- |        |        R3         | -->
+      <!-- |        |  (ackordslista)   | -->
+      <!-- +--------+-------------------+ -->
       <!-- Intruction R1 Help Layout: -->
-      <!-- RAM R1 is leftframe. Left frame. It gets data from RAM R2A    --!>
-      <!-- RAM R1 has input text field and an ok button and a reset button and helptext infomration --!>
-      <!-- RAM R1 has Ok button labelled "OK" will load data to frame R3--!>
-      <!-- RAM R1 has Ok button labelled "Reset" will empty all the data in frame R1--!>
-      <!-- RAM R1 has helptext information Date Version "Actual Date" "Actual Version" --!>
-      <!-- RAM R1 has helptext information "Use capitol letters"                       --!>
-      <!-- RAM R1 has helptext information "Blank to separate chords" -                --!>
+      <!-- RAM R1 is leftframe. Left frame. It gets data from RAM R2A    -->
+      <!-- RAM R1 has input text field and an ok button and a reset button and helptext infomration -->
+      <!-- RAM R1 has Ok button labelled "OK" will load data to frame R3--> 
+      <!-- RAM R1 has Ok button labelled "Reset" will empty all the data in frame R1--> 
+      <!-- RAM R1 has helptext information Date Version "Actual Date" "Actual Version" -->
+      <!-- RAM R1 has helptext information "Use capitol letters"                       -->
+      <!-- RAM R1 has helptext information "Blank to separate chords" -                -->
       <!-- RAM R1 Present frames in Ascii format in the bottom of page                  -->
       
-      <!-- RAM R2A Data is a textform with odd rows for chords and even rows for text  --!>
-      <!-- RAM R2A Data is seperated with blanks only valid chord combinations should be loaded to RAM R1 --!>
+      <!-- RAM R2A Data is a textform with odd rows for chords and even rows for text  -->
+      <!-- RAM R2A Data is seperated with blanks only valid chord combinations should be loaded to RAM R1 -->
       <!-- In R2A use standardnotation C, Dm, Fmaj7, G7, A#. -->
-      <!-- RAM R2A Has two buttons. One for Load chords labelled Load. Second Reset. To reset text form in R2A --!>
-      <!-- RAM R2A Press 'Load' all valid chords are added to the R1 list of data. chord by chord into the rows --!>
-      <!-- RAM R2A Press 'Reset' R2A frorm is emptied --!>
+      <!-- RAM R2A Has two buttons. One for Load chords labelled Load. Second Reset. To reset text form in R2A -->
+      <!-- RAM R2A Press 'Load' all valid chords are added to the R1 list of data. chord by chord into the rows -->
+      <!-- RAM R2A Press 'Reset' R2A frorm is emptied -->
       
-      <!-- RAM3 Layout start with one piano chord based on R1 data. A label with the chord should be presented
-      <!-- RAM3 Piano chord should be presented as one octave in graphical keys  --!> 
-      <!-- Keyboard C to B for with keys and responding the black keys           --!>
+      <!-- RAM3 Layout start with one piano chord based on R1 data. A label with the chord should be presented -->
+      <!-- RAM3 Piano chord should be presented as one octave in graphical keys  --> 
+      <!-- Keyboard C to B for with keys and responding the black keys           -->
       <!-- RAM3 Piano chord shall have the actual individual notes on the keys    -->
       <!-- RAM3 Piano chord shall 3 buttons under the chord    -->
-      <!-- RAM3 Piano chord button1 triad. Pressing buttoh should present the triad version in R2B --!>
-      <!-- RAM3 Piano chord button2 tetrad. Pressing buttoh should present the triad version in R2B --!>
-      <!-- RAM3 Piano chord button3 Inversion/ALT. Pressing buttoh should present the Inversion/ALT version in R2B --!>
+      <!-- RAM3 Piano chord button1 triad. Pressing buttoh should present the triad version in R2B -->
+      <!-- RAM3 Piano chord button2 tetrad. Pressing buttoh should present the triad version in R2B -->
+      <!-- RAM3 Piano chord button3 Inversion/ALT. Pressing buttoh should present the Inversion/ALT version in R2B -->
 
-      <!-- RAM R2B Layout is using the existing frame adding a label "Analysis / Alternative Chords" --!>
+      <!-- RAM R2B Layout is using the existing frame adding a label "Analysis / Alternative Chords" -->
       
-      <!--RAM R2B Present the selected chord over 2 octaves piano keyboar --!>
-      <!--RAM R2B Present the selected chord and its type decided by the button in R3 --!>
-      <!--RAM R2B Present the piano graphics and its type decided by the button in R3 --!>
+      <!--RAM R2B Present the selected chord over 2 octaves piano keyboar -->
+      <!--RAM R2B Present the selected chord and its type decided by the button in R3 -->
+      <!--RAM R2B Present the piano graphics and its type decided by the button in R3 -->
       
-      <!-- RAM R2B Shall present an analyse text "Analyse" and result not decided yet --!>
-      <!-- Piano tests - To B Defined --!>
+      <!-- RAM R2B Shall present an analyse text "Analyse" and result not decided yet -->
+      <!-- Piano tests - To B Defined -->
       
       
     </div>
@@ -241,9 +241,9 @@
         const cls = red.has(n) ? 'note-red' : '';
         whiteHtml += `<div class="white-key"><span class="${cls}">${n}</span></div>`;
       });
-      blackHtml += `\n        <div class="black-key" style="left:${base + 20}px;"><span class="${red.has('C#')?'note-red':''}">C#</span></div>\n        <div class="black-key" style="left:${base + 48}px;"><span class="${red.has('D#')?'note-red':''}">D#</span></div>\n        <div class="black-key" style="left:${base + 104}px;"><span class="${red.has('F#')?'note-red':''}">F#</span></div>\n        <div class="black-key" style="left:${base + 132}px;"><span class="${red.has('G#')?'note-red':''}">G#</span></div>\n        <div class="black-key" style="left:${base + 160}px;"><span class="${red.has('A#')?'note-red':''}">A#</span></div>\n      `;
+      blackHtml += `\n        <div class="black-key" style="left:${base + 20}px;"><span class="${red.has('C#')?'note-red':''}">C#</span></div>\n        <div class="black-key" style="left:${base + 48}px;"><span class="${red.has('D#')?'note-red':''}">D#</span></div>\n        <div class="black-key" style="left:${base + 132}px;"><span class="${red.has('F#')?'note-red':''}">F#</span></div>\n        <div class="black-key" style="left:${base + 160}px;"><span class="${red.has('G#')?'note-red':''}">G#</span></div>\n        <div class="black-key" style="left:${base + 188}px;"><span class="${red.has('A#')?'note-red':''}">A#</span></div>`;
     }
-    return `\n      <div class="piano ${sizeClass}" style="width:${totalWidth}px;">\n        <div class="white-keys" style="width:${totalWidth}px;">${whiteHtml}</div>\n        <div class="black-keys" style="width:${totalWidth}px;">${blackHtml}</div>\n      </div>\n    `;
+    return `\n      <div class="piano ${sizeClass}" style="width:${totalWidth}px;">\n        <div class="white-keys" style="width:${totalWidth}px;">${whiteHtml}</div>\n        <div class="black-keys">${blackHtml}</div>\n      </div>`;
   }
 
   // Skapa R3-rader
