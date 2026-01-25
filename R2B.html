@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>R2B - Chord Analysis Piano</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+        }
+
+        #r2b-panel {
+            flex: 1;
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .r2b-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .r2b-header h2 {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .r2b-timestamp {
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        .r2b-content {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            gap: 16px;
+        }
+
+        .r2b-piano-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .r2b-piano-label {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .r2b-piano-svg {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 2/1;
+            border: 1px solid #ddd;
+        }
+
+        .r2b-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .r2b-btn {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            background-color: #d0d0d0;
+            color: #000;
+        }
+
+        .r2b-btn:hover {
+            background-color: #b0b0b0;
+        }
+
+        .r2b-btn:active {
+            opacity: 0.6;
+        }
+
+        .r2b-analysis-section {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 12px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .r2b-analysis-row {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .r2b-analysis-label {
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .r2b-analysis-value {
+            font-size: 0.9rem;
+            color: #000;
+            font-weight: bold;
+            margin-top: 2px;
+        }
+
+        .r2b-footer {
+            font-size: 0.7rem;
+            color: #666;
+            text-align: center;
+            padding-top: 8px;
+            border-top: 1px solid #ddd;
+        }
+
+        .piano-key {
+            cursor: pointer;
+            transition: fill 0.1s;
+        }
+
+        .piano-key:hover {
+            filter: brightness(0.95);
+        }
+    </style>
+</head>
+<body>
+
+<section id="r2b-panel">
+    <div class="r2b-header">
+        <h2>R2B - Piano Analysis</h2>
+        <div class="r2b-timestamp" id="r2b-timestamp">26.01.24 • 14.37</div>
+    </div>
+
+    <div class="r2b-content">
+        <div class="r2b-piano-section">
+            <div class="r2b-piano-label">
+                Chord: <span id="r2b-chord-name">–</span>
+            </div>
+            <svg class="r2b-piano-svg" id="r2b-piano" viewBox="0 0 300 150">
+                <!-- 2-octave piano keys generated here -->
+            </svg>
+        </div>
+
+        <div class="r2b-buttons">
+            <button class="r2b-btn" id="r2b-b10">B10</button>
+            <button class="r2b-btn" id="r2b-b11">B11</button>
+        </div>
+
+        <div class="r2b-analysis-section">
+            <div class="r2b-analysis-row">
+                <div class="r2b-analysis-label">Type</div>
+                <div class="r2b-analysis-value" id="r2b-analysis-type">–</div>
+            </div>
+            <div class="r2b-analysis-row">
+                <div class="r2b-analysis-label">Quality</div>
+                <div class="r2b-analysis-value" id="r2b-analysis-quality">–</div>
+            </div>
+            <div class="r2b-analysis-row">
+                <div class="r2b-analysis-label">Intervals</div>
+                <div class="r2b-analysis-value" id="r2b-analysis-intervals">–</div>
+            </div>
+            <div class="r2b-analysis-row">
+                <div class="r2b-analysis-label">Position</div>
+                <div class="r2b-analysis-value" id="r2b-analysis-position">–</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="r2b-footer">
+        R2B: Receive from R3 → Mark chord notes → Display analysis → Play interactive notes
+    </div>
+</section>
+
+<script>
+    // ===== R2B STATE =====
+    
+    let currentChord = null;
+    let isChordPlaying = false;
+    
+    // ===== NOTE FREQUENCIES =====
+    
+    const NOTE_FREQUENCIES = {
+        'C4': 261.63, 'C#4': 277.18, 'D4': 293.66, 'D#4': 311.13, 'E4': 329.63, 'F4': 349.23,
+        'F#4': 369.99, 'G4': 391.99, 'G#4': 415.30, 'A4': 440.00, 'A#4': 466.16, 'B4': 493.88,
+        'C5': 523.25, 'C#5': 554.37, 'D5': 587.33, 'D#5': 622.25, 'E5': 659.25, 'F5': 698.46,
+        'F#5': 739.99, 'G5': 783.99, 'G#5': 830.61, 'A5': 880.00, 'A#5': 932.33, 'B5': 987.77
+    };
+
+    // ===== R2B INITIALIZATION =====
+    
+    function initR2B() {
+        renderPiano();
+        attachButtonListeners();
+        exposePublicAPI();
+        updateTimestamp();
+    }
+
+    // ===== PIANO RENDERING (2 OCTAVES: C4-B5) =====
+    
+    function renderPiano() {
+        const svg = document.getElementById('r2b-piano');
+        const notes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+        const octaves = [4, 5];
+        
+        let xPos = 0;
+        const totalWhiteKeys = notes.length * octaves.length;
+        const whiteKeyWidth = 300 / totalWhiteKeys;
+        const whiteKeyHeight = 150;
+
+        // Draw white keys (all 14 across 2 octaves)
+        octaves.forEach(octave => {
+            notes.forEach((note, idx) => {
+                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                rect.setAttribute('x', xPos);
+                rect.setAttribute('y', 0);
+                rect.setAttribute('width', whiteKeyWidth);
+                rect.setAttribute('height', whiteKeyHeight);
+                rect.setAttribute('fill', '#f5f5f5');
+                rect.setAttribute('stroke', '#999');
+                rect.setAttribute('class', 'piano-key');
+                rect.setAttribute('data-note', note + octave);
+                svg.appendChild(rect);
+
+                // Add note label
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', xPos + whiteKeyWidth / 2);
+                text.setAttribute('y', whiteKeyHeight - 8);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('font-size', '10');
+                text.setAttribute('fill', '#333');
+                text.setAttribute('pointer-events', 'none');
+                text.textContent = note + octave;
+                svg.appendChild(text);
+
+                xPos += whiteKeyWidth;
+            });
+        });
+
+        // Draw black keys (10 total: no key after E and B in each octave)
+        xPos = 0;
+        octaves.forEach(octave => {
+            const octaveNotes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+            octaveNotes.forEach((note, idx) => {
+                if (note === 'E' || note === 'B') {
+                    xPos += whiteKeyWidth;
+                    return;
+                }
+
+                const x = xPos + (whiteKeyWidth * 0.75) - (whiteKeyWidth * 0.25);
+                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                rect.setAttribute('x', x);
+                rect.setAttribute('y', 0);
+                rect.setAttribute('width', whiteKeyWidth * 0.5);
+                rect.setAttribute('height', 90);
+                rect.setAttribute('fill', '#1a1a1a');
+                rect.setAttribute('stroke', '#000');
+                rect.setAttribute('class', 'piano-key');
+                
+                let blackNote = note + '#' + octave;
+                rect.setAttribute('data-note', blackNote);
+                svg.appendChild(rect);
+
+                xPos += whiteKeyWidth;
+            });
+        });
+
+        // Attach key listeners
+        document.querySelectorAll('#r2b-piano .piano-key').forEach(key => {
+            key.addEventListener('click', () => {
+                playNote(key.getAttribute('data-note'));
+            });
+        });
+    }
+
+    // ===== PUBLIC API FOR R3 =====
+    
+    function setChord(chordData) {
+        // Defensive validation
+        if (!chordData) {
+            resetChord();
+            return;
+        }
+
+        if (typeof chordData.chordName !== 'string' || !Array.isArray(chordData.notes) || chordData.notes.length === 0) {
+            console.warn('R2B.setChord: invalid payload', chordData);
+            resetChord();
+            return;
+        }
+
+        currentChord = chordData;
+        markChordNotes(chordData.notes);
+        playChord(chordData.notes);
+        updateAnalysis(chordData);
+    }
+
+    // ===== CHORD MARKING ON PIANO =====
+    
+    function markChordNotes(notes) {
+        // Clear previous markings
+        const svg = document.getElementById('r2b-piano');
+        svg.querySelectorAll('.piano-key').forEach(key => {
+            const note = key.getAttribute('data-note');
+            const isBlack = note.includes('#');
+            key.setAttribute('fill', isBlack ? '#1a1a1a' : '#f5f5f5');
+        });
+
+        // Mark active chord notes
+        notes.forEach(note => {
+            const key = svg.querySelector(`[data-note="${note}"]`);
+            if (key) {
+                key.setAttribute('fill', '#8fd694');
+            }
+        });
+    }
+
+    // ===== AUDIO PLAYBACK =====
+    
+    function playChord(notes) {
+        if (isChordPlaying) return;
+
+        isChordPlaying = true;
+        console.log(`R2B: Playing chord with notes: ${notes.join(', ')}`);
+        
+        // Placeholder for actual audio playback
+        // In production: create AudioContext, oscillators for each note, play simultaneously
+        
+        // Reset debounce after chord duration
+        setTimeout(() => {
+            isChordPlaying = false;
+        }, 1500);
+    }
+
+    function playNote(note) {
+        console.log(`R2B: Playing individual note: ${note}`);
+        // Placeholder for actual audio
+    }
+
+    // ===== ANALYSIS DISPLAY =====
+    
+    function updateAnalysis(chordData) {
+        const analysis = chordData.analysis || {};
+        
+        document.getElementById('r2b-chord-name').textContent = chordData.chordName ?? '–';
+        document.getElementById('r2b-analysis-type').textContent = analysis.type ?? '–';
+        document.getElementById('r2b-analysis-quality').textContent = analysis.quality ?? '–';
+        document.getElementById('r2b-analysis-intervals').textContent = (analysis.intervals ?? []).join(', ') || '–';
+        document.getElementById('r2b-analysis-position').textContent = analysis.position ?? '–';
+    }
+
+    function clearAnalysis() {
+        document.getElementById('r2b-chord-name').textContent = '–';
+        document.getElementById('r2b-analysis-type').textContent = '–';
+        document.getElementById('r2b-analysis-quality').textContent = '–';
+        document.getElementById('r2b-analysis-intervals').textContent = '–';
+        document.getElementById('r2b-analysis-position').textContent = '–';
+    }
+
+    function resetChord() {
+        // Clear piano markings
+        const svg = document.getElementById('r2b-piano');
+        svg.querySelectorAll('.piano-key').forEach(key => {
+            const note = key.getAttribute('data-note');
+            const isBlack = note.includes('#');
+            key.setAttribute('fill', isBlack ? '#1a1a1a' : '#f5f5f5');
+        });
+
+        currentChord = null;
+        clearAnalysis();
+    }
+
+    // ===== BUTTON HANDLERS =====
+    
+    function attachButtonListeners() {
+        document.getElementById('r2b-b10').addEventListener('click', () => {
+            if (currentChord) {
+                playChord(currentChord.notes);
+            }
+        });
+
+        document.getElementById('r2b-b11').addEventListener('click', () => {
+            resetChord();
+        });
+    }
+
+    // ===== PUBLIC API EXPOSURE =====
+    
+    function exposePublicAPI() {
+        window.R2B = {
+            setChord: setChord
+        };
+    }
+
+    // ===== TIMESTAMP =====
+    
+    function updateTimestamp() {
+        const now = new Date();
+        const yy = String(now.getFullYear()).slice(-2);
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        const hh = String(now.getHours()).padStart(2, '0');
+        const mins = String(now.getMinutes()).padStart(2, '0');
+        
+        document.getElementById('r2b-timestamp').textContent = `${yy}.${mm}.${dd} • ${hh}.${mins}`;
+    }
+
+    // ===== INITIALIZATION =====
+    
+    document.addEventListener('DOMContentLoaded', initR2B);
+</script>
+
+</body>
+</html>

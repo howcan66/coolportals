@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>R3 - Pianogroup Display Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+        }
+
+        #r3-panel {
+            flex: 1;
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .r3-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .r3-header h2 {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .r3-timestamp {
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        .r3-pianogroups-container {
+            display: flex;
+            gap: 0;
+            flex-wrap: nowrap;
+            margin-bottom: 16px;
+            flex: 1;
+        }
+
+        .r3-pianogroup {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #ffffff;
+        }
+
+        .r3-chord-label {
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #000;
+            min-height: 16px;
+            margin-bottom: 4px;
+        }
+
+        .r3-piano-svg {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 20/1;
+        }
+
+        .r3-button-group {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .r3-btn {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            border: none;
+            border-radius: 50%;
+            font-size: 0.85rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .r3-btn:hover {
+            opacity: 0.8;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .r3-btn:active {
+            opacity: 0.6;
+        }
+
+        .r3-btn-mode {
+            background-color: #d0d0d0;
+            color: #000;
+        }
+
+        .r3-btn-mode.active {
+            background-color: #a3d5ff;
+            color: #000;
+        }
+
+        .r3-btn-send {
+            background-color: #c9b3ff;
+            color: #000;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+
+        .r3-footer {
+            font-size: 0.7rem;
+            color: #666;
+            text-align: center;
+        }
+
+        .piano-key {
+            cursor: pointer;
+            transition: fill 0.1s;
+        }
+
+        .piano-key:hover {
+            filter: brightness(0.95);
+        }
+    </style>
+</head>
+<body>
+
+<section id="r3-panel">
+    <div class="r3-header">
+        <h2>R3 - Pianogroups</h2>
+        <div class="r3-timestamp" id="r3-timestamp">26.01.24 • 14.37</div>
+    </div>
+
+    <div class="r3-pianogroups-container" id="r3-pianogroups-container">
+        <!-- 10 pianogroups generated here -->
+    </div>
+
+    <div class="r3-button-group">
+        <button class="r3-btn r3-btn-mode" id="r3-b7" data-mode="triad" aria-label="Triad Mode">T</button>
+        <button class="r3-btn r3-btn-mode" id="r3-b8" data-mode="tetrad" aria-label="Tetrad Mode">Te</button>
+        <button class="r3-btn r3-btn-mode" id="r3-b9" data-mode="inversion" aria-label="Inversion Cycle">I</button>
+        <button class="r3-btn r3-btn-send" id="r3-br3" aria-label="Send to R2B">LR2B</button>
+    </div>
+
+    <div class="r3-footer">
+        R3: Receive from R1 → Compute voicing → Display pianos → Send to R2B
+    </div>
+</section>
+
+<script>
+    // ===== R3 STATE =====
+    
+    let currentRowIndex = null;
+    let currentChord = null;
+    let currentSoundMode = 'triad';
+    let currentInversion = 0;
+    
+    // ===== NOTE FREQUENCIES =====
+    
+    const NOTE_FREQUENCIES = {
+        'C4': 261.63, 'C#4': 277.18, 'D4': 293.66, 'D#4': 311.13, 'E4': 329.63, 'F4': 349.23,
+        'F#4': 369.99, 'G4': 391.99, 'G#4': 415.30, 'A4': 440.00, 'A#4': 466.16, 'B4': 493.88,
+        'C5': 523.25, 'C#5': 554.37, 'D5': 587.33, 'D#5': 622.25, 'E5': 659.25, 'F5': 698.46,
+        'F#5': 739.99, 'G5': 783.99, 'G#5': 830.61, 'A5': 880.00, 'A#5': 932.33, 'B5': 987.77
+    };
+
+    // ===== R3 INITIALIZATION =====
+    
+    function initR3() {
+        renderPianogroups();
+        attachButtonListeners();
+        exposePublicAPI();
+        updateTimestamp();
+    }
+
+    // ===== PIANOGROUP RENDERING =====
+    
+    function renderPianogroups() {
+        const container = document.getElementById('r3-pianogroups-container');
+        for (let i = 1; i <= 10; i++) {
+            const group = document.createElement('div');
+            group.className = 'r3-pianogroup';
+            group.id = `r3-pianogroup-${i}`;
+            group.innerHTML = `
+                <div class="r3-chord-label" id="r3-label-${i}">–</div>
+                <svg class="r3-piano-svg" id="r3-piano-${i}" viewBox="0 0 200 100">
+                    <!-- Piano keys generated here -->
+                </svg>
+            `;
+            container.appendChild(group);
+            renderPianoKeys(i);
+        }
+    }
+
+    function renderPianoKeys(pianoGroupIndex) {
+        const svg = document.getElementById(`r3-piano-${pianoGroupIndex}`);
+        const notes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+        const blackNotes = [1.5, 2.5, 4.5, 5.5, 6.5]; // Position after C, D, F, G, A
+        
+        let xPos = 0;
+        const whiteKeyWidth = 200 / 7;
+        const whiteKeyHeight = 100;
+        
+        // Draw white keys
+        notes.forEach((note, idx) => {
+            const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            rect.setAttribute('x', xPos);
+            rect.setAttribute('y', 0);
+            rect.setAttribute('width', whiteKeyWidth);
+            rect.setAttribute('height', whiteKeyHeight);
+            rect.setAttribute('fill', '#f5f5f5');
+            rect.setAttribute('stroke', '#ccc');
+            rect.setAttribute('class', 'piano-key');
+            rect.setAttribute('data-note', note);
+            rect.setAttribute('data-piano', pianoGroupIndex);
+            svg.appendChild(rect);
+            
+            // Add note label
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', xPos + whiteKeyWidth / 2);
+            text.setAttribute('y', whiteKeyHeight - 5);
+            text.setAttribute('text-anchor', 'middle');
+            text.setAttribute('font-size', '8');
+            text.setAttribute('fill', '#333');
+            text.setAttribute('pointer-events', 'none');
+            text.textContent = note;
+            svg.appendChild(text);
+            
+            xPos += whiteKeyWidth;
+        });
+        
+        // Draw black keys
+        xPos = 0;
+        blackNotes.forEach((position) => {
+            const x = (position * whiteKeyWidth) - (whiteKeyWidth * 0.25);
+            const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            rect.setAttribute('x', x);
+            rect.setAttribute('y', 0);
+            rect.setAttribute('width', whiteKeyWidth * 0.5);
+            rect.setAttribute('height', 60);
+            rect.setAttribute('fill', '#1a1a1a');
+            rect.setAttribute('stroke', '#000');
+            rect.setAttribute('class', 'piano-key');
+            
+            // Determine black note name
+            const whiteNote = notes[Math.floor(position)];
+            let blackNote;
+            if (whiteNote === 'E' || whiteNote === 'B') {
+                // No black key after E or B
+                return;
+            } else {
+                blackNote = whiteNote + '#';
+            }
+            rect.setAttribute('data-note', blackNote);
+            rect.setAttribute('data-piano', pianoGroupIndex);
+            svg.appendChild(rect);
+        });
+        
+        // Attach key listeners
+        document.querySelectorAll(`[data-piano="${pianoGroupIndex}"]`).forEach(key => {
+            key.addEventListener('click', () => {
+                playNote(key.getAttribute('data-note'));
+            });
+        });
+    }
+
+    // ===== PUBLIC API FOR R1 =====
+    
+    function receiveChordFromR1(chordName, rowIndex) {
+        if (!chordName || !rowIndex) {
+            console.warn('R3.receiveChordFromR1: invalid params', chordName, rowIndex);
+            return;
+        }
+
+        currentRowIndex = rowIndex;
+        currentChord = {
+            chordName: chordName,
+            notes: computeVoicing(chordName, currentSoundMode, currentInversion),
+            mode: currentSoundMode,
+            inversion: currentInversion,
+            analysis: analyzeChord(chordName),
+            source: 'R1',
+            timestamp: Date.now()
+        };
+
+        updateChordDisplay(rowIndex, chordName, currentChord.notes);
+        playChord(currentChord.notes);
+    }
+
+    function receiveChordBatch(chordArray) {
+        if (!Array.isArray(chordArray) || chordArray.length !== 10) {
+            console.warn('R3.receiveChordBatch: invalid array', chordArray);
+            return;
+        }
+
+        let soundDelay = 0;
+        chordArray.forEach((chordName, index) => {
+            const rowIndex = index + 1;
+            
+            if (!chordName) {
+                // Empty string: clear pianogroup
+                clearPianoGroup(rowIndex);
+            } else {
+                // Non-empty: process chord
+                setTimeout(() => {
+                    currentRowIndex = rowIndex;
+                    currentChord = {
+                        chordName: chordName,
+                        notes: computeVoicing(chordName, currentSoundMode, currentInversion),
+                        mode: currentSoundMode,
+                        inversion: currentInversion,
+                        analysis: analyzeChord(chordName),
+                        source: 'R1',
+                        timestamp: Date.now()
+                    };
+                    
+                    updateChordDisplay(rowIndex, chordName, currentChord.notes);
+                    playChord(currentChord.notes);
+                }, soundDelay);
+                
+                soundDelay += 400;
+            }
+        });
+    }
+
+    function clearPianoGroup(rowIndex) {
+        if (rowIndex < 1 || rowIndex > 10) {
+            console.warn('R3.clearPianoGroup: invalid rowIndex', rowIndex);
+            return;
+        }
+
+        document.getElementById(`r3-label-${rowIndex}`).textContent = '–';
+        
+        // Clear marked notes
+        const svg = document.getElementById(`r3-piano-${rowIndex}`);
+        svg.querySelectorAll('.piano-key').forEach(key => {
+            const note = key.getAttribute('data-note');
+            const isBlack = note.includes('#');
+            key.setAttribute('fill', isBlack ? '#1a1a1a' : '#f5f5f5');
+        });
+
+        if (currentRowIndex === rowIndex) {
+            currentChord = null;
+            currentRowIndex = null;
+        }
+    }
+
+    // ===== CHORD DISPLAY & MARKING =====
+    
+    function updateChordDisplay(pianoGroupIndex, chordName, notes) {
+        document.getElementById(`r3-label-${pianoGroupIndex}`).textContent = chordName;
+
+        // Clear previous markings
+        const svg = document.getElementById(`r3-piano-${pianoGroupIndex}`);
+        svg.querySelectorAll('.piano-key').forEach(key => {
+            const note = key.getAttribute('data-note');
+            const isBlack = note.includes('#');
+            key.setAttribute('fill', isBlack ? '#1a1a1a' : '#f5f5f5');
+        });
+
+        // Mark active chord notes
+        notes.forEach(note => {
+            const key = svg.querySelector(`[data-note="${note}"]`);
+            if (key) {
+                key.setAttribute('fill', '#8fd694');
+            }
+        });
+    }
+
+    // ===== VOICING COMPUTATION (SIMPLIFIED) =====
+    
+    function computeVoicing(chordName, mode, inversion) {
+        // Placeholder: simplified voicing based on chord name
+        // In production, this would use complex voicing rules
+        const notes = [];
+        
+        // Extract root note
+        const root = chordName[0].toUpperCase();
+        let rootNote = root === 'H' ? 'B' : root;
+        
+        // Simplified: return 3-4 notes for demo
+        if (mode === 'triad') {
+            notes.push(rootNote + '4');
+            notes.push('E4'); // Placeholder
+            notes.push('G4'); // Placeholder
+        } else if (mode === 'tetrad') {
+            notes.push(rootNote + '4');
+            notes.push('E4');
+            notes.push('G4');
+            notes.push('B4');
+        }
+        
+        return notes;
+    }
+
+    function analyzeChord(chordName) {
+        return {
+            type: 'Chord',
+            intervals: ['R', 'M3', 'P5'],
+            quality: 'Major',
+            position: 'Root Position',
+            extensions: [],
+            alterations: []
+        };
+    }
+
+    // ===== AUDIO PLAYBACK =====
+    
+    function playChord(notes) {
+        console.log(`R3: Playing chord with notes: ${notes.join(', ')}`);
+        // Placeholder for actual audio
+    }
+
+    function playNote(note) {
+        console.log(`R3: Playing note: ${note}`);
+        // Placeholder for actual audio
+    }
+
+    // ===== BUTTON HANDLERS =====
+    
+    function attachButtonListeners() {
+        document.getElementById('r3-b7').addEventListener('click', () => {
+            currentSoundMode = 'triad';
+            updateModeButtons();
+            replayCurrentChord();
+        });
+
+        document.getElementById('r3-b8').addEventListener('click', () => {
+            currentSoundMode = 'tetrad';
+            updateModeButtons();
+            replayCurrentChord();
+        });
+
+        document.getElementById('r3-b9').addEventListener('click', () => {
+            currentInversion = (currentInversion + 1) % 4;
+            updateModeButtons();
+            replayCurrentChord();
+        });
+
+        document.getElementById('r3-br3').addEventListener('click', () => {
+            handleBR3Click();
+        });
+    }
+
+    function updateModeButtons() {
+        const b7 = document.getElementById('r3-b7');
+        const b8 = document.getElementById('r3-b8');
+        
+        b7.classList.toggle('active', currentSoundMode === 'triad');
+        b8.classList.toggle('active', currentSoundMode === 'tetrad');
+    }
+
+    function replayCurrentChord() {
+        if (!currentChord || !currentRowIndex) return;
+
+        currentChord.notes = computeVoicing(currentChord.chordName, currentSoundMode, currentInversion);
+        currentChord.mode = currentSoundMode;
+        currentChord.inversion = currentInversion;
+
+        updateChordDisplay(currentRowIndex, currentChord.chordName, currentChord.notes);
+        playChord(currentChord.notes);
+    }
+
+    function handleBR3Click() {
+        if (!currentChord) {
+            console.log('R3: No chord to send to R2B');
+            return;
+        }
+
+        const payload = {
+            chordName: currentChord.chordName,
+            notes: currentChord.notes,
+            mode: currentChord.mode,
+            inversion: currentChord.inversion,
+            analysis: currentChord.analysis,
+            source: 'R3',
+            timestamp: Date.now()
+        };
+
+        if (window.R2B && window.R2B.setChord) {
+            window.R2B.setChord(payload);
+        } else {
+            console.warn('R3: R2B not available');
+        }
+    }
+
+    // ===== PUBLIC API EXPOSURE =====
+    
+    function exposePublicAPI() {
+        window.R3 = {
+            receiveChordFromR1: receiveChordFromR1,
+            receiveChordBatch: receiveChordBatch,
+            clearPianoGroup: clearPianoGroup
+        };
+    }
+
+    // ===== TIMESTAMP =====
+    
+    function updateTimestamp() {
+        const now = new Date();
+        const yy = String(now.getFullYear()).slice(-2);
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        const hh = String(now.getHours()).padStart(2, '0');
+        const mins = String(now.getMinutes()).padStart(2, '0');
+        
+        document.getElementById('r3-timestamp').textContent = `${yy}.${mm}.${dd} • ${hh}.${mins}`;
+    }
+
+    // ===== INITIALIZATION =====
+    
+    document.addEventListener('DOMContentLoaded', initR3);
+</script>
+
+</body>
+</html>
