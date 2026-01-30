@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>R1-R2A-R3-R2B Integration Test Frame</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #fff;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .frame-header {
+            background-color: #0d47a1;
+            padding: 4px 8px; /* compact top row */
+            border-radius: 3px;
+            margin-bottom: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .frame-header h1 {
+            font-size: 0.85rem; /* reduced font size */
+            font-weight: bold;
+            line-height: 1; /* prevent tall header */
+        }
+
+        .frame-header .data-flow {
+            display: flex;
+            align-items: center;
+            gap: 8px; /* suitable distance between items */
+            font-size: 0.7rem; /* compact size */
+            color: #b3e5fc;
+            line-height: 1; /* tight row */
+        }
+
+        .frame-header .workflow-steps {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            font-size: 0.68rem; /* compact */
+            color: #e3f2fd;
+            line-height: 1; /* tight row */
+        }
+
+        .frame-container {
+            display: grid;
+            grid-template-columns: 0.125fr 0.30fr 0.575fr;
+            grid-template-rows: var(--row1-height, 0.3fr) 8px var(--row2-height, 0.7fr);
+            grid-template-areas:
+                "r1 r2a r2b"
+                "r1 divider divider"
+                "r1 r3 r3";
+            gap: 6px;
+            flex: 1;
+            min-height: 0;
+            position: relative;
+        }
+
+        .resize-divider {
+            grid-area: divider;
+            background: transparent;
+            cursor: ns-resize;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
+
+        .resize-divider::before {
+            content: '';
+            width: 100%;
+            height: 4px;
+            background: #0d47a1;
+            border-radius: 2px;
+            transition: background 0.2s, height 0.2s;
+        }
+
+        .resize-divider:hover::before {
+            background: #4dd0e1;
+            height: 6px;
+        }
+
+        .resize-divider.dragging::before {
+            background: #4dd0e1;
+            height: 6px;
+        }
+
+        .frame-r1 { grid-area: r1; }
+        .frame-r2a { grid-area: r2a; }
+        .frame-r2b { grid-area: r2b; }
+        .frame-r3 { grid-area: r3; }
+        
+        .frame-r3 iframe {
+            overflow-y: auto;
+        }
+
+        .frame-wrapper {
+            display: flex;
+            flex-direction: column;
+            background-color: #2a2a2a;
+            border-radius: 2px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+            overflow: hidden;
+        }
+
+        .frame-r1 {
+            overflow: auto;
+        }
+
+        .frame-r1 iframe {
+            min-width: 260px;
+        }
+
+        iframe {
+            flex: 1;
+            border: none;
+            background-color: #fff;
+            min-height: 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="frame-header">
+    <h1>🎹 Piano Chords & Lyrics Analyse and View <span id="frame-timestamp" style="font-size:0.75rem; color:#888; margin-left:auto;"></span></h1>
+    <div class="data-flow" aria-label="Data flow">
+        <span>R1 (single row input) -> R3 (display) or R2A (input) → R1 (validation) → R3 (display) → R2B (analysis)</span>
+    </div>
+</div>
+
+<div class="frame-container">
+    <div class="frame-wrapper frame-r2a">
+        <iframe id="r2a-frame" name="r2a-frame" src="R2A.html"></iframe>
+    </div>
+
+    <div class="frame-wrapper frame-r1">
+        <iframe id="r1-frame" name="r1-frame" src="R1.html"></iframe>
+    </div>
+
+    <div class="resize-divider" id="resize-divider"></div>
+
+    <div class="frame-wrapper frame-r3">
+        <iframe id="r3-frame" name="r3-frame" src="R3.html"></iframe>
+    </div>
+
+    <div class="frame-wrapper frame-r2b">
+        <iframe id="r2b-frame" name="r2b-frame" src="R2B.html"></iframe>
+    </div>
+</div>
+
+<script>
+    // ===== RESIZE DIVIDER =====
+    const divider = document.getElementById('resize-divider');
+    const container = document.querySelector('.frame-container');
+    let isDragging = false;
+
+    // Load saved position
+    function loadDividerPosition() {
+        const saved = localStorage.getItem('frame-divider-position');
+        if (saved) {
+            const percentage = parseFloat(saved);
+            document.documentElement.style.setProperty('--row1-height', percentage + 'fr');
+            document.documentElement.style.setProperty('--row2-height', (1 - percentage) + 'fr');
+        }
+    }
+
+    // Save position
+    function saveDividerPosition(percentage) {
+        localStorage.setItem('frame-divider-position', percentage);
+    }
+
+    loadDividerPosition();
+
+    divider.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        divider.classList.add('dragging');
+        document.body.style.cursor = 'ns-resize';
+        document.body.style.userSelect = 'none';
+        
+        // Disable pointer events on iframes to prevent interference
+        document.querySelectorAll('iframe').forEach(iframe => {
+            iframe.style.pointerEvents = 'none';
+        });
+        
+        e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        
+        e.preventDefault(); // Prevent text selection during drag
+        
+        const containerRect = container.getBoundingClientRect();
+        const mouseY = e.clientY - containerRect.top;
+        const containerHeight = containerRect.height;
+        
+        // Calculate percentage position
+        let percentage = mouseY / containerHeight;
+        
+        // Clamp between 5% and 95% (maximum flexibility)
+        percentage = Math.max(0.05, Math.min(0.95, percentage));
+        
+        const row1 = percentage;
+        const row2 = 1 - percentage;
+        
+        document.documentElement.style.setProperty('--row1-height', row1 + 'fr');
+        document.documentElement.style.setProperty('--row2-height', row2 + 'fr');
+    });
+
+    document.addEventListener('mouseup', () => {
+        if (isDragging) {
+            isDragging = false;
+            divider.classList.remove('dragging');
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+            
+            // Save position
+            const row1Value = getComputedStyle(document.documentElement).getPropertyValue('--row1-height');
+            const percentage = parseFloat(row1Value);
+            if (!isNaN(percentage)) {
+                saveDividerPosition(percentage);
+            }
+            
+            // Re-enable pointer events on iframes
+            document.querySelectorAll('iframe').forEach(iframe => {
+                iframe.style.pointerEvents = '';
+            });
+        }
+    });
+
+    // ===== IFRAME MESSAGE ROUTING =====
+    window.addEventListener('message', (event) => {
+        // Route messages between iframes
+        console.log('[Frame Router] Received message:', event.data.type);
+        
+        if (event.data.type === 'R2A_LOAD_CHORDS') {
+            // Route R2A→R1
+            const r1Frame = document.getElementById('r1-frame');
+            if (r1Frame && r1Frame.contentWindow) {
+                r1Frame.contentWindow.postMessage(event.data, '*');
+                console.log('[Frame Router] R2A→R1: chords loaded');
+            }
+        }
+        else if (event.data.type === 'R1_LOAD_CHORD') {
+            // Route R1→R3 (B1: Load single chord)
+            const r3Frame = document.getElementById('r3-frame');
+            if (r3Frame && r3Frame.contentWindow) {
+                r3Frame.contentWindow.postMessage(event.data, '*');
+                console.log('[Frame Router] R1→R3: chord loaded', event.data.chord);
+            }
+        }
+        else if (event.data.type === 'R1_LOAD_ALL') {
+            // Route R1→R3 (B3: Load all chords)
+            const r3Frame = document.getElementById('r3-frame');
+            if (r3Frame && r3Frame.contentWindow) {
+                r3Frame.contentWindow.postMessage(event.data, '*');
+                console.log('[Frame Router] R1→R3: all chords loaded');
+            }
+        }
+        else if (event.data.type === 'R1_CLEAR_ALL') {
+            // Route R1→R3 (B4: Clear all)
+            const r3Frame = document.getElementById('r3-frame');
+            if (r3Frame && r3Frame.contentWindow) {
+                r3Frame.contentWindow.postMessage(event.data, '*');
+                console.log('[Frame Router] R1→R3: cleared');
+            }
+        }
+        else if (event.data.type === 'R3_SEND_TO_R2B') {
+            // Route R3→R2B (BR3: Send chord analysis)
+            const r2bFrame = document.getElementById('r2b-frame');
+            if (r2bFrame && r2bFrame.contentWindow) {
+                r2bFrame.contentWindow.postMessage(event.data, '*');
+                console.log('[Frame Router] R3→R2B: chord sent for analysis');
+            }
+        }
+        else if (event.data.type === 'R3_FOCUS_AND_PLAY') {
+            // Route R1→R3 (B25: Focus row and play)
+            const r3Frame = document.getElementById('r3-frame');
+            if (r3Frame && r3Frame.contentWindow) {
+                r3Frame.contentWindow.postMessage(event.data, '*');
+                console.log('[Frame Router] R1→R3: focus and play', event.data.rowIndex);
+            }
+        }
+    });
+
+    // ===== TIMESTAMP =====
+    function updateFrameTimestamp() {
+        const d = new Date();
+        const yy = String(d.getFullYear()).slice(-2);
+        const mm = String(d.getMonth()+1).padStart(2,'0');
+        const dd = String(d.getDate()).padStart(2,'0');
+        const hh = String(d.getHours()).padStart(2,'0');
+        const mi = String(d.getMinutes()).padStart(2,'0');
+        document.getElementById('frame-timestamp').textContent = `${yy}.${mm}.${dd} • ${hh}.${mi}`;
+    }
+    
+    updateFrameTimestamp();
+    setInterval(updateFrameTimestamp, 60000);
+
+    // Note: iframes have same-origin policy, so cross-iframe communication 
+    // via window.R1, window.R2A, window.R3, window.R2B requires all files 
+    // to be served from same origin (http://localhost or file://)
+
+    console.log('Frame loaded. All 4 panels should be visible.');
+    console.log('Cross-origin restrictions apply if serving via file:// protocol.');
+    console.log('Use local HTTP server for full cross-panel testing.');
+</script>
+
+</body>
+</html>
