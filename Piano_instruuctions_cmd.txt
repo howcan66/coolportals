@@ -1,0 +1,53 @@
+Piano CMD / Short Commands Log
+
+PSD (Piano Screen Data)
+- Header: as-is
+- R1: HL 15%, VL 100%
+- R2A: HL 40%, VL 30%
+- R2B: HL 45%, VL 30%
+- R3: HL 85%, VL 70%
+
+Files (current)
+- Piano/integration.html
+- Piano/frame.html
+- Piano/R1.html
+- Piano/R2A.html
+- Piano/R2B.html
+- Piano/R3.html
+
+Commands / Short Notes
+- CMD / cmd = command (show/list/define commands)
+- PA / pa = Please Analyse (analyze & comment only, no changes)
+- PP / pp = Please Propose (give recommendations/options)
+- EX / ex = Execute (implement the proposal)
+- Document cmd = go through conversations and add all short cmds to instruction document
+- Build / OK / Approve = implement the proposed PA changes
+- PA then Build = full workflow (analyze, then implement if approved)
+- PSD = Piano Screen Data / show current Piano Screen Data
+- Build Frames / Build = apply PSD to frame.html
+- Update PSD = replace PSD block above
+- Integration = no changes unless requested
+- SB / sb = scrollbar (horizontal/vertical)
+- HL = horizontal (width %)
+- VL = vertical (height %)
+- R1 = Input Validation panel
+- R2A = Batch Input panel
+- R2B = Analysis Piano panel
+- R3 = Piano Groups display
+- Header = top section
+- Frame Layout / Frame = layout configuration
+- Timestamp = date/time display
+- No changes / no change = analyze only, don't modify
+- Build = apply changes/implement
+
+WORKFLOW
+- Say PA [topic] = I analyze and present findings only
+- Say Build or OK = I implement the PA recommendations
+- Say no changes = I skip implementation even after PA
+
+Testing
+- Open Piano/integration.html
+- Open Piano/frame.html
+
+TODO
+- 
