@@ -1,0 +1,61 @@
+<!--
+R1 Panel Functionalities
+
+Piano Single Entry Forms:
+R1 Recieve Data from R2A
+R1.R2A.n Textform one row 10 characters valid chords only, B1 button B2 Button directly after
+Start with 10 rows of R1.R2a.n rows - fill in with R2A textformdata
+R1.X Chord Validation Rules (Strict Mode – Option B)
+
+All R1.R2A.n textforms must follow strict chord grammar:
+
+1. Chord root must be one of: A, B, C, D, E, F, G
+2. Optional accidentals: # or b (one character)
+3. Optional chord quality:
+   - maj, min, dim, aug, sus, dom
+4. Optional extensions:
+   - 2, 4, 5, 6, 7, 9, 11, 13
+5. Optional alterations:
+   - #5, b5, #9, b9, #11, b13
+6. Optional additions:
+   - add9, add11, add13
+7. Maximum total length: 10 characters
+8. Invalid chord strings must be rejected and not sent to R3
+R1.XC Invalid Chord Handling (Option C)
+
+9. Valid examples:
+   - Cmaj7
+   - Dm9
+   - F#dim
+   - G7b9
+   - Bbmaj13
+10. Invalid examples:
+   - Hm7
+   - C##11
+   - Zmaj7
+   - 7Cmaj
+   
+B1 "LR3" Load R1.R2A.n Data to R3 Piano Chords
+B2 "XR1" Erase R1 Data and Erase R3 Data - Erase = Empty data / Textform
+B3 "LR3" Load all R1 Data to R3
+B4 "XR1" Restet all R1 Data, Reset all R3 Data
+R1.1 helptext "Input for chords start with caption characters"
+R1.2 helptext use timestamp version when html i generated yy.dd.dd time hour.minute
+When pressing B1 chord shall update R3.n and chord should sound
+When pressing B3 chords shall update R3.n and all chords should sound
+
+-->
+<!-- Clarificationa / Support text
+-(default. It can execute without data will *filled* with the values from R2A when the page loads)
+-B3 and B4 is placed under the R1 textforms. B3 and B4 are beside each other
+- R1 receives initial data from R2A  
+- R1 has 10 rows of chord inputs  
+- Each row has:  
+  - Textform (max 10 chars, valid chords only)  
+  - B1 (“LR3”) → load that row to R3 and play the chord  
+  - B2 (“XR1”) → erase all R1 + all R3  
+- B3 (global play) → update all R3 rows and play all chords  
+- Helptexts R1.1 and R1.2  
+- Timestamp format when HTML is generated  
+- Sound should play on B1 and B3 actions
+-->

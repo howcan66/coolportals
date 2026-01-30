@@ -1,0 +1,48 @@
+<!--
+
+R2A Funktionalitet
+
+
+
+----------------------------------------+--------------------------------------------+--------------------------------------+
+|        R1 : Piano Panel		        |   R2A Input Panel                          | R2B : Chord Analysis Panel           |  
+|                                       |                                            |                                      |
+|   R1.R2A1 Textform B1 B2              | R2a.1 Textform for chords                  |                                      |
+|   R1.R2A3 Textform B1 B2              | R2a.2 Textform for text (ignored)          |                       	            |
+|   R1.R2A5 Textform B1 B2	            | R2a.3 Textform for chords                  | - Virtual Piano (2 Octaves)          |
+|   R1.R2A7 Textform B1 B2     	        | R2a.4 Textform for chords                  |   Piano graphics. white & Black keys |
+|Rows built from R2A textforms          | Odd rows are chords                        |   incl. notes                        |
+|                              	        | Even rows are ignored                      | - Highlight Notes                    |
+|                                       | Valid chords start with capital char       |                                      |
+|                                       | Valid chords start after blank chars       | - Individual notes shall be played   |
+|                                       | Valid chords shall be piano chords         |                                      |
+|Button description                     | - Multi-line Text                          | - Chord Type                         |
+| - B1: Load Button "L" R3     	        |   Input Field                              | - Receive Chords from R3 Panel       |
+| - B2: Reset Button "X" R1 Panel       | - B5: Validate & Load to R1 textforms      |	R3.R1.n			                    |
+| - B3: Load All "LR1A" to R3 Panel     | - B6: Reset textform R2A                   |                                      |
+| - B4: Reset All "XA" in RA Panel      |                                            |                                      |      
+|                                       |                                            |                                      |
+|                                       |                                            |                                      |
+|                                       | - B5: Button is named "LR1"                |                                      |
+|                                       | - B6: Button is named"XR2A"                | - Alternatives                       |
+| - Help Text button of frame           |                                            | - B10: Play Chords R2B		        |
+|   Use uppercase for first char.       |                                            | - B1 1: "X" Reset Chord 2B           |
++---------------------------------------+--------------------------------------------+--------------------------------------|
+|                                       |                         R3: Chord List Panel                                      |
+|                              	        |                                                                                   |
+|                                       | - Displays validated chords from R1 dynamically on same row until Row end         |
+|                                       |                                                                                   |
+|                                       |                                                                                   |
+|                                       |                                                                                   |
+|                                       |                                                                                   |
+|					                    | - Buttons for actions:                                                            |
+|					                    |     B7: Show Triad | B8: Show Tetrad | B9: Show Inversions                        |
+|                                       |                                                                                   |
+|					                    |                                                                                   |
+|					                    |                                                                                   |
+|					                    |                                                                                   |
+|					                    |                                                                                   |
+|					                    |                                                                                   |
++---------------------------------------+-----------------------------------------------------------------------------------+
+
+-->

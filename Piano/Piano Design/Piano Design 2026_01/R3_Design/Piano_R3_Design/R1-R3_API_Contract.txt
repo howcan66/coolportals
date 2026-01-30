@@ -1,0 +1,515 @@
+================================================================================
+                    R1 ↔ R3 API CONTRACT (Interface Specification)
+                              Version 1.0 - 2026-01-24
+================================================================================
+
+PURPOSE:
+--------
+This document defines the exact API contract between R1 (Chord Input Panel) and 
+R3 (Pianogroup Display Panel) to ensure correct data flow, row-index mapping, 
+and function signatures.
+
+DATA FLOW DIRECTION: R1 → R3 (Unidirectional)
+- R1 SENDS chord data to R3
+- R3 RECEIVES and displays chord data
+- R3 does NOT send data back to R1
+
+================================================================================
+SECTION 1: FUNCTION SIGNATURES
+================================================================================
+
+1.1 SINGLE CHORD RECEPTION (Row-Level Update)
+─────────────────────────────────────────────
+
+Function: receiveChordFromR1(chordName, rowIndex)
+
+Parameters:
+  - chordName (String): Validated chord name, max 10 characters
+    * Format: Per R1.X rules (e.g., "Cmaj7", "G7b9", "F#dim")
+    * Normalized: "H" → "B" conversion already applied by R1
+    * Validity: R1 guarantees only valid chords are sent
+  
+  - rowIndex (Number): Integer 1-10, specifies target pianogroup
+    * 1 = R3.Pianogroup.1 (first octave piano)
+    * 10 = R3.Pianogroup.10 (tenth octave piano)
+    * Invalid indices (< 1 or > 10): R3 must silently ignore
+
+Return Value: void (or Promise if async audio playback)
+
+Side Effects:
+  1. Update R3.Pianogroup[rowIndex] with chord name
+  2. Mark piano keys for chord tones in green (#8fd694)
+  3. Compute voicing from chord quality using current mode/inversion
+  4. Play sound based on currentSoundMode (triad/tetrad)
+  5. Store internally: currentRowIndex = rowIndex, currentChord = {chordName, notes, ...}
+
+Trigger Points:
+  - R1 B1 button: Single row load (B1 clicked on row n)
+    Call: R3.receiveChordFromR1("Cmaj7", 1)
+  
+  - R1 B3 button: Iterates rows 1-10, calls for each valid chord with ~400ms gaps
+    Calls: R3.receiveChordFromR1("C", 1), then R3.receiveChordFromR1("Dm", 2), etc.
+
+Example Usage (JavaScript):
+```javascript
+// R1 Button Handler (B1 - Row 3)
+function handleB1Click(rowIndex) {
+  const chord = "Gm7";  // Validated by R1.X regex
+  if (window.R3 && window.R3.receiveChordFromR1) {
+    window.R3.receiveChordFromR1(chord, rowIndex);
+  }
+}
+
+// Output at R3:
+// R3.Pianogroup.3 now displays "Gm7" with marked notes (G, B♭, D, F)
+```
+
+---
+
+1.2 BATCH CHORD RECEPTION (Global Load - B3)
+─────────────────────────────────────────────
+
+Function: receiveChordBatch(chordArray)
+
+Parameters:
+  - chordArray (Array[10]): Array of 10 chord names (or empty strings)
+    * Index 0 → R3.Pianogroup.1
+    * Index 1 → R3.Pianogroup.2
+    * ...
+    * Index 9 → R3.Pianogroup.10
+    * Empty string ("") → clears corresponding pianogroup
+    * Example: ["C", "Dm", "G7", "", "Am", "", "", "", "", ""]
+
+Return Value: void (or Promise if async)
+
+Side Effects:
+  1. Update all 10 pianogroups simultaneously (or sequentially as needed)
+  2. For each non-empty chord:
+     - Display chord name
+     - Mark piano keys in green
+     - Compute voicing
+  3. For each empty chord:
+     - Clear chord name (display "–")
+     - Clear all marked notes
+  4. Trigger sound playback for all non-empty chords sequentially (~400ms gap)
+  5. Update internal state: currentRowIndex = null (batch operation, no single row active)
+
+Trigger Points:
+  - R1 B3 button: Global load all chords
+    Call: R3.receiveChordBatch(["C", "Dm", "G7", "F", "Am", "Em", "A7", "", "", ""])
+
+Example Usage (JavaScript):
+```javascript
+// R1 B3 Handler (Global Load)
+function handleB3Click() {
+  const chordArray = [];
+  for (let i = 1; i <= 10; i++) {
+    const input = document.getElementById(`r1-textform-${i}`);
+    chordArray.push(input.value.trim() || "");  // Empty string if blank
+  }
+  
+  if (window.R3 && window.R3.receiveChordBatch) {
+    window.R3.receiveChordBatch(chordArray);
+  }
+}
+
+// Output at R3:
+// All 10 pianogroups updated, then sounds play sequentially (~400ms each)
+```
+
+---
+
+1.3 PIANOGROUP CLEAR (Row/Global Clear)
+─────────────────────────────────────────
+
+Function: clearPianoGroup(rowIndex)
+
+Parameters:
+  - rowIndex (Number): Integer 1-10, specifies pianogroup to clear
+    * 1-10: Clear corresponding pianogroup
+    * Invalid indices: R3 silently ignores
+
+Return Value: void
+
+Side Effects:
+  1. Clear chord name (display "–" or empty)
+  2. Clear all marked notes (remove green highlights)
+  3. No sound playback
+  4. If rowIndex matches currentRowIndex: Reset currentRowIndex = null, currentChord = null
+
+Trigger Points:
+  - R1 B2 button: Row clear (B2 clicked on row n)
+    Call: R3.clearPianoGroup(n)
+  
+  - R1 B4 button: Global clear (B4 clicked)
+    Calls: R3.clearPianoGroup(1), R3.clearPianoGroup(2), ..., R3.clearPianoGroup(10)
+
+Example Usage (JavaScript):
+```javascript
+// R1 B2 Handler (Row Clear)
+function handleB2Click(rowIndex) {
+  if (window.R3 && window.R3.clearPianoGroup) {
+    window.R3.clearPianoGroup(rowIndex);
+  }
+}
+
+// R1 B4 Handler (Global Clear)
+function handleB4Click() {
+  for (let i = 1; i <= 10; i++) {
+    if (window.R3 && window.R3.clearPianoGroup) {
+      R3.clearPianoGroup(i);
+    }
+  }
+}
+
+// Output at R3:
+// All pianogroups cleared (names = "–", no marked notes)
+```
+
+---
+
+1.4 READINESS CHECK (Optional - for R2B integration)
+────────────────────────────────────────────────────
+
+Function: window.R3.isReady()
+
+Parameters: None
+
+Return Value: Boolean
+  - true: R3 panel is fully loaded and ready to receive data
+  - false: R3 not yet initialized or not available
+
+Usage in R1:
+```javascript
+if (window.R3 && window.R3.isReady()) {
+  R3.receiveChordFromR1(chord, rowIndex);
+} else {
+  console.warn("R3 panel not ready");
+}
+```
+
+================================================================================
+SECTION 2: DATA FORMAT SPECIFICATION
+================================================================================
+
+2.1 CHORD NAME FORMAT
+─────────────────────
+
+String Specification:
+  - Type: String (text)
+  - Max Length: 10 characters (including root, accidental, quality, extensions, alterations)
+  - Case: Uppercase root (A-G, B), lowercase extensions/qualities (optional)
+    * Examples: "C", "Cm", "Cmaj7", "F#dim", "Bbmaj13"
+  - Normalized: Root "H" already converted to "B" by R1 before sending
+  - Validation: Already verified by R1.X regex; R3 can assume validity
+
+Valid Examples:
+  - Single note: "C", "G", "A"
+  - Minor: "Cm", "F#m", "Bbm"
+  - Major 7: "Cmaj7", "Gmaj7", "F#maj7"
+  - Dominant: "G7", "D7b9", "A7#11"
+  - Diminished: "Bdim", "F#dim"
+  - Augmented: "Caug", "Gaug"
+  - Suspended: "Csus4", "Gsus2"
+  - Extended: "Dm9", "Cmaj13", "G7#11b13"
+
+Invalid Examples (R1 rejects these):
+  - "C##11" (double accidental)
+  - "Zmaj7" (invalid root)
+  - "C/E" (slash chord)
+  - "C7(b9)" (parentheses)
+  - "Cmaj7add7" (duplicate extension)
+
+---
+
+2.2 ROW INDEX FORMAT
+────────────────────
+
+Number Specification:
+  - Type: Integer
+  - Range: 1-10 (corresponding to R1 rows 1-10)
+  - Mapping: rowIndex n → R3.Pianogroup.n
+  - Out-of-Range Handling: R3 silently ignores indices < 1 or > 10
+
+Examples:
+  - rowIndex 1 → Update R3.Pianogroup.1 (first octave)
+  - rowIndex 5 → Update R3.Pianogroup.5 (fifth octave)
+  - rowIndex 10 → Update R3.Pianogroup.10 (tenth octave)
+  - rowIndex 0 or 11 → Silently ignored
+
+---
+
+2.3 CHORD ARRAY FORMAT (for receiveChordBatch)
+───────────────────────────────────────────────
+
+Array Specification:
+  - Type: Array of 10 strings
+  - Length: Exactly 10 elements
+  - Index Mapping: [0]=PG1, [1]=PG2, ..., [9]=PG10
+  - Empty Elements: Use "" (empty string) to clear a pianogroup
+  - Format: Each element is either valid chordName or ""
+
+Example Array:
+```javascript
+[
+  "C",        // [0] → R3.Pianogroup.1
+  "Dm",       // [1] → R3.Pianogroup.2
+  "G7",       // [2] → R3.Pianogroup.3
+  "",         // [3] → R3.Pianogroup.4 (cleared)
+  "Am",       // [4] → R3.Pianogroup.5
+  "",         // [5] → R3.Pianogroup.6 (cleared)
+  "",         // [6] → R3.Pianogroup.7 (cleared)
+  "",         // [7] → R3.Pianogroup.8 (cleared)
+  "",         // [8] → R3.Pianogroup.9 (cleared)
+  ""          // [9] → R3.Pianogroup.10 (cleared)
+]
+```
+
+================================================================================
+SECTION 3: TIMING & SYNCHRONIZATION
+================================================================================
+
+3.1 SINGLE CHORD TIMING (B1 - Row Load)
+────────────────────────────────────────
+
+B1 Button Click Sequence:
+1. User clicks B1 on row n
+2. R1 validates chord and gets rowIndex = n
+3. R1 calls: R3.receiveChordFromR1(chordName, n)
+4. R3 immediately updates pianogroup[n] display (~0ms)
+5. R3 computes voicing based on current mode/inversion (~10ms)
+6. R3 plays sound (~50-100ms to initiate, sustains ~1-2s)
+
+Total Perceived Latency: < 100ms (visually instant)
+
+---
+
+3.2 BATCH CHORD TIMING (B3 - Global Load)
+───────────────────────────────────────────
+
+B3 Button Click Sequence:
+1. User clicks B3
+2. R1 iterates rows 1-10, collects valid chords into array
+3. R1 calls: R3.receiveChordBatch(chordArray)
+4. R3 updates all 10 pianogroups (~50-100ms for all displays)
+5. R3 plays sounds sequentially with ~400ms gap:
+   - Sound 1 plays at t=0ms (if chordArray[0] not empty)
+   - Sound 2 plays at t=400ms (if chordArray[1] not empty)
+   - Sound 3 plays at t=800ms (if chordArray[2] not empty)
+   - etc.
+
+Total Duration: ~400ms per chord × number of non-empty chords
+
+Example Timeline (5 valid chords):
+  t=0ms:    B3 clicked, all displays update, Sound 1 starts
+  t=400ms:  Sound 1 ends, Sound 2 starts
+  t=800ms:  Sound 2 ends, Sound 3 starts
+  t=1200ms: Sound 3 ends, Sound 4 starts
+  t=1600ms: Sound 4 ends, Sound 5 starts
+  t=2400ms: Sound 5 ends (final sound duration ~1000ms)
+
+---
+
+3.3 CLEAR TIMING (B2/B4)
+────────────────────────
+
+B2/B4 Button Click Sequence:
+1. User clicks B2 (row) or B4 (global)
+2. R1 calls: R3.clearPianoGroup(rowIndex) [or multiple calls for B4]
+3. R3 immediately clears display (~0ms)
+4. No sound playback
+
+Total Latency: < 50ms (visually instant)
+
+================================================================================
+SECTION 4: ERROR HANDLING & EDGE CASES
+================================================================================
+
+4.1 INVALID ROW INDEX
+─────────────────────
+
+Scenario: R1 calls receiveChordFromR1("Cmaj7", 15)
+
+R3 Handling:
+  - Detect rowIndex 15 is out of range (> 10)
+  - Silently ignore (no update, no error message)
+  - Log warning to console (dev mode only)
+
+Code Example:
+```javascript
+function receiveChordFromR1(chordName, rowIndex) {
+  if (rowIndex < 1 || rowIndex > 10) {
+    console.warn(`Invalid rowIndex: ${rowIndex}`);
+    return;  // Silently ignore
+  }
+  // ... proceed with update
+}
+```
+
+---
+
+4.2 EMPTY/NULL CHORD NAME
+─────────────────────────
+
+Scenario: R1 calls receiveChordFromR1("", 1) or receiveChordFromR1(null, 1)
+
+R3 Handling:
+  - Treat empty string or null as "clear pianogroup"
+  - Equivalent to calling clearPianoGroup(rowIndex)
+  - Clear display, no sound playback
+
+Code Example:
+```javascript
+function receiveChordFromR1(chordName, rowIndex) {
+  if (!chordName || chordName.trim() === "") {
+    clearPianoGroup(rowIndex);
+    return;
+  }
+  // ... proceed with update
+}
+```
+
+---
+
+4.3 MISSING ROWINDEX PARAMETER
+───────────────────────────────
+
+Scenario: Old R1 code calls receiveChordFromR1("Cmaj7") without rowIndex
+
+R3 Handling (Backward Compatibility):
+  - If rowIndex is undefined/missing: Use last known currentRowIndex
+  - If no previous rowIndex: Use rowIndex = 1 (default first pianogroup)
+  - Log warning to console
+
+Code Example:
+```javascript
+function receiveChordFromR1(chordName, rowIndex) {
+  if (rowIndex === undefined) {
+    rowIndex = currentRowIndex || 1;
+    console.warn(`Missing rowIndex; defaulting to ${rowIndex}`);
+  }
+  // ... proceed
+}
+```
+
+---
+
+4.4 RACE CONDITION (Multiple rapid calls)
+──────────────────────────────────────────
+
+Scenario: R1 B3 fires 10 rapid receiveChordFromR1 calls, but user clicks B2 during playback
+
+R3 Handling:
+  - Each receiveChordFromR1 call updates its specific pianogroup independently
+  - B2 clear only affects specified row
+  - Sound playback queues are handled separately (audio engine manages timing)
+  - No data corruption; each row is isolated
+
+---
+
+4.5 R3 PANEL NOT LOADED
+───────────────────────
+
+Scenario: R1 tries to call R3.receiveChordFromR1() but R3 script not loaded yet
+
+R1 Defensive Code:
+```javascript
+function sendToR3(chord, rowIndex) {
+  if (!window.R3 || !window.R3.receiveChordFromR1) {
+    console.warn("R3 panel not available");
+    return false;
+  }
+  window.R3.receiveChordFromR1(chord, rowIndex);
+  return true;
+}
+```
+
+================================================================================
+SECTION 5: IMPLEMENTATION CHECKLIST FOR DEVELOPERS
+================================================================================
+
+R3 Development Checklist:
+─────────────────────────
+
+Implementation:
+  [ ] Create window.R3 namespace object
+  [ ] Implement receiveChordFromR1(chordName, rowIndex) function
+  [ ] Implement receiveChordBatch(chordArray) function
+  [ ] Implement clearPianoGroup(rowIndex) function
+  [ ] Implement isReady() function
+  [ ] Add currentRowIndex state variable
+  [ ] Add currentChord state variable
+  [ ] Implement voicing calculation based on chord quality
+  [ ] Implement pianogroup update for correct row index
+  [ ] Implement sound playback with ~400ms sequential gap
+
+Validation:
+  [ ] Verify receiveChordFromR1 rejects rowIndex < 1 or > 10
+  [ ] Verify receiveChordBatch accepts exactly 10 elements
+  [ ] Verify empty strings in batch clear corresponding pianogroups
+  [ ] Verify clearPianoGroup doesn't affect other pianogroups
+  [ ] Verify sound playback sequence for B3 (400ms gap)
+  [ ] Verify no sound plays for B2/B4 (clear operations)
+
+Testing:
+  [ ] Test: Single chord load (B1 simulation)
+  [ ] Test: Global batch load (B3 simulation with 10 chords)
+  [ ] Test: Row clear (B2 simulation)
+  [ ] Test: Global clear (B4 simulation)
+  [ ] Test: Invalid row indices (0, 11, -1, 1000)
+  [ ] Test: Empty chord names
+  [ ] Test: Missing rowIndex parameter (backward compatibility)
+  [ ] Test: R3 not loaded (error handling in R1)
+  [ ] Test: Rapid successive calls (concurrency)
+  [ ] Test: Sound playback timing alignment with display updates
+
+---
+
+R1 Development Checklist:
+─────────────────────────
+
+Implementation:
+  [ ] Validate chords with R1.X regex before calling R3 functions
+  [ ] Normalize H→B in chord name before sending to R3
+  [ ] B1 handler: Call R3.receiveChordFromR1(chord, rowIndex)
+  [ ] B3 handler: Call R3.receiveChordBatch(chordArray)
+  [ ] B2 handler: Call R3.clearPianoGroup(rowIndex)
+  [ ] B4 handler: Loop R3.clearPianoGroup(i) for i=1..10
+  [ ] Add defensive check: window.R3 && window.R3.receiveChordFromR1
+  [ ] Handle R3 not available gracefully
+
+Testing:
+  [ ] Test: B1 sends chord with correct row index
+  [ ] Test: B3 collects array of 10 chords (empty strings for blanks)
+  [ ] Test: H→B normalization works
+  [ ] Test: Invalid chords rejected before R3 call
+  [ ] Test: Overflow guard (n > 10 ignored)
+  [ ] Test: R1 works even if R3 not loaded
+  [ ] Test: Keyboard shortcuts (Enter, Shift+Enter)
+
+================================================================================
+SECTION 6: GLOSSARY & DEFINITIONS
+================================================================================
+
+Term                 | Definition
+─────────────────────┼────────────────────────────────────────────────────
+rowIndex            | Integer 1-10 specifying which R3 pianogroup to update
+chordName           | Validated chord string (e.g., "Cmaj7", "G7b9")
+pianogroup          | One octave (C-B) piano visualization in R3
+currentRowIndex     | Internal state variable tracking last active pianogroup
+currentChord        | Internal state variable storing active chord data
+receiveChordFromR1  | Function for single-row chord updates
+receiveChordBatch   | Function for 10-row global batch updates
+clearPianoGroup     | Function to clear a specific pianogroup
+isReady             | Function to check if R3 is initialized
+B1 Button           | R1 row-level load-to-R3 button
+B2 Button           | R1 row-level clear button
+B3 Button           | R1 global load-all-to-R3 button
+B4 Button           | R1 global clear-all button
+voicing             | Computed set of note pitches for a chord
+mode                | Sound mode: "triad" (3 notes) or "tetrad" (4+ notes)
+inversion           | Voice order: 0 (root), 1 (first), 2 (second), 3 (third)
+
+================================================================================
+END OF API CONTRACT
+================================================================================

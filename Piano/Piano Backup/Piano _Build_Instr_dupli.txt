@@ -1,0 +1,19 @@
+<!-- Piano Design Build File
+
+1 Use Piano_Overall_Layout_Instr.txt          for web layout
+
+2 Use R1_funct_Redo.txt                       for R1 html frame
+
+3 Use R3_Funct_Redo.txt                       for R2A html frame
+
+4 Use R3_Funct_Redo.txt                       for R3 html frame
+
+5 Use R2B_Funct_Redo.txt                      for R2A html frame
+
+6 Use Piano Design Style Instr.txt            for the generic web design
+
+Suggest single rows for build question
+
+Suggest single rows for build improvements
+
+-->

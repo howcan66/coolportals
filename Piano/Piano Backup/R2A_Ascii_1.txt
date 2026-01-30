@@ -1,0 +1,21 @@
+<!--
+
+R2A Panel Basic Layout - Support for Design and Style 
++---------------------------------------------------------------------------------------------+
+|           R2A Input Panel                                                                   |
+|                                                                                             |
+|           R2A.1 Textform for chords                                                         |
+|           R2A.2 Textform for text (ignored)                                                 |
+|           R2A.3 Textform for chords                                                         |
+|           R2A.4 Textform for text (ignored)                                                 |
+|           R2A.n n = no of rows no = 10                                                      |
+|                                                                                             |
+|           Support instruction - Odd rows are chords                                         |
+|           Support Instruction - Even rows are ignored                                       |
+|                                                                                             |
+|           B5: Load Button Validate & Load to R1 textforms named "L" Under the R2A.n rows    |
+|           B6: Reset Button for textforms R2A.n named "X" Beside the B5 Button               |
+|                                                                                             |
++---------------------------------------------------------------------------------------------+
+
+-->

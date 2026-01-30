@@ -1,0 +1,54 @@
+UPPDATERAD INSTRUKTION
+Rita en horisontell ram över hela bredden.
+
+Placera ordet HEADER centrerat på nästa rad.
+
+Rita en ny horisontell ram över hela bredden.
+
+Dela layouten vertikalt i två områden där vänsterdelen (R1) är 15% av totalbredden och högerdelen är 85%.
+
+Rita en obruten vertikal rektangel i vänsterdelen som sträcker sig från direkt under den övre ramen till bottenramen.
+
+Placera texten R1 högst upp i vänsterrektangeln.
+
+Till höger om vänsterrektangeln, rita en horisontell linje som markerar toppen av R2‑området.
+
+Dela R2‑området i två sektioner där den vänstra sektionen (R2A) är 40% av högerdelen och den högra sektionen (R2B) är 45% av högerdelen.
+
+Placera texten R2A i den vänstra sektionen av R2‑området.
+
+Placera texten R2B i den högra sektionen av R2‑området.
+
+Ge R2‑området en total höjd motsvarande 30% av högerdelens höjd.
+
+Rita en horisontell linje under R2‑området, utan att korsa vänsterrektangeln.
+
+Under denna linje, skapa en stor rektangel som täcker hela högerdelen — detta är R3‑området.
+
+Ge R3‑området en total höjd motsvarande 70% av högerdelens höjd.
+
+Placera texten R3 i den övre delen av denna rektangel.
+
+När AI ska generera en HTML‑fil ska ramarna täcka hela webbfönstret.
+
+Skriv ut ASCII‑layouten.
+
+ASCII‑LAYOUT (R2 = 30%, R3 = 70%)
+Kod
++-----------------------------------------------------------------------------------+
+|                                      HEADER                                       |
++-----------------------------------------------------------------------------------+
+| R1         |----------------------------+-----------------------------------------|
+|            |            R2A             |                   R2B                   |
+|            |                            |                                         |
+|            |                            |                                         |
+|            |----------------------------+-----------------------------------------|
+|            |                              R3                                      |
+|            |                                                                      |
+|            |                                                                      |
+|            |                                                                      |
+|            |                                                                      |
+|            |                                                                      |
+|            |                                                                      |
+|            |                                                                      |
++-----------------------------------------------------------------------------------+

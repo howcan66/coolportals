@@ -1,0 +1,362 @@
+<!-- R1 R2A R3 R1 to R3 instructions --->
+
+<!------------------R1 Panel Functionalities ------------------>
+<!------------------R1 Panel Functionalities ------------------>
+<!------------------R1 Panel Functionalities ------------------>
+
+<!--
+Piano Single Entry Forms:
+1. Initialisering
+ - R1 ska ta emot initial data från R2A.
+ - Vid sidladdning ska samtliga 10 rader i R1 fyllas med värden från R2A.
+ - Systemet ska fungera även om R2A är tomt (default mode).
+2. R1–rader (R1.R2A.n)
+ - R1 består av 10 rader: R1.R2A.1 till R1.R2A.10.
+ - Varje rad innehåller:
+   a) Ett textfält (max 10 tecken).
+   b) B1–knapp direkt efter textfältet.
+   c) B2–knapp direkt efter B1.
+ - Textfältet får endast innehålla giltiga ackord enligt R1.X.
+3. R1.X – Chord Validation Rules (Strict Mode – Option B)
+ Alla R1.R2A.n textfält måste följa strikt ackordgrammatik:
+  1. Rot: A, B, C, D, E, F, G
+  2. Olyckstecken (valfritt): # eller b
+  3. Kvalitet (valfritt):
+    - maj, min, dim, aug, sus, dom
+  4. Extension (valfritt):
+    - 2, 4, 5, 6, 7, 9, 11, 13
+  5. Alterationer (valfritt):
+    - #5, b5, #9, b9, #11, b13
+  6. Additions (valfritt):
+    - add9, add11, add13
+  7. Maximal längd: 10 tecken totalt.
+  8. Ogiltiga ackord får inte skickas till R3.
+4. R1.XC – Invalid Chord Handling (Option C)
+ - Vid ogiltigt ackord och knapptryckning (B1 eller B3):
+   a) Textfältet ska tömmas automatiskt.
+   b) R3 ska inte uppdateras med ogiltigt ackord.
+   c) Inget ljud ska spelas.
+ - Ingen felindikering ska visas.
+ - Rensning ska ske tyst och omedelbart.
+5. Exempel
+ Giltiga ackord:
+  - Cmaj7
+  - Dm9
+  - F#dim
+  - G7b9
+  - Bbmaj13
+ Ogiltiga ackord:
+  - Hm7
+  - C##11
+  - Zmaj7
+  - 7Cmaj
+6. Radknappar
+ B1 – "LR3"
+  - Laddar R1.R2A.n till R3.n.
+  - Spelar ljud för det aktuella ackordet.
+  - Kräver giltigt ackord.
+ B2 – "XR1"
+  - Rensar alla R1–fält.
+  - Rensar alla R3–fält.
+  - Erase = sätt textfält till tom sträng.
+  - Spelar inget ljud.
+7. Globala knappar (placerade under R1–raderna, bredvid varandra)
+ B3 – "LR3" (Load All)
+  - Laddar alla giltiga R1–värden till R3.
+  - Spelar ljud för alla giltiga ackord.
+  - Ogiltiga ackord rensas enligt R1.XC.
+ B4 – "XR1" (Reset All)
+  - Rensar alla R1–fält.
+  - Rensar alla R3–fält.
+  - Spelar inget ljud.
+8. Hjälptexter
+ R1.1 – "Input for chords start with caption characters"
+ R1.2 – Vid HTML–generering ska en tidsstämpel inkluderas:
+  Format: yy.dd.dd hour.minute
+9. Ljudregler
+ - B1 spelar ett ackord.
+ - B3 spelar alla ackord.
+ - B2 och B4 spelar inget ljud.
+-->
+
+<!------------------R1 Panel Functionalities Above ------------------>
+<!------------------R1 Panel Functionalities Above ------------------>
+<!------------------R1 Panel Functionalities Above ------------------>
+
+<!-- R1 to R2A interface Improvement
+Vid laddning från R2A till R1 fylls endast de udda raderna (giltiga ackord) i R1.
+Ogiltiga ackord eller tomma rader ignoreras tyst utan felmeddelande.
+-->
+
+
+R2A_Funct_Redo.txt
+<!------------------ R2A Panel Functionalities Below ------------------>
+<!------------------ R2A Panel Functionalities Below ------------------>
+<!------------------ R2A Panel Functionalities Below ------------------>
+
+<!--
+
+R2A Multiline textform input Rows below each other (This data is used to fill in R1 Text forms)
+Buttons B5 and B6 beside each other
+R2A.1 Text Row 1 Odd rows shall be Piano Chords only, valid format start with: capital letter or blank letters
+R2A.2 Text Row 2 Even rows ignored
+R2A Button B5 "L" Load chords to R1 textforms : R1.R2A.n
+R2A Button B6 "X" Erase chords from R2A muli line textform
+2. R2A – Text Input Frame:
+ - Purpose:
+   - Accepts input in a multi-line text field for chord notations (odd rows) and plain text descriptions (even rows).
+   - Each valid chord is validated and sent to R1.
+ - Components:
+   a. Text Area: User input field for chords and accompanying text.
+   b. B5 "Load" Button: Validates chords and sends them to R1.
+   c. B6 "Reset" Button: Clears the input area in R2A.
+ - Chord Validation Rules:
+   - Only valid chord notations (e.g., C, Dm, Fmaj7, G7, A#) are accepted.
+   - Odd rows must contain valid chord notations.
+   - Even rows are treated as plain descriptions without validation.
+     - Test data example1 "A" = OK, "A C" = OK, " G pmqpwm Dmaj7" = "G Dmaj7" = OK
+Missing Features You Need to Implement with JavaScript:
+Button functionalities (e.g., Load, Reset, Reset All, Analyze, Play Chord).
+Chord validation logic and error feedback for invalid entries.
+Dynamic generation of chord lists in R3.
+Interactive piano functionality in R2B for highlighting and playbacks.
+Real-time chord analysis and updates in R2B.
+==== Action Required Below =====
+## Inversion Logic and Playback
+### Inversion Logic
+Inversion logic allows for the generation of distinct voicings by rearranging the notes of a chord. By moving the root note to another position within the chord, alternative harmonic structures can be produced. This technology is particularly essential for creating variations of chords such as:
+- **Root Position:** No inversions.
+- **First Inversion:** Root note is moved to the top of the chord.
+- **Second Inversion:** The second note is moved to the top of the chord.
+- Example: C Major (C-E-G) becomes:
+  - Root Position: C, E, G
+  - First Inversion: E, G, C
+  - Second Inversion: G, C, E
+**Panels Associated:**
+- **R1 (Piano Entry Panel):** Manual entry of chords with inversion possibilities.
+- **R3 (Chord List Panel):** Includes buttons for different inversions (B9).
+- **R2B (Chord Analysis Panel):** Highlights keys and displays notes for the chosen inversion.
+### Playback Feature
+Real-time playback allows users to hear the chords, individual notes, or chord sequences they input or generate:
+- **Play Chord Button (B10):** Upon clicking, the system generates audio for the suggested chord or inversion.
+- **Interactive Keyboard:** Users can manually interact with the virtual 2-octave piano on-screen to play individual notes.
+**Panels Associated:**
+- **R1 (Piano Entry Panel):** Sends the chord data for playback upon clicking the "OK" or "Load" button.
+- **R2A (Text Input Panel):** Valid chord data from text input can be sent for playback.
+- **R2B (Chord Analysis Panel):** Displays the visual and interactive playback of the selected chord.
+6 Change as required
+6.a R1 – Pianoackord (Left Frame)
+Missing functionality to send validated and entered chord data to R3 on button actions (e.g., "OK" or "Load").
+"Reset All" button does not reset the entire R1 section (including help text or other related areas).
+=== Additional functionality ====
+Implement chord analysis functionality (e.g., detecting notes, displaying chord type).
+Implement playback for both individual notes and chords via the Web Audio API.
+Populate R3 dynamically based on the input and manage button functionality (Triad, Tetrad, Inversion/ALT).
+Add error handling feedback within the UI directly (e.g., show errors near corresponding buttons or text fields).
+=== Additional functionality ====
+==== Action Required Above =====
+============================================= All done ation in group part below =====================
+6.R2A – Text Input Frame - All done
+Missing validation for chord notations: No Validation Now
+Odd rows must validate as chord notations:
+Insert changed code, update complete file, comment: inserted, whole file kept integrity
+Even rows are treated as plain text without validation: Not Implemented Now
+Insert changed code, update complete file, comment: inserted, whole file kept integrity
+Missing functionality to send validated chords from odd rows to R1: Insert changed code, update complete file, comment: inserted, whole file kept integrity
+Insert changed code, update complete file, comment: inserted, whole file kept integrity
+Missing feedback for detected invalid chords (e.g., invalid entries are ignored, but the user is not notified):
+Not done Now
+6.R3 – Chord List Panel
+Missing chord buttons:
+Insert changed code, update complete file, comment: inserted, whole file kept integrity
+B7 (Triad), B8 (Tetrad), and B9 (Inversion/ALT) buttons for each chord are not implemented.
+Insert changed code, update complete file, comment: inserted, whole file kept integrity
+Missing functionality to automatically populate the chord list in R3 from validated data in R1.
+Insert changed code, update complete file, comment: inserted, whole file kept integrity
+Missing click functionality for chord buttons:
+Insert changed code, update complete file, comment: inserted, whole file kept integrity
+Clicking on any chord or its associated buttons does not send data to R2B for analysis.
+Insert changed code, update complete file, comment: inserted, whole file kept integrity
+6.R2B – Analysis and Alternate Chords Frame
+Missing chord analysis functionality:
+No logic to display "Notes in Chord," "Chord Type," and "Alternatives" when a chord is selected.
+Missing interactive piano:
+Functionality to highlight corresponding keys for the selected chord (from R3 or R1) is not implemented.
+Missing link with R3 or R1 actions:
+No workflow to dynamically update R2B when chords are sent from R3 or R1.
+Let me know if you'd like me to elaborate further or assist in implementing these missing features!
+All Insert changed code, update complete file, comment: inserted, whole file kept integrity
+
+============================================= All done ation in group part above =====================
+General Notes:
+- The layout uses `CSS Grid` for organizing the frames and panels within the overall structure.
+- Each panel (R1, R2A, R2B, and R3) is responsive and easily extendable for future features or adjustments.
+- Dynamic interactivity between R1, R2A, R2B, and R3 is handled via JavaScript.
+-->
+
+<!------------------ R2A Panel Functionalities Above ------------------>
+<!------------------ R2A Panel Functionalities Above ------------------>
+<!------------------ R2A Panel Functionalities Above ------------------>
+
+
+<!-- R1 R3 Interface Improvements
+
+Förbättrade instruktioner mellan R1 och R3
+
+
+Tydliggör data överföring:
+
+När användaren trycker på B1 (LR3) i R1-panelen, skickas det aktuella giltiga ackordet från vald rad i R1 till motsvarande plats i R3.
+När användaren trycker på B3 (LR3, Load All) i R1-panelen, skickas samtliga giltiga ackord från R1 till R3, i ordningsföljd.
+
+Förklara vad som händer med ogiltiga ackord
+Endast giltiga ackord (enligt valideringsreglerna i R1) förs över till R3.
+Ogiltiga ackord rensas bort och lämnar motsvarande plats i R3 tom.
+
+R3:s uppdateringslogik
+
+R3-panelen uppdateras direkt när data skickas från R1. Tidigare ackord i R3 ersätts med de nya från R1 vid varje överföring.
+R3 sparar ingen historik – endast de senaste giltiga ackorden från R1 visas.
+
+Förtydliga användarinteraktion:
+Ingen återkoppling ges till användaren om ogiltiga ackord rensas bort; detta sker tyst och automatiskt.
+Om R1 är tom eller endast innehåller ogiltiga ackord, blir R3 också tom vid överföring.
+
+-->
+
+<-- 3_Funct_Redo.txt
+<!------------------ R3 Panel Functionalities Below ------------------>
+<!------------------ R3 Panel Functionalities Below ------------------>
+<!------------------ R3 Panel Functionalities Below ------------------>
+
+<!--
+
+R3 Panel Functionalities
+------------------------
+1. R3 presenterar ackordgrafik i form av pianografik.
+ - Varje pianografik visar en oktav med vita och svarta tangenter.
+ - Tangenternas notnamn ska alltid visas direkt på tangenterna.
+ - Noter får aldrig döljas eller ersättas av annan grafik.
+2. Pianografiken består av 10 fasta pianogrupper:
+ - Dessa benämns R3.Pianogroup.1 till R3.Pianogroup.10.
+ - Samtliga 10 pianogrupper ska placeras horisontellt på samma rad.
+ - Ingen radbrytning får förekomma.
+ - Pianogrupperna ska ligga kant-i-kant utan mellanrum.
+ - R3-panelens bredd utgör 85% av sidans bredd.
+ - De 10 pianogrupperna ska tillsammans fylla hela denna bredd.
+ - Varje pianogrupp ska automatiskt anpassa sin bredd så att alla 10 får plats.
+ - Pianogruppens höjd ska skalas proportionellt till dess bredd.
+ - Ingen del av R3.Pianogroup får visa sidans bakgrund:
+   * Ingen padding
+   * Ingen margin
+   * Ingen vit yta mellan grupperna
+3. Tonmarkering i R3 är exkluderad:
+ - Triad-markering: exkluderas
+ - Tetrad-markering: exkluderas
+ - Inversions-markering: exkluderas
+4. Knappar för R3:
+ - B7: Show Triad (funktion exkluderad)
+ - B8: Show Tetrad (funktion exkluderad)
+ - B9: Show Inversions (funktion exkluderad)
+ - BR3: Load into R2B ("LR2B")
+5. Placering av knappar:
+ - Knapparna B7, B8, B9 och BR3 ska placeras i en horisontell rad direkt under pianografiken.
+ - Knapparna ska vara centrerade horisontellt i R3-panelen.
+ - Knapparna ska vara små och runda.
+ - Ingen text ska visas under knapparna.
+ - Avståndet mellan knapparna ska vara jämnt.
+ - Knapparnas rad ska ligga direkt under R3.Pianogroup-raden utan mellanliggande element.
+6. R3-panelens bakgrundsfärg:
+ - R3-panelens bakgrundsfärg är vit.
+R3 Input From R1
+-----------------
+1. R3 får alltid sitt aktiva ackord från R1.
+ - R1 ansvarar för att välja eller aktivera ett ackord.
+ - Det ackord som är aktivt i R1 ska omedelbart göras tillgängligt för R3.
+ - Det ackord som är aktivt i R1 ska omedelbart göras tillgängligt för R3.
+ - Tidigare ackord ska ignoreras.
+ - Ingen historik sparas i R3.
+5. R3 får inte själv generera eller ändra ackord.
+ - R3 är en ren presentationspanel.
+R3 Input From R1 via B1 och B3
+------------------------------
+1. R3 kan ta emot ackord från R1 på två sätt:
+ - Ett ackord i taget via B1.
+ - En lista av ackord via B3.
+2. B1 – Skicka ett ackord från R1 till R3:
+ - R3 uppdaterar EN pianogrupp åt gången.
+ - Ackorden fylls i R3.Pianogroup i ordning:
+   * Första B1 → R3.Pianogroup.1
+   * Andra B1 → R3.Pianogroup.2
+   * ... upp till R3.Pianogroup.10
+ - Varje pianogrupp visar:
+   * Ackordnamn överst
+   * Pianografik under
+   * Markerade ackordnoter
+3. B3 – Skicka ALLA ackord från R1 till R3:
+ - R3 rensar alla pianogrupper.
+ - R3 fyller grupperna med R1:s ackordlista, ett ackord per grupp.
+ - Max 10 ackord visas.
+4. R3 genererar aldrig egna ackord.
+ - Endast R1 bestämmer vilka ackord som skickas via B1 eller B3.
+-->
+
+<!------------------ R3 Panel Functionalities Above ------------------>
+<!------------------ R3 Panel Functionalities Above ------------------>
+<!------------------ R3 Panel Functionalities Above ------------------>
+
+<!-- CoPilot improvement suggestions between R3 and R2B -->
+Suggested Improvements: R3 ↔ R2B
+
+Dataflöde:
+När användaren klickar på ett ackord t.ex. BR3 eller ackord knappar), 
+skickas det valda ackordet direkt till R2B för analys och visning.
+Endast ett ackord åt gången kan analyseras i R2B, 
+R2B alltid visar det senast valda ackordet från R3.
+
+R2B Display:
+R2B-panelen visar en grafisk representation av ackordet på en tvåoktavig piano,
+samt en textanalys (t.ex. vilka toner ingår, ackordtyp, eventuella alternativ/inversioner).
+Om inget ackord är valt, ska R2B vara tom eller visa en neutral standardvy.
+
+Användarinteraktion:
+Användaren kan välja ackord i R3 genom att klicka, och att detta omedelbart uppdaterar R2B.
+Om användaren klickar på en analysknapp 
+(t.ex. Triad, Tetrad, Inversion), ska R2B visa motsvarande analys för det valda ackordet.
+
+Synkronisering och återställning
+
+Om R3 rensas eller uppdateras med nya ackord, ska R2B automatiskt återställas eller uppdateras för att spegla det aktuella urvalet
+
+-->
+
+<!------------------ R2B Panel Functionalities Below ------------------>
+<!------------------ R2B Panel Functionalities Below ------------------>
+<!------------------ R2B Panel Functionalities Below ------------------>
+<--
+R2B Present Selected R3 Piano Graphical Chord over two octaves. Piano keys white and black shall have the notes marked
+R2B Shall play the full chord or individual key notes.
+R2B Button is B10 "LR2B" Play the loaded R2B Chord
+R2B Button is B11 "XR2B" Reset R2B Data
+
+R2B – Analysis and Alternate Chords (Chord Analysis Frame):
+ - Purpose:
+   - Displays the analysis of a selected chord from R3 or manual input.
+   - Visualizes the selected chord on a virtual piano spanning **two octaves (C4 to B5)** with marked keys.
+   - Displays the result of analyzing the chord (e.g., triad, tetrad, inversion, alternative chords, etc.).
+ - Components:
+   a. Visual Piano Keyboard: A graphical 2-octave piano, with white and black keys (C4 to B5).
+   b. Text Analysis Section: Displays information about the chord:
+     - List of notes in the chord and their analysis.
+     - Description of the selected chord type (e.g., "Triad," "Tetrad").
+     - Display of alternative chords or inversions.
+     - Button B10 in R2B. B10 shall play the chord in R2B
+ - Workflow:
+   - Chord data comes from R3 when a user clicks on a specific chord or action buttons (B5 B6 B7 (e.g., Triad, Tetrad, Inversion)).
+   - Marked keys display the corresponding tones of the chord.
+-->
+
+<!------------------ R2B Panel Functionalities Above ------------------>
+<!------------------ R2B Panel Functionalities Above ------------------>
+<!------------------ R2B Panel Functionalities Above ------------------>
+

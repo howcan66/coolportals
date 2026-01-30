@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chord Layout Interface</title>
+  <style>
+    /* Layout and Styling */
+    body {
+      display: grid;
+      grid-template-columns: 1fr 2fr 2fr;   /* R1 : R2A : R2B */
+      grid-template-rows: 70% 30%;         /* Top (R1, R2A, R2B), Bottom Row (R3) */
+      height: 100vh;                       /* Full viewport height */
+      margin: 0;
+    }
+
+    .panel {
+      border: 1px solid #ccc;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    #R1 {
+      grid-row: 1 / span 2; /* Spanning both rows */
+      grid-column: 1 / 2;   /* Left-most column */
+      background-color: #f9f9f9;
+    }
+
+    #R2A {
+      grid-row: 1 / 2; /* Top row */
+      grid-column: 2 / 3; /* Center column */
+      background-color: #e6f7ff;
+    }
+
+    #R2B {
+      grid-row: 1 / 2; /* Top row */
+      grid-column: 3 / 4; /* Right column */
+      background-color: #ffe6e6;
+    }
+
+    #R3 {
+      grid-row: 2 / 3; /* Bottom row, spans across R2A and R2B */
+      grid-column: 2 / 4;
+      background-color: #e6ffe6;
+    }
+
+    .header {
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 1.2em;
+    }
+
+    .row-input {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .button-group {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      padding: 5px 10px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background: #0056b3;
+    }
+
+    textarea {
+      width: 100%;
+      box-sizing: border-box;
+      resize: none;
+    }
+
+    .chord-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+  <!-- === START OF FRAME LAYOUT INSTRUCTIONS === -->
+  <!-- 
+    +-------------------+-------------------+-------------------+
+    |        R1         |       R2A        |       R2B         |
+    | (Piano Entry Panel)| (Text Input Panel)| (Chord Analysis   |
+    |                   |                   | Panel)            |
+    +-------------------+-------------------+-------------------+
+    |                   |                   R3                  |
+    |                   |          (Chord List Panel)           |
+    +-------------------+---------------------------------------+
+    - R1: Vertical panel for chord entry with buttons and help text.
+    - R2A: Top-center, for entering chords manually in odd rows.
+    - R2B: Top-right, displays chord details, piano visualization, and play button.
+    - R3: Bottom-wide horizontal layout for displaying processed chord list.
+  -->
+  <!-- === END OF FRAME LAYOUT INSTRUCTIONS === -->
+
+  <!-- R1: Piano Entry Panel -->
+  <div id="R1" class="panel">
+    <div class="header">R1 – Piano Entry Panel</div>
+    <!-- Text Form -->
+    <div class="row-input">
+      <label for="chord-line-1">Line 1:</label>
+      <input id="chord-line-1" type="text" maxlength="10" placeholder="Enter chord">
+      <div>
+        <button class="btn">B1: Load</button>
+        <button class="btn">B2: Clear</button>
+      </div>
+    </div>
+    <div class="row-input">
+      <label for="chord-line-2">Line 2:</label>
+      <input id="chord-line-2" type="text" maxlength="10" placeholder="Enter chord">
+      <div>
+        <button class="btn">B1: Load</button>
+        <button class="btn">B2: Clear</button>
+      </div>
+    </div>
+    <div class="row-input">
+      <label for="chord-line-3">Line 3:</label>
+      <input id="chord-line-3" type="text" maxlength="10" placeholder="Enter chord">
+      <div>
+        <button class="btn">B1: Load</button>
+        <button class="btn">B2: Clear</button>
+      </div>
+    </div>
+    <!-- Global Buttons -->
+    <div class="button-group">
+      <button class="btn">B3: Load All Rows</button>
+      <button class="btn">B4: Reset</button>
+    </div>
+    <!-- Help Section -->
+    <div id="chord-help">
+      <h4>Help:</h4>
+      <ul>
+        <li>Use uppercase letters for chord names.</li>
+        <li>Separate chords with spaces (e.g., "C G7 Fmaj7").</li>
+        <li>Click B1 to load each row or B3 to load all rows into R3.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- R2A: Text Input Panel -->
+  <div id="R2A" class="panel">
+    <div class="header">R2A – Text Input Panel</div>
+    <textarea rows="5" placeholder="Enter chords on odd rows, descriptions on even"></textarea>
+    <div class="button-group">
+      <button class="btn">B5: Load</button>
+      <button class="btn">B6: Reset</button>
+    </div>
+    <p>[Feedback: e.g., 'C, G7 successfully transferred to R1']</p>
+  </div>
+
+  <!-- R2B: Chord Analysis Panel -->
+  <div id="R2B" class="panel">
+    <div class="header">R2B – Chord Analysis Panel</div>
+    <p>Selected Chord: <span>[Chord Name]</span></p>
+    <p>Tones: <span>[Tone Breakdown]</span></p>
+    <div id="piano">
+      <p>[Two Octave Piano Placeholder]</p>
+    </div>
+    <button class="btn">Play</button>
+    <p>[Feedback: 'Chord Played']</p>
+  </div>
+
+  <!-- R3: Chord List Panel -->
+  <div id="R3" class="panel">
+    <div class="header">R3 – Chord List Panel</div>
+    <!-- Dynamic List-->
+    <div class="chord-list">
+      <span>[C]</span>
+      <span>[G7]</span>
+      <span>[F#m7]</span>
+    </div>
+    <div class="button-group">
+      <button class="btn">Show Triads</button>
+      <button class="btn">Show Tetrads</button>
+      <button class="btn">Show Inv/ALT</button>
+      <button class="btn">Clear Filters</button>
+    </div>
+    <p>[Feedback: 'Filters cleared! Displaying all chords.']</p>
+  </div>
+
+</body>
+</html>

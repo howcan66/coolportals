@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>R3 Test</title>
+    <style>
+        body {
+            background: #1a1a1a;
+            padding: 20px;
+        }
+        .test-svg {
+            width: 400px;
+            height: 80px;
+            border: 2px solid red;
+            background: white;
+        }
+        p {
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <p>Test SVG rendering:</p>
+    <svg class="test-svg" id="test-svg" viewBox="0 0 200 100">
+        <!-- Will be filled by script -->
+    </svg>
+    
+    <script>
+        console.log('Test page loaded');
+        
+        const svg = document.getElementById('test-svg');
+        console.log('SVG element:', svg);
+        
+        if (svg) {
+            // Draw a simple white rectangle
+            const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            rect.setAttribute('x', '10');
+            rect.setAttribute('y', '10');
+            rect.setAttribute('width', '80');
+            rect.setAttribute('height', '80');
+            rect.setAttribute('fill', 'blue');
+            rect.setAttribute('stroke', 'black');
+            svg.appendChild(rect);
+            console.log('Appended rectangle');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,641 @@
+<!--
+Copilot Specification.
+
+=== chord_layout part Instruction  part ============
+Frame Layout Instructions
+R1 (Piano Entry Panel):
+Position:
+
+A single vertical frame located on the far-left.
+Spans the entire vertical height of the layout (both rows).
+Separate from the other frames (no overlapping with R3).
+Purpose:
+
+Used for displaying auto-filled chords from R2A.
+Accepts manual chord input and provides buttons for chord-related actions.
+R2A (Text Input Panel):
+Position:
+
+Placed to the right of R1, in the top-center column.
+Purpose:
+
+Accepts user input with a multi-line text box to enter chords.
+Contains buttons for validating chord entries and clearing input.
+R2B (Chord Analysis Panel):
+Position:
+
+Placed to the right of R2A, in the top-right column.
+Purpose:
+
+Analyzes chords selected from R3 or entered manually in R1.
+Displays chord details, highlights notes on a virtual piano spanning two octaves, and supports chord playback.
+R3 (Chord List Panel):
+Position:
+
+Horizontally spans the combined width of R2A and R2B.
+Positioned directly below R2A and R2B in the bottom row.
+Purpose:
+
+Displays validated and loaded chords in a list format.
+Includes control buttons to view chord variations like triads, tetrads, and inversions.
+Should not overlap or appear below R1.
+Frame Layout in ASCII
+Code
++-------------------+-------------------+-------------------+
+|        R1         |       R2A        |       R2B         |
+|(Piano Entry Panel)| (Text Input Panel)| (Chord Analysis   |
+|                   |                   | Panel)            |
++-------------------+-------------------+-------------------+
+|                   |                   R3                  |
+|                   |          (Chord List Panel)           |
++-------------------+---------------------------------------+
+Summary:
+The frame layout divides the interface into four distinct sections:
+R1 (a vertical frame on the left spanning the full vertical height).
+R2A (top-center for text input).
+R2B (top-right for chord analysis and playback).
+R3 (bottom row, spanning horizontally across the width of R2A and R2B).
+
+======================= Instruction R1 ========================================================
+
+Complete Instruction for R1 - Piano Entry Panel
+Purpose:
+The R1 panel starts with a Text Form (a0) that displays up to three rows for valid chords auto-filled from R2A after pressing B5.
+If there are fewer than 3 valid chords from R2A, the remaining rows in the Text Form will remain blank.
+The Text Form is editable, allowing the user to manually enter or modify chords.
+Each Text Form row has associated B1 and B2 buttons:
+B1 (Load): Transfers the specific row to R3.
+B2 (X): Clears that specific row.
+Additional global buttons provide functionalities:
+B3 (Load): Transfers all available chords in R1 (Text Form and modifications) to R3.
+B4 (X): Fully resets R1, including the Text Form and any displayed help text.
+Layout and Components
+1. Text Form:
+Purpose:
+
+A 3-line form, where each line allows up to 10 characters to display or accept valid chord input.
+Automatically populated with valid chords from R2A when the B5 button of R2A is pressed.
+Blank rows are left if fewer than 3 chords are provided from R2A.
+Editable to allow manual chord input or modification of existing chords.
+Specifications:
+
+Position: Top of the R1 panel.
+Number of Rows: 3.
+Character Limit per Row: Up to 10 characters.
+Behavior:
+Each row operates independently of the others.
+If the row is empty, B1 will do nothing when pressed.
+B2 clears only the corresponding row.
+Users can enter or edit valid chords after data is auto-filled.
+Example: (after R2A populates data):
+Code
+Line 1: C
+Line 2: G7
+Line 3: (Blank)
+2. Per-Row Buttons:
+Located directly after each text form row and offering the following actions:
+
+[B1: Load]:
+
+Label: "Load".
+Function: Transfers the data in the corresponding row to R3.
+Behavior: Ignores the row if it does not contain a valid chord. Displays success or error messages:
+E.g., "Row X loaded into R3" or "No valid chord in Row X to load."
+[B2: X]:
+
+Label: "X".
+Function: Clears the content of the corresponding row.
+3. Global Buttons:
+Located below the last text form row and buttons:
+
+[B3: Load]:
+
+Label: "Load".
+Function: Transfers all valid chord data (from a0 and manual input) from R1 to R3.
+Behavior: Displays success or error message:
+Success: "All data successfully loaded into R3."
+Error: "No valid data to load into R3."
+[B4: X]:
+
+Label: "X".
+Function: Resets the R1 panel entirely, including:
+Text Form content (all rows reset to blank).
+Any displayed feedback messages.
+Help text that is displayed.
+4. Help Text Section:
+Displayed at the bottom of the R1 panel to provide user guidance:
+
+Chord Naming Rules:
+Use uppercase letters for chord names.
+Separate chords with spaces (e.g., "C G7 Fmaj7").
+Interactive Prompts for R2A and R3 Interactions:
+Example: "Press B5 in R2A to validate and send chords to R1."
+Example: "Press B1 to load specific rows to R3, or B3 to load all at once."
+ASCII Illustration of R1 Layout
+Code
++-------------------+
+|       R1          |  <-- Piano Entry Panel
+|-------------------|
+| Line 1: C         |  <-- Valid chord or blank
+| [B1: Load] [B2: X]|  <-- Buttons for Line 1
+|-------------------|
+| Line 2: G7        |  <-- Valid chord or blank
+| [B1: Load] [B2: X]|  <-- Buttons for Line 2
+|-------------------|
+| Line 3:           |  <-- Blank if no valid chord
+| [B1: Load] [B2: X]|  <-- Buttons for Line 3
+|-------------------|
+| [B3: Load]        |  <-- Transfers all R1 data to R3
+| [B4: X]           |  <-- Resets the entire R1 Panel
+|-------------------|
+|  Help Text:       |
+|  Chord Rules:     |
+|  - Use uppercase  | 
+|  - Separate with  | 
+|    spaces (e.g.,   |
+|    "C G7 Dm7 F")  |
+| Instructions:     |
+| - Press "Load B1" |
+|   to transfer     |
+| - Press B3 "Load" |
+|   to transfer all |
++-------------------+
+
+============= Behavioral Rules for checking ======================================
+
+Interaction Between R2A and R1:
+Clicking the B5 button in R2A will:
+Populate the Text Form (a0) in R1 with up to 3 valid chords.
+Any invalid chords or extra rows in R2A are ignored (invalid chords are not transferred).
+A visual confirmation appears in R1 for success or failure:
+Success Message: "Chords loaded successfully from R2A."
+Error Message: "No valid chords detected in R2A."
+Interaction Between R1 and R3:
+B1 (Load):
+Transfers a single row (if valid) to R3 when clicked.
+B3 (Load):
+Transfers all rows (valid and modified chords) from R1 to R3 at once.
+Error Handling and Validations:
+R2A Input Validation:
+Only valid chord notations (e.g., C, G7, Fmaj7) from R2A are accepted into R1.
+Invalid input is ignored, and an error message is displayed in R2A.
+Feedback Messages in R1:
+Visual feedback to confirm actions or indicate errors, such as:
+"All R1 data successfully loaded into R3."
+"No valid chords to load into R3."
+
+============ End Instructions for R1 ==================
+
+============= R2A ======================================
+
+Instructions to Build the R2A Frame
+Purpose:
+R2A is a Text Input Panel where users can input chords (in odd lines) and optional descriptions or text (in even lines). It processes the input, validates chords, and sends valid ones to R1 using the B5 ("Load") button while allowing the panel to be reset using the B6 ("X") button.
+
+Key Components:
+1. Header / Section Title:
+Purpose: Clearly indicate that this section is for text input (R2A).
+Use a heading or a label to display "R2A – Text Input Panel".
+Example text to display on the header: "Text Input Panel for Chords and Descriptions".
+2. Text Input:
+Purpose:
+
+A multi-line input text area for the user to enter chords and descriptions.
+Divided into lines to handle both chord input (odd rows) and description input (even rows).
+The first, third, and fifth lines are explicitly for chord validation.
+The second and fourth lines accept plain text descriptions with no validation.
+Design Requirements:
+
+Size: Allow exactly 5 rows of text, where each row supports at least 50–100 characters.
+Placeholder Text: Add placeholder guidance, e.g., "Enter chords on odd rows and plain text on even rows."
+Editable: Ensure the input text area allows the user to freely input chords/descriptions manually. Input is visible, scrollable (if large), and accessible.
+3. Two Buttons:
+Place the buttons directly below the text area, aligned horizontally:
+
+B5 ("Load"):
+
+Purpose: Validate the text input in odd-numbered rows (chords only) and send up to 3 valid chords to the R1 Text Form.
+Execution:
+Validate input for proper chord notations in odd rows only.
+Ignore invalid chords or malformed input (e.g., "ABC", "Chord1").
+Transfer up to 3 validated chords to R1’s Text Form.
+Feedback Mechanism: Provide success/error feedback, such as:
+"C, G7 successfully loaded into R1."
+"No valid chords detected in R2A. Please check your input."
+B6 ("X"):
+
+Purpose: Resets the Text Input Area in the R2A frame entirely.
+Execution: On button click, clear all text lines in the input area and provide a message saying "Input cleared."
+4. Feedback Area:
+Purpose: Display messages guiding the user about the success or failure of actions taken in R2A.
+
+Messages should update dynamically based on:
+Successful data validation and transfer to R1.
+Clearing the input text form.
+Position: Display below buttons B5 ("Load") and B6 ("X").
+
+Layout Design in ASCII:
+Code
++-------------------------------------+
+|               R2A                   |  <-- Text Input Panel
+|-------------------------------------|
+| Line 1: (Chord Input)               |  <-- Odd row, validated for valid chords
+| Line 2: (Description Input)         |  <-- Even row, plain text (no validation)
+| Line 3: (Chord Input)               |  <-- Validated, bound to R1
+| Line 4: (Description Input)         |  <-- Plain text input ignored by R1
+| Line 5: (Chord Input)               |  <-- Validated, bound to R1
+|-------------------------------------|
+| [B5: Load Button]   [B6: X Button]  |  <-- Buttons directly below text input
+|-------------------------------------|
+| Feedback:                           |
+| - Success or error message...       |  <-- Feedback label appears dynamically
++-------------------------------------+
+Specifications for Core Components
+Text Input Area:
+
+Houses a multi-line text box with at least 5 rows for user input.
+Odd-numbered rows validate only chord notations in the format:
+Chords: A, Bb, C#, Dm, F#m7.
+Notations allowed include sharps (#), flats (b), minor (m), and additional chord types (e.g., maj, 7, dim).
+Invalid entries (e.g., "abc", "Gmaj9dim2", "InvalidChord") are ignored.
+Even-numbered rows are ignored during validation and act as descriptions.
+B5 ("Load") Button:
+
+Validates chord notations in odd-numbered rows and sends up to 3 valid chords to R1.
+Adds visual confirmation:
+Shows success message: "A, Bb successfully loaded into R1."
+Shows error message: "No valid chords detected."
+Example Input in R2A (textarea):
+Code
+C
+Some description
+G7
+Another description
+Fmaj7
+Result in R1 (Text Form):
+Code
+Line 1: C
+Line 2: G7
+Line 3: Fmaj7
+B6 ("X") Button:
+
+Resets the textarea to blank and clears feedback messages.
+Feedback Visibility:
+
+Feedback messages appear dynamically after button actions:
+When B5 is clicked:
+Success example: "Chords loaded to R1: C, F#m7, Bb."
+Error example: "No valid chords detected."
+When B6 is clicked:
+Feedback: "Input cleared."
+
+Clarification: R3 is Reset by R1
+Key Behavior:
+R1 Triggers R3 Reset:
+When the reset button B4 (X) in R1 is clicked:
+All chord data in R3 should be cleared.
+Chord list display in R3 resets to its initial state:
+Shows the message: "No chords loaded".
+Clears all rows and filters applied in R3.
+Feedback: Display a message in R3 such as:
+"R3 has been successfully reset by R1."
+This ensures transparency for the user.
+Flow of Operation:
+Click B4 (X) in R1 to reset the panel.
+Automatically clear and reset R3 to its initial empty state, regardless of previously loaded chords or applied filters.
+Purpose:
+Allows users to reset the entire interface (R1 and R3) in unison.
+Ensures that R3 remains in sync with R1 after a reset action.
+
+
+============= END R2A ======================================
+
+Review R2A and R1 interface
+
+
+============= Start R3A ======================================
+
+Instructions to Build R3 – Chord List Panel
+Purpose
+The R3 Panel dynamically stores and visually displays chords sent from R1.
+Provides users with options to filter the displayed chords or highlight specific components of the chords (e.g., triads, tetrads, inversions) using dedicated buttons.
+Ensures chords are displayed clearly and in rows, with users able to interact further by clearing, filtering, or highlighting parts of the data.
+Components of R3
+1. Header Section
+Display a static header at the top: "R3 – Chord List Panel".
+Clearly communicates that this section holds the processed chord data.
+2. Chord List Display Area
+A dynamic grid or row-based display that lists all chords currently stored in R3.
+Chords are displayed in rows, one after another, with proper spacing and alignment.
+3. Control Buttons
+Buttons for manipulating the chord list:
+Show Triads (B7):
+Displays only triads in the chord list. Removes tetrads and inversions from view temporarily.
+Show Tetrads (B8):
+Displays only tetrads, hiding other types of chords temporarily.
+Show Inversions (B9):
+Highlights inversions in the chord list so users can visually differentiate them.
+Clear Filters (B10):
+Resets any active filters, restoring the original full chord list.
+ASCII Layout of R3 Panel
+Here is the layout in ASCII form:
+
+Code
++-------------------------------------------+
+|               R3                          |
+|          Chord List Panel                 | <-- Static header
+|-------------------------------------------|
+| C   G7   F#m7   Bb7   Dm7                 | <-- Dynamic chord row 1
+| A7  E7   C7                                | <-- Dynamic chord row 2 (new row when overflow)
+|-------------------------------------------|
+| [o] Show Triads  [o] Show Tetrads         |
+| [o] Show Inv/ALT [o] Clear Filters        | <-- Round buttons for filtering
++-------------------------------------------+
+Details of Each Component
+Header
+Purpose: A fixed/static heading for clarity and organization.
+Display the title centered: "R3 – Chord List Panel".
+Chord List Display
+Dynamic Behavior:
+
+Chords are added dynamically in the same row horizontally until there is no room left in the row.
+Automatically creates a new row for additional chords when the screen width is exceeded.
+Displays chords sent from R1 in their original format (e.g., C, G7, F#m7).
+Character Handling:
+
+Each chord is displayed with sufficient space between entries to ensure legibility (e.g., 20px or 1.25em margin between chords).
+Initial State:
+
+If no chords are loaded, display the message: "No chords loaded" (this message disappears once chords are added).
+Behavior:
+
+Dynamically add chords as they're transferred from R1 (using B1 or B3 in R1).
+Ensure row-wrapping when chords exceed the visible panel width.
+Control Buttons
+Positioning: Below the chord list display, evenly spaced horizontally as a single button row.
+Round Button Functions:
+B7 (Show Triads):
+
+Filters and displays only triads (3-note chords) in the chord list. Any other chords (e.g., tetrads, inversions) are hidden temporarily.
+Example:
+Input Chords: C, G7, Dm7, F#m7.
+After Clicking B7:
+Output: C, Dm (triads only).
+Feedback: "Filtered chords: Displaying triads only."
+B8 (Show Tetrads):
+
+Filters and displays only tetrads (4-note chords) in the chord list while hiding others temporarily.
+Example:
+Input Chords: C, G7, Dm7, F#m7.
+After Clicking B8:
+Output: G7, F#m7 (tetrads only).
+Feedback: "Filtered chords: Displaying tetrads only."
+B9 (Show Inv/ALT):
+
+Highlights any inversions or alternative voicings in the chord list (e.g., C/E, F/A).
+Example:
+Input Chords: C/E, G7/B, Dm, A7.
+After Clicking B9:
+Highlighted Chords: C/E, G7/B (inversions/ALT chords detected and highlighted).
+Feedback: "Highlighted inversions/alt chords: C/E, G7/B."
+B10 (Clear Filters):
+
+Resets any active filters, restoring the original complete chord list in its unfiltered state.
+Feedback Example: "Filters cleared. Displaying all chords."
+Dynamic Behavior Guidelines
+1. Populating Chords from R1
+Chords sent from R1 are added to the end of the chord list in R3:
+
+If R3 contains no chords, the new chord becomes the first entry.
+If a row reaches its maximum width, create a new row dynamically and add the chord(s) there.
+Skipping Invalid Entries:
+
+If R1 sends invalid or empty chords, these should be skipped during population into R3.
+Feedback Example: "No valid chords sent from R1. Check input and try again."
+2. Filtering and Highlighting
+Temporary Filtering:
+Filters (B7, B8, B9) do not permanently delete chords but hide non-matching ones from the display.
+Feedback Messaging Examples:
+Clicking "Show Triads":
+Feedback: "Filtered: Now displaying only triads."
+Clicking "Show Tetrads":
+Feedback: "Filtered: Now displaying only tetrads."
+Clicking "Clear Filters":
+Feedback: "Filters cleared. All chords displayed."
+3. Reset Behavior
+Add a Reset All button (optional):
+Clears all chords from R3.
+Resets the display area to show: "No chords loaded".
+ASCII Code of R3 Layout
+Code
++-----------------------------------------+
+|                 R3                      |  <-- Header
+|        Chord List Panel                 |
+|-----------------------------------------|
+| C      G7       F#m7      Bb7           |  <-- Dynamic row 1
+| Dm     A7       E7                      |  <-- Dynamic row 2 (new row when overflow)
+|-----------------------------------------|
+| [o] Show Triads   [o] Show Tetrads      |  <-- Round Buttons for Filter Options
+| [o] Show Inv/ALT  [o] Clear Filters     |      
++-----------------------------------------+
+Prioritization of Features
+Here’s how to approach the creation of R3 in phases:
+
+Phase 1: Core Functionality
+Create the header: Display "R3 – Chord List Panel" at the top of R3.
+Implement the dynamic chord display area:
+Display chords horizontally, wrapping to the new row when full.
+Populate chords dynamically when sent from R1.
+Phase 2: Advanced Interactions
+Add control buttons (B7, B8, B9, B10):
+Triad filter: Display only triads from the chord list.
+Tetrad filter: Show only tetrads from the list.
+Inversion highlighting: Highlight chords with inversions.
+Clear filters: Reset the view back to its original state.
+Phase 3: Styling and Feedback
+Add margin/padding between chords for a clean layout.
+Provide feedback messaging below the control buttons for all filtering, highlighting, and reset actions.
+Implement additional accessibility features such as visual emphasis for current filters and proper labels.
+
+
+============= END R3A =======================================
+
+============= Start R2B ======================================
+
+===================== R2B – Chord Analysis Panel =====================
+Purpose
+R2B analyzes chords selected from R3 or entered manually in R1.
+It displays chord details, highlights notes on a virtual piano spanning two octaves, and supports chord playback.
+
+Components of R2B
+1. Header Section
+A static header displayed at the top of the panel:
+
+“R2B – Chord Analysis Panel”
+
+This clearly communicates that this section performs chord analysis.
+
+2. Chord Display Area
+A dedicated area that shows:
+
+The selected chord name (e.g., C, G7, F#m7b5)
+
+The chord type (triad, tetrad, inversion, altered chord)
+
+Optional: interval structure (e.g., 1–3–5–b7)
+
+This area updates dynamically whenever a new chord is selected.
+
+3. Tone Breakdown
+A list of the chord’s component tones, for example:
+
+C
+
+E
+
+G
+
+or for tetrads:
+
+G
+
+B
+
+D
+
+F
+
+This list updates automatically when a new chord is analyzed.
+
+4. Piano Visualization (Two Octaves)
+A virtual piano spanning 24 keys (C–B × 2).
+
+Requirements:
+
+Correct white/black key layout
+
+Highlighting rules:
+
+Root note: primary highlight color
+
+Chord tones: secondary highlight color
+
+Altered tones (e.g., #11, b9): tertiary highlight color
+
+Keys must visually reset when a new chord is selected
+
+Piano must remain static in layout but dynamic in highlighting
+
+5. Playback Button
+A button labeled “Play”.
+
+Behavior:
+
+Plays the chord in root position
+
+Uses a simple synthesized piano sound
+
+Optional: short fade‑in/fade‑out
+
+Feedback message example:
+“Chord played: G7”
+
+6. Feedback Area
+Displays dynamic messages such as:
+
+“Chord loaded from R3: Cmaj7”
+
+“Invalid chord format”
+
+“Chord played”
+
+Positioned below the piano visualization.
+
+R2B – Behavioral Rules
+1. Input Sources
+R2B accepts chords from:
+
+R3 (user clicks a chord)
+
+R1 (via B1 or B3)
+
+Manual input (future extension)
+
+2. Update Flow
+When a chord is received:
+
+Validate chord format
+
+Identify chord type (triad, tetrad, inversion, altered)
+
+Compute tone set
+
+Update chord display
+
+Highlight piano keys
+
+Enable playback button
+
+Show feedback message
+
+3. Error Handling
+If the chord is invalid:
+
+Clear piano highlights
+
+Clear tone list
+
+Display: “Invalid chord”
+
+Disable playback button
+
+4. Reset Behavior
+When R1 triggers a full reset (B4):
+
+R2B clears:
+
+chord name
+
+tone list
+
+piano highlights
+
+feedback
+
+Shows default message:
+“No chord selected.”
+
+ASCII Layout for R2B
+Kod
++------------------------------------------------------+
+|                     R2B                              |
+|             Chord Analysis Panel                     |
++------------------------------------------------------+
+|  Selected Chord:  Cmaj7                              |
+|                                                      |
+|  Tones:  C   E   G   B                               |
+|                                                      |
+|  +-----------------------------------------------+   |
+|  |   Piano (Two Octaves)                         |   |
+|  |                                               |   |
+|  |   | | |   | | | |   | | |   | | | |           |   |
+|  |   | | |   | | | |   | | |   | | | |           |   |
+|  |  C D#D E F G G#A A#B  C D#D E F G G#A A#B      |   |
+|  |                                               |   |
+|  |  [Highlighted keys based on selected chord]   |   |
+|  +-----------------------------------------------+   |
+|                                                      |
+|  [Play]                                              |
+|                                                      |
+|  Feedback: Chord loaded from R3: Cmaj7               |
++------------------------------------------------------+
+
+============= END R2B ======================================
+
+============  Modificarions 1 ==============================
+
+
+
+
+
+-->

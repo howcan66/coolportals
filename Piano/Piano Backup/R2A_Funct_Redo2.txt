@@ -1,0 +1,104 @@
+<!------- R2A Panel Functionalities Below ------------------------------------->
+<!------- R2A Panel Functionalities Below ------------------------------------->
+<!------- R2A Panel Functionalities Below ------------------------------------->
+
+<-- R2A Multiline textform Starts 3 row under R2A Panel
+
+R2A Multiline textform input Rows below each other (This data is used to fill in R1 Text forms)
+R2A.1 Text Row 1 Odd rows shall be Piano Chords only, valid format start with: capital letter or blank letters
+R2A.2 Text Row 2 Even rows ignored
+
+Build 10 rows of R2A.n
+
+R2A Button B5 "L" Load chords to R1 textforms : R1.R2A.n, Button is placed before text form
+R2A Button B6 "X" Erase chords from R2A muli line textform, button is placed under B6 and before textform
+
+
+2. R2A – Text Input Frame:
+   - Purpose: 
+      - Accepts input in a multi-line text field for chord notations (odd rows) and plain text descriptions (even rows).
+      - Each valid chord is validated and sent to R1. 
+   - Components:
+      a. Text Area: User input field for chords and accompanying text.
+      b. B5 "Load" Button: Validates chords and sends them to R1.
+      c. B6 "Reset" Button: Clears the input area in R2A.
+	  
+	  	  
+	  
+-->  
+<!--
+Instruktioner för R2A – Textinmatning
+
+Skriv in dina ackord och beskrivningar i textfältet nedan.
+Varje rad i textfältet motsvarar en separat post:
+
+Udda rader (1, 3, 5, ...): Här ska du skriva pianoackord, t.ex. Cmaj7, Dm, F#dim. Endast giltiga ackord enligt reglerna accepteras.
+Jämna rader (2, 4, 6, ...): Här kan du skriva valfri beskrivande text. Dessa rader ignoreras vid ackordöverföring.
+
+
+Du kan skriva flera ackord på samma udda rad, separerade med mellanslag.
+Tryck på knappen "L" för att ladda alla giltiga ackord från udda rader till R1-panelen. Ogiltiga ackord ignoreras tyst.
+Tryck på knappen "X" för att rensa hela textfältet.
+Endast de ackord som är korrekt formaterade och placerade på udda rader kommer att skickas till R1.
+Exempel på giltig inmatning:
+Cmaj7 Dm7
+Min favoritackord
+F#dim G7
+Ackord till refräng
+
+
+Rad 1: Cmaj7 Dm7 (båda ackord skickas till R1)
+Rad 2: Beskrivning (ignoreras)
+Rad 3: F#dim G7 (båda ackord skickas till R1)
+Rad 4: Beskrivning (ignoreras)
+
+R2A Chord validation improvements -->
+   - Chord Validation Rules:
+      - Only valid chord notations (e.g., C, Dm, Fmaj7, G7, A#) are accepted.
+      - Odd rows must contain valid chord notations.
+      - Even rows are treated as plain descriptions without validation.
+      - Test data example1 "A" = OK, "A C" = OK, " G  pmqpwm Dmaj7" = "G Dmaj7" = OK
+nsert changed code, update complete file, comment: inserted, whole file kept integrity
+
+Missing functionality to send validated chords from odd rows to R1: Insert changed code, update complete file, comment: inserted, whole file kept integrity
+Insert changed code, update complete file, comment: inserted, whole file kept integrity
+
+Missing feedback for detected invalid chords (e.g., invalid entries are ignored, but the user is not notified):
+Not done Now
+
+6.R3 – Chord List Panel
+Missing chord buttons:
+Insert changed code, update complete file, comment: inserted, whole file kept integrity
+
+B7 (Triad), B8 (Tetrad), and B9 (Inversion/ALT) buttons for each chord are not implemented.
+Insert changed code, update complete file, comment: inserted, whole file kept integrity
+
+Missing functionality to automatically populate the chord list in R3 from validated data in R1.
+Insert changed code, update complete file, comment: inserted, whole file kept integrity
+
+Missing click functionality for chord buttons:
+Insert changed code, update complete file, comment: inserted, whole file kept integrity
+
+Clicking on any chord or its associated buttons does not send data to R2B for analysis.
+Insert changed code, update complete file, comment: inserted, whole file kept integrity
+
+6.R2B – Analysis and Alternate Chords Frame
+Missing chord analysis functionality:
+No logic to display "Notes in Chord," "Chord Type," and "Alternatives" when a chord is selected.
+Missing interactive piano:
+Functionality to highlight corresponding keys for the selected chord (from R3 or R1) is not implemented.
+Missing link with R3 or R1 actions:
+No workflow to dynamically update R2B when chords are sent from R3 or R1.
+Let me know if you'd like me to elaborate further or assist in implementing these missing features!
+All Insert changed code, update complete file, comment: inserted, whole file kept integrity
+
+============================================= All done ation in group part above =====================
+
+General Notes:
+- The layout uses `CSS Grid` for organizing the frames and panels within the overall structure.
+- Each panel (R1, R2A, R2B, and R3) is responsive and easily extendable for future features or adjustments.
+- Dynamic interactivity between R1, R2A, R2B, and R3 is handled via JavaScript.
+-->
+<!------- R2A Panel Functionalities Above ------------------------------------->
+<!------- R2A Panel Functionalities Above ------------------------------------->
+<!------- R2A Panel Functionalities Above ------------------------------------->

@@ -1,0 +1,104 @@
+R1 Panel Functionalities
+------------------------
+
+Piano Single Entry Forms:
+
+1. Initialisering
+   - R1 ska ta emot initial data från R2A.
+   - Vid sidladdning ska samtliga 10 rader i R1 fyllas med värden från R2A.
+   - Systemet ska fungera även om R2A är tomt (default mode).
+
+2. R1‑rader (R1.R2A.n)
+   - R1 består av 10 rader: R1.R2A.1 till R1.R2A.10.
+   - Varje rad innehåller:
+       a) Ett textfält (max 10 tecken).
+       b) B1‑knapp direkt efter textfältet.
+       c) B2‑knapp direkt efter B1.
+   - Textfältet får endast innehålla giltiga ackord enligt R1.X.
+
+3. R1.X – Chord Validation Rules (Strict Mode – Option B)
+   Alla R1.R2A.n textfält måste följa strikt ackordgrammatik:
+
+   1. Rot: A, B, C, D, E, F, G
+   2. Olyckstecken (valfritt): # eller b
+   3. Kvalitet (valfritt):
+        - maj, min, dim, aug, sus, dom
+   4. Extension (valfritt):
+        - 2, 4, 5, 6, 7, 9, 11, 13
+   5. Alterationer (valfritt):
+        - #5, b5, #9, b9, #11, b13
+   6. Additions (valfritt):
+        - add9, add11, add13
+   7. Maximal längd: 10 tecken totalt.
+   8. Ogiltiga ackord får inte skickas till R3.
+
+4. R1.XC – Invalid Chord Handling (Option C)
+   - Vid ogiltigt ackord och knapptryckning (B1 eller B3):
+       a) Textfältet ska tömmas automatiskt.
+       b) R3 ska inte uppdateras med ogiltigt ackord.
+       c) Inget ljud ska spelas.
+   - Ingen felindikering ska visas.
+   - Rensning ska ske tyst och omedelbart.
+
+5. Exempel
+   Giltiga ackord:
+     - Cmaj7
+     - Dm9
+     - F#dim
+     - G7b9
+     - Bbmaj13
+
+   Ogiltiga ackord:
+     - Hm7
+     - C##11
+     - Zmaj7
+     - 7Cmaj
+
+6. Radknappar
+   B1 – "LR3"
+       - Laddar R1.R2A.n till R3.n.
+       - Spelar ljud för det aktuella ackordet.
+       - Kräver giltigt ackord.
+
+   B2 – "XR1"
+       - Rensar alla R1‑fält.
+       - Rensar alla R3‑fält.
+       - Erase = sätt textfält till tom sträng.
+       - Spelar inget ljud.
+
+7. Globala knappar (placerade under R1‑raderna, bredvid varandra)
+   B3 – "LR3" (Load All)
+       - Laddar alla giltiga R1‑värden till R3.
+       - Spelar ljud för alla giltiga ackord.
+       - Ogiltiga ackord rensas enligt R1.XC.
+
+   B4 – "XR1" (Reset All)
+       - Rensar alla R1‑fält.
+       - Rensar alla R3‑fält.
+       - Spelar inget ljud.
+
+8. Hjälptexter
+   R1.1 – "Input for chords start with caption characters"
+   R1.2 – Vid HTML‑generering ska en tidsstämpel inkluderas:
+          Format: yy.dd.dd hour.minute
+
+9. Ljudregler
+   - B1 spelar ett ackord.
+   - B3 spelar alla ackord.
+   - B2 och B4 spelar inget ljud.
+   
+<--
+
+
+
+<!-- Gör ej fler aktiviter nedan
+Om du vill kan jag nu:
+
+göra en slutlig ren version
+
+skapa en HTML/JS‑implementeringsplan
+
+analysera R2A eller R3 på samma nivå
+
+eller bygga ett flödesschema över hela R1‑logiken
+-->

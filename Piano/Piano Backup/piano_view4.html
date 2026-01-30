@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piano CP4</title>
+    <style>
+        /* General page styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr 2fr; /* Define layout column sizes */
+            grid-template-rows: auto auto; /* Define layout row sizes */
+            gap: 20px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Panel styling */
+        .panel {
+            padding: 20px;
+            border: 1px solid #ccc;
+            box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            background: white;
+        }
+
+        .panel h2 {
+            text-align: center;
+            margin-top: 0;
+        }
+
+        /* Styling for input fields and buttons */
+        input, textarea {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .help-text {
+            font-size: 0.9em;
+            color: #777;
+            margin-top: 10px;
+        }
+
+        .buttons-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .piano-keys {
+            display: grid;
+            grid-template-columns: repeat(14, 1fr); /* Two octaves */
+            gap: 3px;
+            margin: 20px 0;
+        }
+
+        .piano-key {
+            width: 100%;
+            height: 70px;
+            position: relative;
+            background: white;
+            border: 1px solid #d3d3d3;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+
+        .piano-key:hover {
+            background: #f0f0f0;
+        }
+
+        .black-key {
+            background: black;
+            z-index: 1;
+            position: relative;
+            height: 50px;
+            margin-left: -15px;
+            margin-right: -15px;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+        }
+
+        .black-key:hover {
+            background: #333;
+        }
+
+        .highlight {
+            background: yellow !important;
+        }
+    </style>
+    <script>
+        // State for chord data
+        const chordsData = [];
+
+        // Validate Chords
+        function validateChords(input) {
+            const chordsRegex = /^[A-Ga-g](#|b|m|maj7|7|dim|aug)?$/; // Regex for valid chords
+            return input.split(' ').filter(chord => chordsRegex.test(chord.trim().toUpperCase())).map(chord => chord.trim().toUpperCase());
+        }
+
+        // Reset Text Input (R2A)
+        function resetTextInput() {
+            document.getElementById('chords-textarea').value = '';
+        }
+
+        // Load and Validate Text Input (R2A -> R1)
+        function loadTextInput() {
+            const textarea = document.getElementById('chords-textarea').value;
+            const rows = textarea.split('\n');
+            let validChords = [];
+
+            rows.forEach((row, index) => {
+                if (index % 2 === 0) { // Validate only odd rows
+                    const validated = validateChords(row);
+                    validChords = validChords.concat(validated);
+                }
+            });
+
+            // Fill R1 with validated chords
+            document.getElementById('manual-chord-input').value = validChords.join(' ');
+        }
+
+        // Reset R1 (Piano Entry Panel)
+        function resetR1() {
+            document.getElementById('manual-chord-input').value = '';
+        }
+
+        // Load Chords from R1 to R3
+        function loadChordsToR3() {
+            const manualChords = document.getElementById('manual-chord-input').value.split(' ');
+            const chordListContainer = document.getElementById('chord-list');
+            chordListContainer.innerHTML = ''; // Clear existing chords
+
+            manualChords.forEach((chord, index) => {
+                const chordItem = document.createElement('div');
+                chordItem.classList.add('chord-item');
+                chordItem.innerHTML = `<span>${chord}</span>
+                    <div class="chord-buttons">
+                        <button onclick="handleTriad('${chord}')">B7 - Triad</button>
+                        <button onclick="handleTetrad('${chord}')">B8 - Tetrad</button>
+                        <button onclick="handleInversion('${chord}')">B9 - Inversion/ALT</button>
+                    </div>`;
+                chordListContainer.appendChild(chordItem);
+            });
+        }
+
+        // Placeholder Triad Functionality
+        function handleTriad(chord) {
+            alert(`Displaying Triad for ${chord}`);
+        }
+
+        // Placeholder Tetrad Functionality
+        function handleTetrad(chord) {
+            alert(`Displaying Tetrad for ${chord}`);
+        }
+
+        // Placeholder Inversion Functionality
+        function handleInversion(chord) {
+            alert(`Displaying Inversions or ALT for ${chord}`);
+        }
+
+        // Play Chord Button
+        function playChord() {
+            alert('Playing the currently selected chord using Web Audio API (To be implemented)');
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <!-- R1: Piano Entry Panel -->
+        <div id="r1" class="panel">
+            <h2>Piano Entry Panel</h2>
+            <label for="manual-chord-input">Manual Chord Entry</label>
+            <input type="text" id="manual-chord-input" placeholder="Enter chord(s) here">
+            <div class="buttons-group">
+                <button onclick="loadChordsToR3()">OK</button>
+                <button onclick="resetR1()">Reset</button>
+            </div>
+            <div class="buttons-group">
+                <button onclick="loadChordsToR3()">Load Chords</button>
+                <button onclick="resetR1()">Reset All</button>
+            </div>
+            <p class="help-text">Enter chords in uppercase. Separate chords with spaces.</p>
+        </div>
+
+        <!-- R2A: Text Input Panel -->
+        <div id="r2a" class="panel">
+            <h2>Text Input Panel</h2>
+            <textarea id="chords-textarea" placeholder="Enter chord notations (odd rows) and plain text (even rows)..."></textarea>
+            <div class="buttons-group">
+                <button onclick="loadTextInput()">Load</button>
+                <button onclick="resetTextInput()">Reset</button>
+            </div>
+        </div>
+
+        <!-- R2B: Chord Analysis Panel -->
+        <div id="r2b" class="panel">
+            <h2>Chord Analysis Panel</h2>
+            <div>
+                <p><strong>Notes in Chord:</strong> <span id="notes-in-chord">None</span></p>
+                <p><strong>Chord Type:</strong> <span id="chord-type">None</span></p>
+                <p><strong>Alternative Chords:</strong> <span id="alt-chords">None</span></p>
+            </div>
+            <div class="piano-keys">
+                <!-- Generate keys dynamically; here keys span two octaves -->
+                <div class="piano-key">C</div>
+                <div class="piano-key black-key"></div>
+                <div class="piano-key">D</div>
+                <div class="piano-key black-key"></div>
+                <div class="piano-key">E</div>
+                <div class="piano-key">F</div>
+                <div class="piano-key black-key"></div>
+                <div class="piano-key">G</div>
+                <div class="piano-key black-key"></div>
+                <div class="piano-key">A</div>
+                <div class="piano-key black-key"></div>
+                <div class="piano-key">B</div>
+                <div class="piano-key">C</div>
+                <div class="piano-key black-key"></div>
+                <div class="piano-key">D</div>
+                <div class="piano-key black-key"></div>
+                <div class="piano-key">E</div>
+                <div class="piano-key">F</div>
+                <div class="piano-key black-key"></div>
+                <div class="piano-key">G</div>
+                <div class="piano-key black-key"></div>
+                <div class="piano-key">A</div>
+                <div class="piano-key black-key"></div>
+                <div class="piano-key">B</div>
+            </div>
+            <button onclick="playChord()">Play Chord</button>
+        </div>
+
+        <!-- R3: Chord List Panel -->
+        <div id="r3" class="panel">
+            <h2>Chord List Panel</h2>
+            <div id="chord-list"></div>
+        </div>
+    </div>
+</body>
+</html>

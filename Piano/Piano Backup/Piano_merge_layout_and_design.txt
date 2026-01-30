@@ -1,0 +1,127 @@
+<!-- Web design and layout instructions --->
+
+<!------------------ Web design and layout instructions ------------------>
+<!------------------ Web design and layout instructions ------------------>
+<!------------------ Web design and layout instructions ------------------>
+
+<!-- Copilot design improvements
+
+Include these instructions where applicable:
+Ange fallback-typsnitt för bastext:
+Base font: Arial, Helvetica, sans-serif;
+
+
+Lägg till visuell feedback för knappens hover-tillstånd:
+Buttons: On hover, use a slightly lighter background shade for visual feedback.
+
+
+Säkerställ tillräcklig kontrast för tillgänglighet:
+Ensure all text and interactive elements meet at least WCAG AA contrast requirements.
+
+-->
+<!-- Overall Layout
+
+Rita en horisontell ram över hela bredden.
+
+Placera ordet HEADER centrerat på nästa rad.
+
+Rita en ny horisontell ram över hela bredden.
+
+Dela layouten vertikalt i två områden där vänsterdelen (R1) är 15% av totalbredden och högerdelen är 85%.
+
+Rita en obruten vertikal rektangel i vänsterdelen som sträcker sig från direkt under den övre ramen till bottenramen.
+
+Placera texten R1 högst upp i vänsterrektangeln.
+
+Till höger om vänsterrektangeln, rita en horisontell linje som markerar toppen av R2‑området.
+
+Dela R2‑området i två sektioner där den vänstra sektionen (R2A) är 40% av högerdelen och den högra sektionen (R2B) är 45% av högerdelen.
+
+Placera texten R2A i den vänstra sektionen av R2‑området.
+
+Placera texten R2B i den högra sektionen av R2‑området.
+
+Ge R2‑området en total höjd motsvarande 30% av högerdelens höjd.
+
+Rita en horisontell linje under R2‑området, utan att korsa vänsterrektangeln.
+
+Under denna linje, skapa en stor rektangel som täcker hela högerdelen — detta är R3‑området.
+
+Ge R3‑området en total höjd motsvarande 70% av högerdelens höjd.
+
+Placera texten R3 i den övre delen av denna rektangel.
+
+När AI ska generera en HTML‑fil ska ramarna täcka hela webbfönstret.
+
+Skriv ut ASCII‑layouten.
+
+ASCII‑LAYOUT (R2 = 30%, R3 = 70%)
+Kod
++-----------------------------------------------------------------------------------+
+|                                      HEADER                                       |
++-----------------------------------------------------------------------------------+
+| R1         |----------------------------+-----------------------------------------|
+|            |            R2A             |                   R2B                   |
+|            |                            |                                         |
+|            |                            |                                         |
+|            |----------------------------+-----------------------------------------|
+|            |                              R3                                      |
+|            |                                                                      |
+|            |                                                                      |
+|            |                                                                      |
+|            |                                                                      |
+|            |                                                                      |
+|            |                                                                      |
+|            |                                                                      |
++-----------------------------------------------------------------------------------+
+
+
+
+-->
+
+<!------------------ Web design and layout instructions ------------------>
+<!------------------ Web design and layout instructions ------------------>
+<!------------------ Web design and layout instructions ------------------>
+<!--
+Palette
+
+Page background: #1e1e1e
+Panels: #2b2b2b
+Borders/dividers: #444; inner headers: #333
+Primary (OK): #0078d4; Secondary/load: #00a86b; Danger/reset: #a80000
+Text: white; secondary: #ddd; tertiary: #ccc
+Piano keys: white #fdfdfd with border #333; black keys solid black; "marked" state: #4da3ff
+
+Typography
+
+Base font: Arial, sans-serif; body text color white; default size ~1rem
+Section titles/labels: 1.1rem, bold, centered
+Help/footer text: 0.8rem; help line-height 1.3
+Piano key labels: 0.75rem, centered on each key
+Textarea: monospace, 0.9rem
+
+Layout and Spacing
+
+Page: full-height grid with narrow sidebar (15%) and wide main area (85%); no outer margin/padding
+Sidebar: column layout, 10px padding, 10px gaps, right border 2px solid #444
+Top-right panel: 10px padding, 6px vertical gaps, bottom border 2px solid #444
+Buttons: 4px 8px padding, 4px radius; load/reset-all buttons use 6px padding with 10px then 5px top margins
+Inputs: 4px padding, 1px solid #555, 4px radius; full-width within row
+Piano frames: background #2b2b2b, 1px #444 border, top padding 5px; label bar full width with 5px padding
+Piano key area: 300px width, 150px height; black keys 24px wide, 90px tall, absolutely positioned with small bottom radius
+
+States
+
+Buttons force white text
+Marked keys (white/black) use highlight blue #4da3ff
+Textarea: white background, dark text, 1px #555 border, 4px radius; resizable vertically
+
+Use this sheet to replicate the same visual tone (colors, sizes, typographic choices) even if components or layout differ.
+
+-->
+
+
+
+<!------------------ Web design and layout instructions ------------------>
+<!------------------ Web design and layout instructions ------------------>
+<!------------------ Web design and layout instructions ------------------>

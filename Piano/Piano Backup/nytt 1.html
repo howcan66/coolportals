@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chord Input and Analysis Layout</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #FFFFFF;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 2fr 2fr; /* R1 takes 1/5 width, R2A and R2B split remaining 4/5 width */
+            grid-template-rows: 3fr 1fr; /* Top row for R1, R2A, and R2B; bottom row for R3 */
+            height: 100vh;
+            gap: 1px; /* Small border gap between sections */
+            border: 1px solid #CCCCCC;
+        }
+
+        .panel {
+            border: 1px solid #CCCCCC;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        #r1 {
+            background-color: #F8F8F8;
+            grid-row: 1 / span 2; /* R1 spans vertically across both rows */
+        }
+
+        #r2a {
+            background-color: #FFF;
+        }
+
+        #r2b {
+            background-color: #FFF;
+        }
+
+        #r3 {
+            background-color: #EEE;
+            grid-column: 2 / span 2; /* R3 spans horizontally across R2A and R2B width */
+        }
+
+        /* Button styles (minimalist) */
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            margin: 4px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- R1: Piano Entry Panel -->
+        <div id="r1" class="panel">
+            <h3>R1: Piano Entry Panel</h3>
+            <p>Manual chord input and controls:</p>
+            <button onclick="alert('OK Button Clicked')">B1: OK</button>
+            <button onclick="alert('Reset Button Clicked')">B2: Reset</button>
+            <button onclick="alert('Load to R3 Button Clicked')">B3: Load to R3</button>
+            <button onclick="alert('Reset All Button Clicked')">B4: Reset All</button>
+        </div>
+
+        <!-- R2A: Text Input Panel -->
+        <div id="r2a" class="panel">
+            <h3>R2A: Text Input Panel</h3>
+            <textarea placeholder="Enter chord notations here..." rows="5" style="width: 100%;"></textarea>
+            <button onclick="alert('Validate Chords Button Clicked')">B5: Validate</button>
+            <button onclick="alert('Reset Input Button Clicked')">B6: Reset Input</button>
+        </div>
+
+        <!-- R2B: Chord Analysis Panel -->
+        <div id="r2b" class="panel">
+            <h3>R2B: Chord Analysis Panel</h3>
+            <div style="height: 100px; background-color: #ccc; text-align: center; line-height: 100px;">
+                Virtual Piano (C4 - B5)
+            </div>
+            <p>Chord Details:</p>
+            <ul>
+                <li>List of notes in chord</li>
+                <li>Description of chord type (e.g., Triad, Tetrad)</li>
+                <li>Alternatives and inversions</li>
+            </ul>
+            <button onclick="alert('Play Chord Button Clicked')">B10: Play Chord</button>
+        </div>
+
+        <!-- R3: Chord List Panel -->
+        <div id="r3" class="panel">
+            <h3>R3: Chord List Panel</h3>
+            <p>List of validated chords will appear here.</p>
+            <button onclick="alert('Show Triad Button Clicked')">B7: Show Triad</button>
+            <button onclick="alert('Show Tetrad Button Clicked')">B8: Show Tetrad</button>
+            <button onclick="alert('Show Inversions Button Clicked')">B9: Show Inversions</button>
+        </div>
+    </div>
+</body>
+</html>

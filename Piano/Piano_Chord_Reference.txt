@@ -1,0 +1,274 @@
+================================================================================
+PIANO APP - CHORD REFERENCE GUIDE
+================================================================================
+Last Updated: 2026-01-30
+Piano Application Chord Dictionary & Music Theory Reference
+================================================================================
+
+OVERVIEW
+--------
+This document lists all supported chords in the Piano application with their
+musical structure, intervals, notes, and theory explanations.
+
+NOTATION SYSTEM
+---------------
+• Root notes: A, B, C, D, E, F, G (H is accepted as alias for B)
+• Sharps: # (raises note by semitone)
+• Flats: b (lowers note by semitone)
+• Octave range: C4 to B5 (2 octaves on piano display)
+• Mode: Triad (3 notes) or Tetrad (4 notes)
+
+INTERVAL NOTATION
+-----------------
+R    = Root (1st note)
+m2   = Minor 2nd (1 semitone)
+M2   = Major 2nd (2 semitones)
+m3   = Minor 3rd (3 semitones)
+M3   = Major 3rd (4 semitones)
+P4   = Perfect 4th (5 semitones)
+P5   = Perfect 5th (7 semitones)
+m6   = Minor 6th (8 semitones)
+M6   = Major 6th (9 semitones)
+m7   = Minor 7th (10 semitones)
+M7   = Major 7th (11 semitones)
+
+================================================================================
+CHORD CATALOG
+================================================================================
+
+──────────────────────────────────────────────────────────────────────────────
+1. MAJOR CHORDS (Root-M3-P5)
+──────────────────────────────────────────────────────────────────────────────
+Quality: Bright, stable, happy sound
+Structure: Root + Major 3rd + Perfect 5th
+Interval Pattern: R - M3 - P5
+
+C     | Triad: C4-E4-G4       | Tetrad: C4-E4-G4-B4   | Intervals: 0-4-7(-11)
+C#    | Triad: C#4-E#4-G#4    | Tetrad: C#4-E#4-G#4-B#4 | Intervals: 0-4-7(-11)
+D     | Triad: D4-F#4-A4      | Tetrad: D4-F#4-A4-C#5 | Intervals: 0-4-7(-9)
+D#    | Triad: D#4-F##4-A#4   | Tetrad: D#4-F##4-A#4-C##5 | Intervals: 0-4-7(-9)
+E     | Triad: E4-G#4-B4      | Tetrad: E4-G#4-B4-D#5 | Intervals: 0-4-7(-10)
+F     | Triad: F4-A4-C5       | Tetrad: F4-A4-C5-E5   | Intervals: 0-4-7(-11)
+F#    | Triad: F#4-A#4-C#5    | Tetrad: F#4-A#4-C#5-E#5 | Intervals: 0-4-7(-11)
+G     | Triad: G4-B4-D5       | Tetrad: G4-B4-D5-F#5  | Intervals: 0-4-7(-9)
+G#    | Triad: G#4-B#4-D#5    | Tetrad: G#4-B#4-D#5-F##5 | Intervals: 0-4-7(-9)
+A     | Triad: A4-C#5-E5      | Tetrad: A4-C#5-E5-G#5 | Intervals: 0-4-7(-9)
+A#    | Triad: A#4-C##5-E#5   | Tetrad: A#4-C##5-E#5-G##5 | Intervals: 0-4-7(-9)
+B     | Triad: B4-D#5-F#5     | Tetrad: B4-D#5-F#5-A#5 | Intervals: 0-4-7(-10)
+
+──────────────────────────────────────────────────────────────────────────────
+2. MINOR CHORDS (Root-m3-P5)
+──────────────────────────────────────────────────────────────────────────────
+Quality: Dark, melancholic, introspective sound
+Structure: Root + Minor 3rd + Perfect 5th
+Interval Pattern: R - m3 - P5
+Suffix: m
+
+Cm    | Triad: C4-Eb4-G4      | Tetrad: C4-Eb4-G4-Bb4  | Intervals: 0-3-7(-10)
+C#m   | Triad: C#4-E4-G#4     | Tetrad: C#4-E4-G#4-B4  | Intervals: 0-3-7(-11)
+Dm    | Triad: D4-F4-A4       | Tetrad: D4-F4-A4-C5    | Intervals: 0-3-7(-10)
+D#m   | Triad: D#4-F#4-A#4    | Tetrad: D#4-F#4-A#4-C#5 | Intervals: 0-3-7(-9)
+Em    | Triad: E4-G4-B4       | Tetrad: E4-G4-B4-D5    | Intervals: 0-3-7(-10)
+Fm    | Triad: F4-Ab4-C5      | Tetrad: F4-Ab4-C5-Eb5  | Intervals: 0-3-7(-10)
+F#m   | Triad: F#4-A4-C#5     | Tetrad: F#4-A4-C#5-E5  | Intervals: 0-3-7(-10)
+Gm    | Triad: G4-Bb4-D5      | Tetrad: G4-Bb4-D5-F5   | Intervals: 0-3-7(-10)
+G#m   | Triad: G#4-B4-D#5     | Tetrad: G#4-B4-D#5-F#5 | Intervals: 0-3-7(-9)
+Am    | Triad: A4-C5-E5       | Tetrad: A4-C5-E5-G5    | Intervals: 0-3-7(-10)
+A#m   | Triad: A#4-C#5-E#5    | Tetrad: A#4-C#5-E#5-G#5 | Intervals: 0-3-7(-9)
+Bm    | Triad: B4-D5-F#5      | Tetrad: B4-D5-F#5-A5   | Intervals: 0-3-7(-10)
+
+──────────────────────────────────────────────────────────────────────────────
+3. DOMINANT 7TH CHORDS (Root-M3-P5-m7)
+──────────────────────────────────────────────────────────────────────────────
+Quality: Tension, needs resolution, bluesy
+Structure: Major triad + Minor 7th
+Interval Pattern: R - M3 - P5 - m7
+Suffix: 7
+Use: Common in blues, jazz, classical cadences (V7→I)
+
+C7    | Triad: C4-E4-G4       | Tetrad: C4-E4-G4-Bb4   | Intervals: 0-4-7-10
+C#7   | Triad: C#4-E#4-G#4    | Tetrad: C#4-E#4-G#4-B4 | Intervals: 0-4-7-11
+D7    | Triad: D4-F#4-A4      | Tetrad: D4-F#4-A4-C5   | Intervals: 0-4-7-10
+D#7   | Triad: D#4-F##4-A#4   | Tetrad: D#4-F##4-A#4-C#5 | Intervals: 0-4-7-9
+E7    | Triad: E4-G#4-B4      | Tetrad: E4-G#4-B4-D5   | Intervals: 0-4-7-10
+F7    | Triad: F4-A4-C5       | Tetrad: F4-A4-C5-Eb5   | Intervals: 0-4-7-10
+F#7   | Triad: F#4-A#4-C#5    | Tetrad: F#4-A#4-C#5-E5 | Intervals: 0-4-7-10
+G7    | Triad: G4-B4-D5       | Tetrad: G4-B4-D5-F5    | Intervals: 0-4-7-10
+G#7   | Triad: G#4-B#4-D#5    | Tetrad: G#4-B#4-D#5-F#5 | Intervals: 0-4-7-9
+A7    | Triad: A4-C#5-E5      | Tetrad: A4-C#5-E5-G5   | Intervals: 0-4-7-10
+A#7   | Triad: A#4-C##5-E#5   | Tetrad: A#4-C##5-E#5-G#5 | Intervals: 0-4-7-9
+B7    | Triad: B4-D#5-F#5     | Tetrad: B4-D#5-F#5-A5  | Intervals: 0-4-7-10
+
+──────────────────────────────────────────────────────────────────────────────
+4. MINOR 7TH CHORDS (Root-m3-P5-m7)
+──────────────────────────────────────────────────────────────────────────────
+Quality: Smooth, jazzy, mellow
+Structure: Minor triad + Minor 7th
+Interval Pattern: R - m3 - P5 - m7
+Suffix: m7
+Use: Common in jazz, R&B, smooth progressions
+
+Cm7   | Triad: C4-Eb4-G4      | Tetrad: C4-Eb4-G4-Bb4  | Intervals: 0-3-7-10
+C#m7  | Triad: C#4-E4-G#4     | Tetrad: C#4-E4-G#4-B4  | Intervals: 0-3-7-11
+Dm7   | Triad: D4-F4-A4       | Tetrad: D4-F4-A4-C5    | Intervals: 0-3-7-10
+D#m7  | Triad: D#4-F#4-A#4    | Tetrad: D#4-F#4-A#4-C#5 | Intervals: 0-3-7-9
+Em7   | Triad: E4-G4-B4       | Tetrad: E4-G4-B4-D5    | Intervals: 0-3-7-10
+Fm7   | Triad: F4-Ab4-C5      | Tetrad: F4-Ab4-C5-Eb5  | Intervals: 0-3-7-10
+F#m7  | Triad: F#4-A4-C#5     | Tetrad: F#4-A4-C#5-E5  | Intervals: 0-3-7-10
+Gm7   | Triad: G4-Bb4-D5      | Tetrad: G4-Bb4-D5-F5   | Intervals: 0-3-7-10
+G#m7  | Triad: G#4-B4-D#5     | Tetrad: G#4-B4-D#5-F#5 | Intervals: 0-3-7-9
+Am7   | Triad: A4-C5-E5       | Tetrad: A4-C5-E5-G5    | Intervals: 0-3-7-10
+A#m7  | Triad: A#4-C#5-E#5    | Tetrad: A#4-C#5-E#5-G#5 | Intervals: 0-3-7-9
+Bm7   | Triad: B4-D5-F#5      | Tetrad: B4-D5-F#5-A5   | Intervals: 0-3-7-10
+
+──────────────────────────────────────────────────────────────────────────────
+5. MAJOR 7TH CHORDS (Root-M3-P5-M7)
+──────────────────────────────────────────────────────────────────────────────
+Quality: Dreamy, sophisticated, lush
+Structure: Major triad + Major 7th
+Interval Pattern: R - M3 - P5 - M7
+Suffix: maj7
+Use: Jazz, ballads, smooth transitions, creates color
+
+Cmaj7   | Triad: C4-E4-G4     | Tetrad: C4-E4-G4-B4    | Intervals: 0-4-7-11
+C#maj7  | Triad: C#4-E#4-G#4  | Tetrad: C#4-E#4-G#4-B#4 | Intervals: 0-4-7-11
+Dmaj7   | Triad: D4-F#4-A4    | Tetrad: D4-F#4-A4-C#5  | Intervals: 0-4-7-9
+D#maj7  | Triad: D#4-F##4-A#4 | Tetrad: D#4-F##4-A#4-C##5 | Intervals: 0-4-7-9
+Emaj7   | Triad: E4-G#4-B4    | Tetrad: E4-G#4-B4-D#5  | Intervals: 0-4-7-10
+Fmaj7   | Triad: F4-A4-C5     | Tetrad: F4-A4-C5-E5    | Intervals: 0-4-7-11
+F#maj7  | Triad: F#4-A#4-C#5  | Tetrad: F#4-A#4-C#5-E#5 | Intervals: 0-4-7-11
+Gmaj7   | Triad: G4-B4-D5     | Tetrad: G4-B4-D5-F#5   | Intervals: 0-4-7-9
+G#maj7  | Triad: G#4-B#4-D#5  | Tetrad: G#4-B#4-D#5-F##5 | Intervals: 0-4-7-9
+Amaj7   | Triad: A4-C#5-E5    | Tetrad: A4-C#5-E5-G#5  | Intervals: 0-4-7-9
+A#maj7  | Triad: A#4-C##5-E#5 | Tetrad: A#4-C##5-E#5-G##5 | Intervals: 0-4-7-9
+Bmaj7   | Triad: B4-D#5-F#5   | Tetrad: B4-D#5-F#5-A#5 | Intervals: 0-4-7-10
+
+──────────────────────────────────────────────────────────────────────────────
+6. DIMINISHED CHORDS (Root-m3-dim5)
+──────────────────────────────────────────────────────────────────────────────
+Quality: Tense, unstable, dissonant
+Structure: Root + Minor 3rd + Diminished 5th (tritone)
+Interval Pattern: R - m3 - dim5 - dim7
+Suffix: mm (diminished)
+Use: Passing chords, creating tension before resolution
+
+Cmm   | Triad: C4-Eb4-Gb4     | Tetrad: C4-Eb4-Gb4-A4  | Intervals: 0-3-6(-9)
+Dmm   | Triad: D4-F4-Ab4      | Tetrad: D4-F4-Ab4-C5   | Intervals: 0-3-6(-10)
+Emm   | Triad: E4-G4-Bb4      | Tetrad: E4-G4-Bb4-D5   | Intervals: 0-3-6(-10)
+Gmm   | Triad: G4-Bb4-Db5     | Tetrad: G4-Bb4-Db5-E5  | Intervals: 0-3-6(-9)
+Amm   | Triad: A4-C5-Eb5      | Tetrad: A4-C5-Eb5-G5   | Intervals: 0-3-6(-10)
+Bmm   | Triad: B4-D5-F5       | Tetrad: B4-D5-F5-A5    | Intervals: 0-3-6(-10)
+
+──────────────────────────────────────────────────────────────────────────────
+7. SUSPENDED 2ND CHORDS (Root-M2-P5)
+──────────────────────────────────────────────────────────────────────────────
+Quality: Open, floating, unresolved
+Structure: Root + Major 2nd + Perfect 5th (no 3rd)
+Interval Pattern: R - M2 - P5
+Suffix: sus2
+Use: Creates ambiguity (neither major nor minor), adds color
+
+Csus2 | Triad: C4-D4-G4       | Tetrad: C4-D4-G4-B4    | Intervals: 0-2-7(-11)
+Dsus2 | Triad: D4-E4-A4       | Tetrad: D4-E4-A4-C#5   | Intervals: 0-2-7(-9)
+Esus2 | Triad: E4-F#4-B4      | Tetrad: E4-F#4-B4-D#5  | Intervals: 0-2-7(-10)
+Fsus2 | Triad: F4-G4-C5       | Tetrad: F4-G4-C5-E5    | Intervals: 0-2-7(-11)
+Gsus2 | Triad: G4-A4-D5       | Tetrad: G4-A4-D5-F#5   | Intervals: 0-2-7(-9)
+Asus2 | Triad: A4-B4-E5       | Tetrad: A4-B4-E5-G#5   | Intervals: 0-2-7(-9)
+Bsus2 | Triad: B4-C#5-F#5     | Tetrad: B4-C#5-F#5-A#5 | Intervals: 0-2-7(-10)
+
+──────────────────────────────────────────────────────────────────────────────
+8. SUSPENDED 4TH CHORDS (Root-P4-P5)
+──────────────────────────────────────────────────────────────────────────────
+Quality: Anticipatory, wanting resolution
+Structure: Root + Perfect 4th + Perfect 5th (no 3rd)
+Interval Pattern: R - P4 - P5
+Suffix: sus4
+Use: Classic suspension (resolves to major/minor), rock/folk
+
+Csus4 | Triad: C4-F4-G4       | Tetrad: C4-F4-G4-B4    | Intervals: 0-5-7(-11)
+Dsus4 | Triad: D4-G4-A4       | Tetrad: D4-G4-A4-C#5   | Intervals: 0-5-7(-9)
+Esus4 | Triad: E4-A4-B4       | Tetrad: E4-A4-B4-D#5   | Intervals: 0-5-7(-10)
+Fsus4 | Triad: F4-Bb4-C5      | Tetrad: F4-Bb4-C5-E5   | Intervals: 0-5-7(-11)
+Gsus4 | Triad: G4-C5-D5       | Tetrad: G4-C5-D5-F#5   | Intervals: 0-5-7(-9)
+Asus4 | Triad: A4-D5-E5       | Tetrad: A4-D5-E5-G#5   | Intervals: 0-5-7(-9)
+Bsus4 | Triad: B4-E5-F#5      | Tetrad: B4-E5-F#5-A#5  | Intervals: 0-5-7(-10)
+
+================================================================================
+TECHNICAL NOTES
+================================================================================
+
+ENHARMONIC SPELLINGS
+--------------------
+The application automatically converts flat notes to sharp equivalents to match
+the piano keyboard's visual representation:
+  Eb → D#    Ab → G#    Bb → A#
+  Db → C#    Gb → F#
+  Cb → B     Fb → E
+  E# → F     B# → C
+
+TRIAD vs TETRAD MODE
+--------------------
+• Triad: 3-note chord (root, 3rd, 5th)
+• Tetrad: 4-note chord (adds 7th or equivalent 4th note)
+• Some chords have identical triad/tetrad structures
+• Switch mode using R3 panel buttons: B8 (Triad) / B9 (Tetrad)
+
+INVERSIONS (NOT YET IMPLEMENTED)
+---------------------------------
+Inversions reorder chord notes:
+• Root position: Root is lowest note
+• 1st inversion: 3rd is lowest note
+• 2nd inversion: 5th is lowest note
+• 3rd inversion: 7th is lowest note (tetrads only)
+
+CHORD VALIDATION
+----------------
+Valid chord format in R1 panel:
+  [A-GH][#|b]?[maj|m|dim|aug|sus]?[2|4|5|6|7|9|11|13]?
+
+Examples:
+  C, Dm, G7, Cmaj7, Esus4, F#m7, Bmm, Asus2
+
+Invalid examples:
+  H#m (H doesn't have sharps), C8, Xm7, C#b
+
+================================================================================
+CHORD PROGRESSION EXAMPLES
+================================================================================
+
+I-IV-V-I in C Major:
+  C → F → G → C
+
+ii-V-I in C Major (jazz cadence):
+  Dm7 → G7 → Cmaj7
+
+I-vi-IV-V (50s progression):
+  C → Am → F → G
+
+Circle of 5ths (Jazz):
+  C → F → Bb → Eb → Ab → Db → Gb → B → E → A → D → G → C
+
+Blues in C:
+  C7 → C7 → C7 → C7 → F7 → F7 → C7 → C7 → G7 → F7 → C7 → G7
+
+================================================================================
+APPENDIX: CHORD TABLE SUMMARY
+================================================================================
+
+Total Chords: 84 chord types
+  - 12 Major
+  - 12 Minor (m)
+  - 12 Dominant 7th (7)
+  - 12 Minor 7th (m7)
+  - 12 Major 7th (maj7)
+  - 6  Diminished (mm)
+  - 7  Suspended 2nd (sus2)
+  - 7  Suspended 4th (sus4)
+
+Note Coverage: C4 to B5 (2 octaves, 24 keys)
+White Keys: 14 (C, D, E, F, G, A, B across 2 octaves)
+Black Keys: 10 (C#, D#, F#, G#, A# across 2 octaves)
+
+================================================================================
+END OF CHORD REFERENCE
+================================================================================

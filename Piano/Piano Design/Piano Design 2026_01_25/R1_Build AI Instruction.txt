@@ -1,0 +1,200 @@
+<!-------R1 Panel Functionalities ------------------------------------->
+
+<-- R1 : Piano Panel, webb frame  
++---------------------------------------+
+|   R1 : Piano Panel, webb frame        |
+|                                       |
+|   Rows built from R2A textforms       |
+|                                       |
+|   R1.R2A.1 Textform B1 B2             |
+|   R1.R2A.2 Textform B1 B2             |
+|   R1.R2A.3 Textform B1 B2	   	    |
+|   R1.R2A.4 Textform B1 B2     	       |
+|   R1.R2A.n Textform B1 B2     	       |
+|                                       |
+|   Button description                  |
+| - B1: Load Button "L" R3     	       | 
+| - B2: Reset Button "X" R1 Panel       | 
+| - B3: Load All "LR1A" to R3 Panel     |
+| - B4: Reset All "XA" in RA Panel      | 
+|                                       |
+|              B3  B4                   |
+|                                       | 
+|                                       |
+| - Help Text button of frame           |
+| - Timestamp as version presentation   |
+|                                       |
++---------------------------------------+
+-->
+
+Piano Single Entry Forms:
+
+1. Initialisering
+   - R1 ska ta emot initial data från R2A.
+   - Vid sidladdning ska samtliga 10 rader i R1 fyllas med värden från R2A.
+   - Systemet ska fungera även om R2A är tomt (default mode).
+   - Aktiva lägen: Option B (Strict Mode, se R1.X) och Option C (Silent Clear, se R1.XC).
+
+   R2A→R1 inläsning (vid sidladdning):
+   - Upp till 10 poster läses från R2A och mappas 1‑till‑1: R2A[1]→R1.R2A.1, ..., R2A[10]→R1.R2A.10.
+   - Post‑sanering: trimma ledande/trailande blanksteg; interna blanksteg ej tillåtna; skiftlägesokänsligt.
+   - Validering: varje post valideras enligt R1.X. Ogiltiga poster rensas tyst enligt R1.XC (fältet töms; inget ljud; ingen uppdatering till R3).
+   - Om R2A innehåller färre än 10 poster: fyll tillgängliga och lämna resterande rader tomma.
+   - Om R2A innehåller fler än 10 poster: överskjutande poster ignoreras.
+   - Default mode: om R2A saknar värden initialt, är samtliga R1‑rader tomma.
+
+2. R1‑rader (R1.R2A.n)
+   - R1 består av 10 rader: R1.R2A.1 till R1.R2A.10.
+   - Varje rad innehåller:
+       a) Ett textfält (max 10 tecken) ska vara blank som default. Ingen hjälptext.
+       b) B1‑knapp (tre tecken) direkt efter textfältet – etikett: "LR3".
+       c) B2‑knapp (tre tecken) direkt efter B1 – etikett: "XR1".
+   - Textfältet får endast innehålla giltiga ackord enligt R1.X.
+   - Placering (rad): Textfältet placeras först. Direkt till höger om textfältet placeras B1 ("LR3"), och direkt till höger om B1 placeras B2 ("XR1"). Alla tre är inline på samma rad.
+   - Mellanrum (rad): ~8–12 px mellan textfält och B1; ~8–12 px mellan B1 och B2; ~12–16 px vertikalt mellan rader.
+
+3. R1.X – Chord Validation Rules (Strict Mode – Option B)
+   Alla R1.R2A.n textfält måste följa strikt ackordgrammatik:
+
+   1. Rot: A, B, C, D, E, F, G, H
+      - Notation: "H" motsvarar B (tysk notation). Systemet kan acceptera både "B" och "H"; vid ljud/engine‑mappning ska "H" tolkas som B.
+      - UI‑normalisering: i visning används kanonisk form "B"; inmatat "H" normaliseras till "B".
+   2. Olyckstecken (valfritt): # eller b
+   3. Kvalitet (valfritt):
+            - m, maj, dim, aug, sus
+         - Rekommendation: "m" tolkas som minor; "maj" för major (t.ex. Cmaj7).
+   4. Extension (valfritt):
+        - 2, 4, 5, 6, 7, 9, 11, 13
+   5. Alterationer (valfritt):
+        - #5, b5, #9, b9, #11, b13
+   6. Additions (valfritt):
+        - add9, add11, add13
+   7. Maximal längd: 10 tecken totalt (inklusive alla delar).
+   8. Ogiltiga ackord får inte skickas till R3.
+
+   Ordning (kanonisk): Rot (+ olyckstecken) + kvalitet + extension + alterationer + additions.
+   Exempel på kombinationer: "Cm7", "Cmaj7#9", "G7b9", "F#dim", "Bbmaj13".
+   Formell validering (exempel): använd regex i valideringsmodul; ordningen ovan ska följas och total längd <= 10.
+
+   Begränsningar (Strict Mode):
+   - Slash‑ackord/inversioner ej tillåtna (t.ex. "C/E" är ogiltigt).
+   - Parenteser och mellanslag ej tillåtna (t.ex. "C7(b9)", "C maj 7" är ogiltiga).
+   - Additions får inte duplicera en redan angiven extension (t.ex. "Cmaj7add7" är ogiltigt).
+   - Additions kan samexistera med extensioner om de avser olika siffror (t.ex. "Cmaj7add11" är tillåtet).
+
+4. R1.XC – Invalid Chord Handling (Option C)
+   - Vid ogiltigt ackord och knapptryckning (B1 eller B3):
+       a) Textfältet ska tömmas automatiskt.
+       b) R3 ska inte uppdateras med ogiltigt ackord.
+       c) Inget ljud ska spelas.
+   - Ingen felindikering ska visas.
+   - Rensning ska ske tyst och omedelbart.
+
+5. Exempel
+   Giltiga ackord:
+     - C
+	 - Cm
+	 - Cm7
+	 - Cmaj7
+     - Dm9
+     - F#dim
+     - G7b9
+     - Bbmaj13
+
+   Ogiltiga ackord (exempel):
+     - C##11
+     - Zmaj7
+     - 7Cmaj
+       - C/E
+       - C7(b9)
+       - Cmaj7add7
+
+6. Radknappar
+   B1 – "LR3" Bara inget annat
+       - Laddar R1.R2A.n till R3.n.
+       - Spelar ljud för det aktuella ackordet.
+       - Kräver giltigt ackord.
+      - Färg/stil: ljusgrön primär stil (t.ex. #8fd694) för att signalera "load/play".
+
+   B2 – "XR1" Bara inget annat
+       - Rensar endast aktuell rad i R1 (R1.R2A.n).
+       - Rensar motsvarande R3.n.
+       - Erase = sätt textfält till tom sträng.
+       - Spelar inget ljud.
+      - Färg/stil: ljusröd/rosa ton (t.ex. #f4a6a6) för att signalera "clear".
+
+7. Globala knappar (placerade under R1‑raderna, bredvid varandra)
+   B3 – "LR3" är knappnamn
+       - Laddar alla giltiga R1‑värden till R3.
+      - Spelar ljud för alla giltiga ackord (sekventiellt uppifrån och ned, ~400 ms mellanrum).
+       - Ogiltiga ackord rensas enligt R1.XC.
+             - OBS: B3 har samma etikett som B1 ("LR3") men är global; i UI ska det tydligt framgå att B3 påverkar alla rader.
+             - Färg/stil: ljusgrön, men sekundär/outlined variant (t.ex. kontur i #8fd694) för att särskilja från B1.
+
+   B4 – "XR1" är knappnamn
+       - Rensar alla R1‑fält.
+       - Rensar alla R3‑fält.
+       - Spelar inget ljud.
+    - Färg/stil: ljusröd/rosa ton (t.ex. #f4a6a6) matchande B2.
+   - Placering (global): B3 och B4 placeras direkt under raderna, horisontellt bredvid varandra.
+      - Justering (global): centrerad justering i panelen; konsekvent mellanrum ~12–16 px ovanför globalknapparna och ~12–16 px mellan B3 och B4.
+
+8. Hjälptexter
+   R1.1 – Kort hjälpmikrocopy (inline):
+      "Ackordinmatning: börja med rottecken (A–G/H), följ regler i R1.X"
+   R1.1a – Placeholder i varje textfält:
+      "Ex: Cmaj7, G7b9 (max 10 tecken)"
+   R1.1b – Tooltip vid fokus/hover:
+        "Ange ackord enligt ordning: Rot (+#|b) + kvalitet (m|maj|dim|aug|sus) + extension (2|4|5|6|7|9|11|13) + alteration (#5|b5|#9|b9|#11|b13) + additions (add9|add11|add13). Max 10 tecken; inga mellanslag/parenteser; inga slash‑ackord."
+   R1.1c – Tillgänglighet/ARIA:
+      aria‑label: "Ackordfält rad n"; aria‑describedby kopplas till R1.1.
+   R1.2 – Tidsstämpel i HTML:
+      Visas i panelens sidfot/HTML‑footer.
+      Format1: yy.mm.dd  •  Format2: HH.mm (24‑timmar)
+      Exempel: "26.01.24" och "14.37".
+   R1.3 – Språk:
+      Standard: svenska. Alternativ engelska hjälpmikrocopy kan visas: "Chord input: start with root (A–G/B/H), follow R1.X rules".
+   R1.4 – Felindikering:
+      Ingen explicit felindikering. Vid ogiltig inmatning rensas fält tyst enligt R1.XC.
+
+9. Ljudregler
+   - B1 spelar ett ackord.
+   - B3 spelar alla ackord sekventiellt med kort paus (ca 400 ms).
+   - B2 och B4 spelar inget ljud.
+
+10. Formell validering (regex)
+   - Inmatning ska vara skiftlägesokänslig; ledande/trailande blanksteg trimmade; interna blanksteg ej tillåtna.
+   - Följande regex kan användas för strikt validering (inkl längdkravet 10 tecken):
+        ^(?=.{1,10}$)[A-GH](?:#|b)?(?:maj|m|dim|aug|sus)?(?:2|4|5|6|7|9|11|13)?(?:(?:#|b)(?:5|9|11|13))?(?:add(?:9|11|13))?$
+    - Använd regex med i‑flagga (skiftlägesokänslig matchning).
+    - Regex är baseline; följande regler kräver extra programmatisk kontroll:
+       • Förbjud "addX" om samma X redan förekommer som extension (t.ex. "Cmaj7add7" ska avvisas).
+       • Bekräfta att ordningen följer R1.X (regex redan styr detta, men kontrollera vid behov).
+       • Normalisera rot "H"→"B" vid visning (påverkar ej ljud/engine‑mappning).
+    - Kort valideringschecklista:
+       1) Trimming av inmatning.
+       2) Regex‑matchning (i‑flagga).
+       3) Avvisa duplicerande add/extension.
+       4) Bekräfta inga mellanslag/parenteser/slash (regex täcker detta).
+       5) Normalisera H→B i UI.
+   - Exempel som matchar: C, Cm, Cm7, Cmaj7, Dm9, F#dim, G7b9, Bbmaj13.
+   - Exempel som ej matchar: C##11, Zmaj7, 7Cmaj.
+
+11. R1→R3 Dataöverföring
+   - Mappning: R1.R2A.n uppdaterar R3.n (1:1 för n=1…10).
+   - Innehåll i R3: lagra den normaliserade ackordsträngen (UI‑kanonisk form, t.ex. "B" istället för "H"); max 10 tecken; inga mellanslag/parenteser/slash.
+   - Triggers:
+      • B1 (rad): vid giltigt ackord i R1.R2A.n, skriv till R3.n och spela ljud för det ackordet.
+      • B3 (global): iterera rader 1→10; för varje giltigt ackord, skriv till respektive R3.n och spela ljud sekventiellt (top‑down) med ~400 ms paus.
+   - Ogiltig/tom inmatning:
+      • B1 (tomt fält): rensa fältet och rensa R3.n (sätt tom sträng); inget ljud.
+      • B1 (ogiltigt): rensa fältet enligt R1.XC; R3.n lämnas oförändrat; inget ljud.
+      • B3 (tomt eller ogiltigt): rensa fält i R1 enligt R1.XC; R3.n lämnas oförändrat; inget ljud.
+   - Rensning:
+      • B2 (rad): rensar aktuell R1.R2A.n och motsvarande R3.n.
+      • B4 (global): rensar alla R1‑fält och alla R3‑fält.
+   - Överskrivning: giltigt ackord vid B1/B3 överskriver befintligt värde i R3.n.
+   - Duplicat: samma ackord kan förekomma på flera rader; varje R3.n speglar sin rad.
+   - Ordningsgaranti: uppdateringar sker i stigande ordningsnummer (1→10); ingen omordning.
+   
+<!-------R1 Panel Functionalities Above ------------------------------------->

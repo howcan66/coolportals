@@ -1,0 +1,1046 @@
+================================================================================
+DETAILED ALIGNMENT CHECKLIST: R1_Build AI Instruction_3.txt vs R2A_Build AI Instruction_11.txt
+================================================================================
+Date: 2026.01.24
+Status: BOTH FILES NOW AVAILABLE FOR COMPARISON
+
+================================================================================
+SECTION 1: INITIALISERING (Initialization)
+================================================================================
+
+R1 (Current):
+  - R1 receives data from R2A at page load
+  - Up to 10 posts read from R2A → R1.R2A.1...10 mapping
+  - Default: empty R1 if R2A is empty
+  - Options B & C active (Strict Mode, Silent Clear)
+  - Overflow handling: if R2A > 10 posts, ignore excess; if R2A < 10, fill available, leave rest empty
+
+R2A (Current):
+  - R2A loads empty by default
+  - Awaits user input in multiline textforms
+  - Options B & C active
+  - No R2A→R1 push mentioned (R2A waits for user to click B5/B7 to push to R1)
+
+DISCREPANCY #1 - INITIALIZATION FLOW:
+  ❌ R1 actively pulls from R2A at page load
+  ❌ R2A has no reciprocal push described; R1 must implement the pull
+  ⚠️  CLARIFY: Should R1 automatically populate from R2A on page load?
+  
+ALIGNMENT NEEDED:
+  [ ] Add Section 1 clarification: "At page load, R1 automatically reads R2A panel and populates R1 rows"
+  [ ] Document overflow/underflow handling (same as R1: ignore excess, leave gaps empty)
+  [ ] Ensure R2A knows it will be read by R1 at initialization
+
+STATUS: ❌ NOT ALIGNED - Different initialization philosophies
+
+────────────────────────────────────────────────────────────────────────────
+
+SECTION 2: ROWS (Rad structure)
+================================================================================
+
+R1 (Current):
+  - 10 rows: R1.R2A.1 to R1.R2A.10
+  - Per row: textform (max 10 chars) + B1 + B2 buttons
+  - Layout: INLINE horizontal (all 3 on same line)
+  - Spacing: ~8-12px between textform & B1, ~8-12px between B1 & B2, ~12-16px between rows
+
+R2A (Current):
+  - 10 rows: R2A.1 to R2A.10
+  - Per row: textarea (>>>MAX 200 CHARS PER ROW<<<) + B5 + B6 buttons
+  - Layout: VERTICAL/FLEX (textarea on line 1, buttons below on line 2)
+  - Spacing: Full-width textarea, buttons below ~8-12px apart, ~12-16px between rows
+
+KEY DIFFERENCES (INTENTIONAL - Panel types differ):
+  ✅ R1: Single-line textform (1 chord per row, max 10 chars)
+  ✅ R2A: Multiline textarea (up to 30-40 chords per row, max 200 chars)
+  ✅ R1: Horizontal inline layout (textform + buttons inline)
+  ✅ R2A: Vertical flex layout (textarea full-width, buttons below)
+
+ISSUE IN R2A: 
+  ⚠️  Textarea rows="1" contradicts "multiline" concept
+  ⚠️  Should be rows="3" or dynamic CSS height
+
+ALIGNMENT NEEDED:
+  [ ] Document that layout intentionally differs between R1 and R2A (no alignment needed)
+  [ ] Clarify R2A textarea rows attribute: decide between rows="3" (fixed) or CSS height (dynamic)
+  [ ] If aligned layout desired, clarify button placement strategy (buttons inline vs below)
+
+STATUS: ⚠️  PARTIALLY ALIGNED - Row structure differs by design; textarea height ambiguous
+
+────────────────────────────────────────────────────────────────────────────
+
+SECTION 3: CHORD VALIDATION RULES (Ackordgrammatik)
+================================================================================
+
+R1 Component Structure:
+  1. Root: A, B, C, D, E, F, G, H (with "H"↔"B" notation mapping)
+  2. Accidentals: # or b (optional)
+  3. Quality: m, maj, dim, sus (optional) — "aug" FORBIDDEN
+  4. Extension: 2, 4, 5, 6, 7, 9, 11, 13 (optional)
+  5. Alterations: #5, b5, #9, b9, #11, b13 (optional)
+  6. Additions: add9, add11, add13 (optional)
+  7. Max length: 10 chars total
+  8. Invalid chords not sent to R3
+
+R2A Component Structure:
+  1. Root: A, B, C, D, E, F, G, H (with "H"↔"B" notation mapping)
+  2. Accidentals: # or b (optional)
+  3. Quality: m, maj, dim, sus (optional) — "aug" FORBIDDEN
+  4. Extension: 2, 4, 5, 6, 7, 9, 11, 13 (optional)
+  5. Alterations: #5, b5, #9, b9, #11, b13 (optional)
+  6. Additions: add9, add11, add13 (optional)
+  7. Max length: 10 chars total
+  8. Invalid chords not sent to R1
+
+COMPARISON:
+  ✅ IDENTICAL: All 7 components match exactly
+  ✅ IDENTICAL: Root notes, accidentals, quality modifiers, extensions, alterations, additions
+  ✅ IDENTICAL: "aug" forbidden in both (with explanation: use extension instead)
+  ✅ IDENTICAL: 10-character max limit
+  ✅ IDENTICAL: H↔B normalization rules
+  ✅ IDENTICAL: Invalid chord handling philosophy
+  ✅ IDENTICAL: Canonical ordering (Root + accidentals + quality + extension + alterations + additions)
+
+Valid Examples in R1: C, Cm, Cm7, Cmaj7, Dm9, F#dim, G7b9, Bbmaj13
+Valid Examples in R2A: C, Cm, Cm7, Cmaj7, Dm9, F#dim, G7b9, Bbmaj13
+
+Invalid Examples in R1: C##11, Zmaj7, 7Cmaj, C/E, C7(b9), Cmaj7add7
+Invalid Examples in R2A: C##11, Zmaj7, 7Cmaj, C/E, C7(b9), Cmaj7add7
+
+Restrictions in R1: No slash chords, no parentheses, no internal spaces, no duplicate add/extensions
+Restrictions in R2A: No slash chords, no parentheses, no internal spaces, no duplicate add/extensions
+
+ALIGNMENT NEEDED:
+  [ ] NO CHANGES - Section 3 is perfectly aligned between R1 and R2A
+
+STATUS: ✅ PERFECTLY ALIGNED
+
+────────────────────────────────────────────────────────────────────────────
+
+SECTION 4: INVALID CHORD HANDLING (Option C - Silent Clear)
+================================================================================
+
+R1 Behavior (Invalid chord + B1/B3 click):
+  a) Textfield clears automatically
+  b) R3 not updated with invalid chord
+  c) No sound played
+  - Empty field: if prior value exists in R3.n, retain it; if first time, nothing happens
+  - No error indication (no red border, no icon)
+  - Silent, immediate clearing
+
+R2A Behavior (Invalid chord + B5/B7 click):
+  a) Invalid chord ignored (not loaded to R1)
+  b) R1 not updated with invalid chord
+  c) No sound played
+  - Empty field: no data sent to R1; nothing happens
+  - No error indication (no red border, no icon)
+  - Silent, immediate clearing
+
+COMPARISON:
+  ⚠️  SLIGHT DIFFERENCE in empty-field behavior:
+      R1: "If prior R3 value exists, retain it" (carry forward)
+      R2A: "No data sent; nothing happens" (no carry forward described)
+
+ALIGNMENT NEEDED:
+  [ ] R2A Section 4: Add clarification for empty field behavior
+      Change to: "If R1 already has value from prior load, retain it (no change). If first time, nothing happens."
+  [ ] Ensure both files document silent clearing consistently
+
+STATUS: ⚠️  MOSTLY ALIGNED - Empty-field behavior needs clarification in R2A
+
+────────────────────────────────────────────────────────────────────────────
+
+SECTION 5: EXAMPLES
+================================================================================
+
+R1 Valid Examples (8):
+  C, Cm, Cm7, Cmaj7, Dm9, F#dim, G7b9, Bbmaj13
+
+R2A Valid Examples (8):
+  C, Cm, Cm7, Cmaj7, Dm9, F#dim, G7b9, Bbmaj13
+
+R1 Invalid Examples (6):
+  C##11, Zmaj7, 7Cmaj, C/E, C7(b9), Cmaj7add7
+
+R2A Invalid Examples (6):
+  C##11, Zmaj7, 7Cmaj, C/E, C7(b9), Cmaj7add7
+
+ALIGNMENT NEEDED:
+  [ ] NO CHANGES - Examples are perfectly identical
+
+STATUS: ✅ PERFECTLY ALIGNED
+
+────────────────────────────────────────────────────────────────────────────
+
+SECTION 6: ROW-LEVEL BUTTONS (Radknappar)
+================================================================================
+
+R1 Buttons:
+  B1 – "LR3" (Load to R3)
+      - Loads R1.R2A.n to R3.n
+      - Plays sound for that chord
+      - Requires valid chord
+      - Green #8fd694
+  
+  B2 – "XR1" (eXclude/Clear R1)
+      - Clears R1.R2A.n
+      - Also clears R3.n (coupled clear)
+      - No sound
+      - Red #f4a6a6
+
+R2A Buttons:
+  B5 – "L" (Load)
+      - Reads R2A.n textform, extracts space-separated chords
+      - Validates each, sends to R1.R2A.n (mapped sequentially)
+      - No sound (sound triggered from R1)
+      - Requires at least one valid chord
+      - Green #8fd694
+  
+  B6 – "X" (Clear)
+      - Clears R2A.n only
+      - R1 NOT updated (independent clear)
+      - No sound
+      - Red #f4a6a6
+
+DIFFERENCES:
+  ❌ R1 B1 triggers load + sound (directly updates R3)
+  ❌ R2A B5 triggers load only (updates R1 only, not R3; sound deferred)
+  ❌ R1 B2 clears R1 AND R3 (coupled)
+  ❌ R2A B6 clears R2A only (independent)
+  
+  These differences are INTENTIONAL:
+  - R1 is single-entry layer; B1 triggers R1→R3 transfer + sound
+  - R2A is bulk-input layer; B5 triggers R2A→R1 transfer only (R1 handles R1→R3)
+  - R1 B2 couples R1+R3 clear (design choice)
+  - R2A B6 independent clear (preserves R1 data if user modifies R2A)
+
+ALIGNMENT NEEDED:
+  [ ] Document this difference explicitly in both files (not a bug, but critical distinction)
+  [ ] Add note in R2A Section 6: "B5/B6 are ONE layer above R1; sound playback controlled by R1"
+  [ ] Add note in R1 Section 6: "B1/B2 are FINAL layer before R3; B1 triggers sound immediately"
+
+STATUS: ⚠️  ALIGNED BY DESIGN - Different button behavior is intentional, needs documentation
+
+────────────────────────────────────────────────────────────────────────────
+
+SECTION 7: GLOBAL BUTTONS (Globala knappar)
+================================================================================
+
+R1 Global Buttons:
+  B3 – "LR3" (Load All to R3)
+      - Loads all valid R1 values to R3
+      - Plays sound for all chords SEQUENTIALLY (~400ms between each)
+      - Clears invalid chords per R1.XC
+      - Visual distinction: GREEN OUTLINED (vs B1 filled green)
+      - OBS: Same label "LR3" as B1 but global scope
+  
+  B4 – "XR1" (Clear All R1)
+      - Clears all R1 fields
+      - Also clears all R3 fields (coupled)
+      - No sound
+      - RED filled (matches B2)
+
+R2A Global Buttons:
+  B7 – "LA" (Load All)
+      - Iterates R2A.1→R2A.10, extracts all space-separated chords
+      - Validates each, sends all to R1 sequentially (row-by-row)
+      - No sound (sound controlled by R1)
+      - GREEN OUTLINED (vs B5 filled green)
+      - OBS: Different label "LA" (Load All) than B5
+  
+  B8 – "XA" (Clear All)
+      - Clears all R2A fields
+      - R1 NOT affected (independent clear)
+      - No sound
+      - RED filled (matches B6)
+
+DIFFERENCES:
+  ⚠️  Button labels:
+      R1: B3 "LR3" (same as B1, but global), B4 "XR1" (same as B2, but global)
+      R2A: B7 "LA" (Load All - unique), B8 "XA" (Clear All - unique)
+  
+  ✅ Color scheme aligned: GREEN OUTLINED for global load (B3 vs B7)
+  ✅ Color scheme aligned: RED for clear (B4 vs B8)
+  ✅ Placement aligned: Below rows, horizontally centered, ~12-16px gap
+  
+  ❌ R1 couples B4 clear to R3 (clears both R1 + R3)
+  ❌ R2A couples B8 clear to R2A only (independent from R1)
+  
+  ⚠️  Sound handling difference:
+      R1: B3 plays ALL chords sequentially (~400ms between each)
+      R2A: B7 transfers to R1, no sound (R1 will handle playback via B1 later)
+
+ALIGNMENT NEEDED:
+  [ ] Clarify button label strategy: keep R2A labels unique (LA/XA) or align with R1 (LR3/XR1)?
+      Recommendation: Keep R2A labels unique (LA/XA) to avoid confusion about which layer is affected
+  [ ] Document sound sequencing difference:
+      R1 B3: Immediate sequential sound playback (~400ms gaps)
+      R2A B7: Deferred playback (R1 handles sound when user clicks B1/B3 in R1)
+  [ ] Document clear coupling explicitly:
+      R1: B4 clears both R1 and R3 (coupled)
+      R2A: B8 clears R2A only (independent)
+
+STATUS: ⚠️  PARTIALLY ALIGNED - Labels and clear behavior differ intentionally; needs explicit documentation
+
+────────────────────────────────────────────────────────────────────────────
+
+SECTION 8: HELP TEXTS (Hjälptexter)
+================================================================================
+
+R1 Help Structure:
+  R1.1: "Ackordinmatning: börja med rottecken (A–G/H), följ regler i R1.X"
+  R1.1a (Placeholder): "Ex: Cmaj7, G7b9 (max 10 tecken)"
+  R1.1b (Tooltip): "Ange ackord enligt ordning: Rot (+#|b) + kvalitet (m|maj|dim|sus) + extension (2|4|5|6|7|9|11|13) + alteration (#5|b5|#9|b9|#11|b13) + additions (add9|add11|add13). Max 10 tecken; inga mellanslag/parenteser; inga slash‑ackord."
+  R1.1c (ARIA): aria‑label per row, aria‑describedby, role="textbox"
+  R1.2: Timestamp format yy.mm.dd • HH.mm
+  R1.3: Swedish primary, English alternative available
+  R1.4: No error indication
+
+R2A Help Structure:
+  R2A.1: "Ackordinmatning: ange ackord separerade med mellanslag, följ regler i R2A.X"
+  R2A.1a (Placeholder): "Ex: C Dm G7 Cmaj7 (max 10 ackord per rad, blankstegsseparerade)"
+  R2A.1b (Tooltip): "Ange flera ackord separerade med mellanslag. Varje ackord måste följa ordning: Rot (+#|b) + kvalitet (m|maj|dim|sus) + extension (2|4|5|6|7|9|11|13) + alteration (#5|b5|#9|b9|#11|b13) + additions (add9|add11|add13). Max 10 tecken per ackord; inga mellanslag/parenteser inom ackord; inga slash‑ackord."
+  R2A.1c (ARIA): aria‑label per row, aria‑describedby, role="textbox"
+  R2A.2: Timestamp format yy.mm.dd • HH.mm
+  R2A.3: Swedish primary, English alternative available
+  R2A.4: Feedback "n giltiga ackord laddade; m ogiltiga ignorerade"
+
+COMPARISON:
+  ✅ Both use identical chord rule references
+  ✅ Both use Swedish primary + English alternative
+  ✅ Both use timestamp format yy.mm.dd • HH.mm
+  ✅ Both use ARIA labels
+  ⚠️  R1 focuses on "single chord per row" in help text
+  ⚠️  R2A focuses on "multiple chords per row separated by spaces" in help text
+  ⚠️  R2A.4 feedback mechanism not in R1 (R1 doesn't describe feedback format)
+  
+  ⚠️  TYPO in R2A Section 13: "Tillståndsbevarandeoch" (missing space)
+
+ALIGNMENT NEEDED:
+  [ ] R1 Section 8 could add feedback message format if needed (optional)
+  [ ] R2A Section 13: Fix typo "Tillståndsbevarandeoch" → "Tillståndsbevarande och"
+  [ ] Help text differences are appropriate given different input methods (single vs multi)
+
+STATUS: ✅ MOSTLY ALIGNED - Differences are intentional; fix typo in R2A
+
+────────────────────────────────────────────────────────────────────────────
+
+SECTION 9: DATA EXTRACTION & PARSING
+================================================================================
+
+R1 Parsing:
+  1. Read textform value
+  2. Trim whitespace
+  3. Apply case-insensitivity
+  4. Validate against regex
+  5. If valid, proceed to B1 action (transfer to R3 + sound)
+  6. If invalid, clear field per R1.XC
+
+R2A Parsing:
+  1. Read textarea value
+  2. Split by whitespace (space, tab, newline)
+  3. Trim each token
+  4. Validate each token against regex
+  5. Collect valid chords in array
+  6. Transfer valid to R1 sequentially
+  7. Ignore invalid chords silently
+  8. Provide feedback count
+
+ALIGNMENT:
+  ✅ Both trim whitespace
+  ✅ Both apply case-insensitivity
+  ✅ Both validate against same regex
+  ⚠️  R1: Single value → single validation
+  ⚠️  R2A: Multiple values → multiple validations + collection + sequencing
+
+ALIGNMENT NEEDED:
+  [ ] NO ALIGNMENT NEEDED - Parsing differences are appropriate to input method
+  [ ] R1 processes single chord per row; R2A processes multiple chords per row
+
+STATUS: ✅ ALIGNED BY DESIGN
+
+────────────────────────────────────────────────────────────────────────────
+
+SECTION 10: FORMAL VALIDATION (Regex)
+================================================================================
+
+R1 Regex:
+  ^(?=.{1,10}$)[A-GH](?:#|b)?(?:maj|m|dim|sus)?(?:2|4|5|6|7|9|11|13)?(?:(?:#|b)(?:5|9|11|13))?(?:add(?:9|11|13))?$
+
+R2A Regex:
+  ^(?=.{1,10}$)[A-GH](?:#|b)?(?:maj|m|dim|sus)?(?:2|4|5|6|7|9|11|13)?(?:(?:#|b)(?:5|9|11|13))?(?:add(?:9|11|13))?$
+
+R1 Flags: i-flag (case-insensitive), no internal spaces allowed
+R2A Flags: i-flag (case-insensitive), no internal spaces allowed
+
+R1 Additional Checks:
+  - Forbid "addX" if same X already in extension (e.g., "Cmaj7add7" invalid)
+  - Normalize "H"→"B" at display
+  - Confirm no spaces/parentheses/slash (regex covers)
+
+R2A Additional Checks:
+  - Forbid "addX" if same X already in extension (e.g., "Cmaj7add7" invalid)
+  - Normalize "H"→"B" at display
+  - Confirm no spaces/parentheses/slash (regex covers)
+
+COMPARISON:
+  ✅ IDENTICAL regex pattern
+  ✅ IDENTICAL flags (i-flag)
+  ✅ IDENTICAL additional programmatic checks
+  ✅ Both forbid "aug" (verified: pattern shows dim|sus, not aug)
+
+ALIGNMENT NEEDED:
+  [ ] NO CHANGES - Section 10 regex and validation logic are perfectly aligned
+
+STATUS: ✅ PERFECTLY ALIGNED
+
+────────────────────────────────────────────────────────────────────────────
+
+SECTION 11: DATA TRANSFER
+================================================================================
+
+R1 Data Transfer (R2A→R1 initialization + R1→R3 on button click):
+  R2A→R1 (Initialization):
+    - Read up to 10 posts from R2A
+    - Validate and populate R1.R2A.n
+    - Silent discard of invalid
+    - 1:1 mapping R2A[n] → R1.R2A.n
+  
+  R1→R3 (Button click - B1/B3):
+    - B1: Single row transfer, validate, write to R3.n, play sound
+    - B3: All rows, validate each, write to R3 sequentially, play sounds ~400ms apart
+    - B2/B4: Clear R1 and R3 (coupled)
+    - Order guarantee: rows 1→10 top-down
+    - Overwrite existing R3 values
+
+R2A Data Transfer (B5/B7 button click → R1):
+  - B5 (row-level): Read R2A.n, extract space-separated chords, validate each, send to R1.R2A sequentially
+    Example: R2A.1="C Dm G7" → R1.R2A.1="C", R1.R2A.2="Dm", R1.R2A.3="G7"
+  - B7 (global): Iterate R2A.1→R2A.10, collect all valid chords, send to R1 sequentially
+  - B6/B8: Clear R2A only (independent from R1)
+  - Order guarantee: Chords transferred in input order, row-by-row
+  - Overwrite existing R1.R2A values
+
+CRITICAL ALIGNMENT ISSUES:
+
+❌ ISSUE #1 - INITIALIZATION ASYMMETRY:
+   R1 expects to be populated from R2A at page load (automatic pull)
+   R2A has no reciprocal mechanism; R1 must actively read R2A
+   
+   NEEDED: Clarify R1 initialization in R1 Section 1:
+           "At page load, R1 automatically reads R2A panel via JavaScript/API"
+           and verify this is implemented in R1's JS layer
+
+❌ ISSUE #2 - DATA FLOW DIRECTION:
+   R2A→R1: B5/B7 buttons push data FROM R2A TO R1
+   R1→R3: B1/B3 buttons push data FROM R1 TO R3
+   
+   BUT: What about R2A.n containing multiple chords?
+        Example: R2A.1="C Dm G7" has 3 chords
+        When B5 clicked on row 1:
+        - Where do they go? R1.R2A.1, R1.R2A.2, R1.R2A.3? (sequentially?)
+        - Do they overwrite existing values in R1?
+        - What if R1 already has data in rows 1-3?
+   
+   R2A Section 11 documents: "sekventiell mapping" (sequential row-by-row)
+   ✅ This is CORRECT and CLEAR in R2A
+   
+   R1 Section 11 documents: 1:1 mapping (R1.R2A.n one per row)
+   ✅ This assumes single chord per R1 row
+   
+   NEEDED: Confirm R1 architecture supports receiving multiple chords from R2A
+           (may require R1 rows to expand beyond 10, or overflow handling)
+
+❌ ISSUE #3 - SOUND PLAYBACK TIMING:
+   R1 B1: "Plays sound for the chord" (immediate)
+   R1 B3: "Plays sounds sequentially ~400ms apart"
+   R2A B5/B7: "No sound" (deferred to R1)
+   
+   NEEDED: Document sound playback coordination:
+           - When user clicks R2A B5 to load "C Dm G7", does R1 auto-play these?
+           - Or does user need to manually click R1 B1/B3?
+           - Current spec suggests manual, but should clarify
+
+❌ ISSUE #4 - CLEAR COUPLING:
+   R1: B2/B4 clear both R1 AND R3 (coupled)
+   R2A: B6/B8 clear only R2A (independent from R1)
+   
+   NEEDED: Clarify if this is intentional:
+           - Can user clear R1 without clearing R3? (only if R1 has independent clear)
+           - Can user clear R2A without affecting R1? (✅ confirmed in R2A)
+
+ALIGNMENT NEEDED:
+  [ ] R1 Section 1: Explicitly document automatic R2A→R1 initialization at page load
+  [ ] R1 Section 11: Add note about receiving multiple chords from R2A per row
+      (May require clarification: Do multiple chords expand beyond 10 R1 rows?)
+  [ ] Both: Document sound playback coordination (when is sound triggered?)
+  [ ] Both: Clarify clear coupling strategy (R1 coupled, R2A independent — intentional?)
+  [ ] Create data flow diagram showing both initialization and button-triggered transfers
+
+STATUS: ⚠️  MOSTLY ALIGNED - Critical issues need clarification:
+        1. R1 auto-init from R2A not explicitly described as "automatic"
+        2. Multiple-chord handling from R2A unclear in R1 context
+        3. Sound playback coordination vague
+        4. Clear coupling philosophies differ (may be intentional)
+
+────────────────────────────────────────────────────────────────────────────
+
+SECTION 12: REAL-TIME VALIDATION & UX BEHAVIOR
+================================================================================
+
+R1 Behavior:
+  - Validation on every keystroke (no debounce)
+  - No visual change during input
+  - Keyboard: Tab (navigate), Enter (activate B1), Shift+Enter (activate B3)
+  - Focus management: Tab from B2 → next row textfield or B3 if last row
+  - Invalid input: Auto-clear field per R1.XC (silent)
+
+R2A Behavior:
+  - Validation on every keystroke (no debounce)
+  - No visual change during input
+  - Keyboard: Tab (navigate), Enter (activate B5), Ctrl+Enter (activate B7)
+  - Focus management: Tab from B6 → next row textfield or B7 if last row
+  - Invalid input: Ignored silently when button clicked; no auto-clear
+
+COMPARISON:
+  ✅ Both validate in real-time (no debounce)
+  ✅ Both avoid visual feedback during input
+  ✅ Both use Tab for navigation
+  ⚠️  Different Enter key binding:
+      R1: Enter → B1 (row-level load)
+      R2A: Enter → B5 (row-level load)
+      (Both are row-level, so EQUIVALENT)
+  ⚠️  Different global shortcut:
+      R1: Shift+Enter → B3 (global load)
+      R2A: Ctrl+Enter → B7 (global load)
+      (Both trigger global load, but DIFFERENT KEY COMBO)
+  ⚠️  Different invalid handling:
+      R1: Auto-clear field immediately upon invalid input
+      R2A: Ignore invalid upon button click; field remains (user can retry/fix)
+
+ALIGNMENT NEEDED:
+  [ ] Standardize global load keyboard shortcut: 
+      Option A: Use Ctrl+Enter for both (current R2A)
+      Option B: Use Shift+Enter for both (current R1)
+      Recommendation: Keep as-is (different keys prevent conflicts if both panels visible)
+  
+  [ ] Document invalid-input handling difference:
+      R1: Auto-clear (fails silently)
+      R2A: Retain for retry (gives user chance to fix)
+      (Both follow Option C philosophy; just implemented differently)
+
+STATUS: ⚠️  MOSTLY ALIGNED - Keyboard shortcuts differ; invalid handling differs (intentional UX choices)
+
+────────────────────────────────────────────────────────────────────────────
+
+SECTION 13: STATE PERSISTENCE (Tillståndsbevarandeoch sessionhantering)
+================================================================================
+
+R1 State Persistence:
+  - R1 values persist during session (not reset on page refresh)
+  - R1 initializes from R2A at page load (overwrites any prior R1 state)
+  - R3 values persist during session
+  - If R2A changes externally, R1 NOT synced (only R2A→R1 at initial load)
+  - New HTML render → re-init R1 from R2A
+
+R2A State Persistence:
+  - R2A values persist during session (not reset on page refresh)
+  - R2A independent from R1 after load (changes in R2A don't affect R1 automatically)
+  - New HTML render → R2A empty (default)
+
+COMPARISON:
+  ⚠️  R1 re-reads R2A on every HTML render (can be destructive to existing R1 state)
+  ⚠️  R2A stays empty on new render (clean slate)
+  ✅ Both persist during session
+
+POTENTIAL ISSUE:
+  If user has manually edited R1 values in session, and then page refreshes,
+  R1 will be re-populated from R2A (per R1 Section 13), potentially overwriting
+  user's manual edits. Is this desired behavior?
+
+  R2A cleanly resets to empty on new render, so no conflict there.
+
+ALIGNMENT NEEDED:
+  [ ] R1 Section 13: Clarify if re-init from R2A is desired behavior or accidental
+  [ ] Both: Document whether manual edits in R1 should survive page refresh
+  [ ] Consider marking R1 state as "initialized once per session" vs "re-init per render"
+
+STATUS: ⚠️  MOSTLY ALIGNED - State persistence clear, but re-init strategy for R1 could cause data loss
+
+TYPO in R2A Section 13:
+  ❌ "Tillståndsbevarandeoch sessionhantering" 
+  ✅ Should be: "Tillståndsbevarande och sessionhantering" (missing space)
+
+STATUS: ⚠️  FIX NEEDED - Remove typo
+
+────────────────────────────────────────────────────────────────────────────
+
+SECTION 14: HTML STRUCTURE & SEMANTIC MARKUP
+================================================================================
+
+R1 HTML Structure:
+  - Container: <section id="r1-panel" class="r1-piano-panel">
+  - Header: <div class="r1-header"> with <h2> and <p class="r1-help">
+  - Form: <form id="r1-form" class="r1-form">
+  - Row: <fieldset class="r1-row" id="r1-row-n">
+    - <input type="text" class="r1-textform" id="r1-textform-n" maxlength="10" ...>
+    - <button class="btn-row btn-load" id="r1-btn-b1-n">LR3</button>
+    - <button class="btn-row btn-clear" id="r1-btn-b2-n">XR1</button>
+  - Global buttons: <div class="r1-global-buttons">
+    - <button class="btn-global btn-load-all" id="r1-btn-b3">LR3</button>
+    - <button class="btn-global btn-clear-all" id="r1-btn-b4">XR1</button>
+  - Footer: <div class="r1-footer">
+  - CSS classes: r1-*, btn-*, -row, -load, -clear, -global, -load-all, -clear-all
+  - ARIA: aria-label, aria-describedby, role="textbox"
+  - Data attributes: data-row="n"
+
+R2A HTML Structure:
+  - Container: <section id="r2a-panel" class="r2a-piano-panel">
+  - Header: <div class="r2a-header"> with <h2> and <p class="r2a-help">
+  - Form: <form id="r2a-form" class="r2a-form">
+  - Row: <fieldset class="r2a-row" id="r2a-row-n">
+    - <textarea class="r2a-textform" id="r2a-textform-n" maxlength=">>>200 - ADJUST AFTER TESTING<<<" ...>
+    - <button class="btn-row btn-load" id="r2a-btn-b5-n">L</button>
+    - <button class="btn-row btn-clear" id="r2a-btn-b6-n">X</button>
+  - Global buttons: <div class="r2a-global-buttons">
+    - <button class="btn-global btn-load-all" id="r2a-btn-b7">LA</button>
+    - <button class="btn-global btn-clear-all" id="r2a-btn-b8">XA</button>
+  - Footer: <div class="r2a-footer">
+  - CSS classes: r2a-*, btn-*, -row, -load, -clear, -global, -load-all, -clear-all
+  - ARIA: aria-label, aria-describedby, role="textbox"
+  - Data attributes: data-row="n"
+
+COMPARISON:
+  ✅ Identical semantic structure (section, form, fieldset, buttons)
+  ✅ Identical ID naming convention (r1-* vs r2a-*)
+  ✅ Identical CSS class strategy (shared btn-* classes)
+  ✅ Identical ARIA attributes
+  ✅ Identical data attributes
+  ❌ Different input element: R1 uses <input type="text">, R2A uses <textarea>
+  ⚠️  R1 maxlength="10" (explicit), R2A maxlength=">>>200 - ADJUST AFTER TESTING<<<" (flagged)
+  ⚠️  R2A textarea lacks rows attribute (currently none, should be rows="3" or dynamic)
+  ⚠️  Button labels different: R1 "LR3"/"XR1" vs R2A "L"/"X"/"LA"/"XA"
+
+ALIGNMENT NEEDED:
+  [ ] Document button label strategy explicitly:
+      R1: "LR3" = Load to R3, "XR1" = Clear R1 (mnemonic: shows destination/scope)
+      R2A: "L" = Load (to R1), "X" = Clear, "LA" = Load All, "XA" = Clear All (shorter, generic)
+      Recommendation: Keep as-is (appropriate to each layer)
+  
+  [ ] R2A: Clarify textarea rows attribute
+      Current: rows not specified (defaults to 1)
+      Needed: rows="3" (for visible multiline) OR CSS height specification
+  
+  [ ] R2A: Update maxlength from >>>200 - ADJUST AFTER TESTING<<< to actual value
+      Recommendation: Test and finalize, then replace marker
+
+STATUS: ⚠️  MOSTLY ALIGNED - Minor differences in element types and attributes; button labels appropriate
+
+────────────────────────────────────────────────────────────────────────────
+
+SECTION 15: CSS STYLING GUIDELINES
+================================================================================
+
+R1 Color Palette:
+  - Primary green: #8fd694 (Load/Play)
+  - Secondary red: #f4a6a6 (Clear/Reset)
+  - Background: #2b2b2b
+  - Border: #444
+  - Text: white (#ffffff)
+  - Secondary text: #ddd
+  - Input border: #555
+  - Input background: white (focus), #2b2b2b (unfocus)
+
+R2A Color Palette:
+  - Primary green: #8fd694 (Load/Play)
+  - Secondary red: #f4a6a6 (Clear/Reset)
+  - Background: #2b2b2b
+  - Border: #444
+  - Text: white (#ffffff)
+  - Secondary text: #ddd
+  - Textarea border: #555
+  - Textarea background: white (focus), #2b2b2b (unfocus)
+
+Button Styling (R1):
+  - B1/B2 (row): Padding 4px 8px, border-radius 4px, font-size ~0.9rem
+  - B1: Green filled #8fd694
+  - B2: Red filled #f4a6a6
+  - B3: Green outlined (2px border #8fd694, transparent bg)
+  - B4: Red filled #f4a6a6
+  - Hover: opacity 0.8, Active: opacity 0.6, Disabled: opacity 0.5
+
+Button Styling (R2A):
+  - B5/B6 (row): Padding 4px 8px, border-radius 4px, font-size ~0.9rem
+  - B5: Green filled #8fd694
+  - B6: Red filled #f4a6a6
+  - B7: Green outlined (2px border #8fd694, transparent bg)
+  - B8: Red filled #f4a6a6
+  - Hover: opacity 0.8, Active: opacity 0.6, Disabled: opacity 0.5
+
+Input/Textarea Styling (R1):
+  - Padding: 4px 8px
+  - Border: 1px solid #555
+  - Border-radius: 4px
+  - Font: Arial, sans-serif, ~1rem
+  - Background: white
+  - Color: black
+  - Max-width: 120px (R1 textform, ~10 char width)
+  - Transition: border-color 0.2s
+  - Focus: border-color #8fd694
+  - Blur (valid): border-color #555
+  - Blur (invalid): auto-clear, no visual change
+
+Input/Textarea Styling (R2A):
+  - Padding: 4px 8px
+  - Border: 1px solid #555
+  - Border-radius: 4px
+  - Font: Arial, sans-serif, ~1rem
+  - Background: white
+  - Color: black
+  - Width: 100% (R2A textarea, full-width)
+  - Resize: vertical
+  - Transition: border-color 0.2s
+  - Focus: border-color #8fd694
+  - Blur (valid): border-color #555
+  - Blur (invalid): no visual change; feedback via message
+
+Row Layout (R1):
+  - Display: flex, align-items: center
+  - Gap: 10px
+  - Vertical gap between rows: ~12-16 px
+
+Row Layout (R2A):
+  - Display: flex, flex-direction: column (textform on line 1, buttons on line 2)
+  - Gap: 6px
+  - Vertical gap between rows: ~12-16 px
+  - Button container: flex, justify-content: flex-start, gap: 10px
+
+Global Buttons Container (Both):
+  - Margin-top: ~12-16 px
+  - Display: flex, justify-content: center, gap: ~12-16 px
+
+Typography (Both):
+  - Panel title (h2): ~1.2rem, bold, white
+  - Help text: ~0.9rem, #ddd
+  - Button text: ~0.85rem, normal weight, 0.5px letter-spacing
+  - Placeholder: ~0.85rem, #999
+  - Timestamp (footer): ~0.8rem, #ccc
+
+Responsive (Both):
+  - Mobile (<600px): Single-column, smaller padding (2px 4px)
+  - Tablet (600-1024px): Current layout
+  - Desktop (>1024px): Current layout optimal
+  - R2A note: Textarea max-width 600px on wide screens
+
+Focus & Accessibility (Both):
+  - Focus outline: 2px solid #8fd694
+  - Outline offset: 2px
+  - WCAG AA contrast compliance
+
+Animation (Both):
+  - Button hover/active: opacity change 0.2s
+  - Input/textarea focus: border-color change 0.2s
+  - No heavy animations
+
+COMPARISON:
+  ✅ NEARLY IDENTICAL color palette
+  ✅ NEARLY IDENTICAL button styling
+  ✅ NEARLY IDENTICAL typography
+  ✅ NEARLY IDENTICAL focus/accessibility specs
+  ⚠️  Different row layout:
+      R1: display flex, align-items center (horizontal inline)
+      R2A: display flex, flex-direction column (vertical stacked)
+  ⚠️  Different input width constraints:
+      R1: max-width 120px (textform for single 10-char chord)
+      R2A: width 100% (textarea for multiple chords)
+  ✅ Same gap values (8-12px buttons, 12-16px rows)
+
+ALIGNMENT NEEDED:
+  [ ] NO CHANGES - CSS styling differences are appropriate to element types
+  [ ] Document that layout differs by design: R1 horizontal inline, R2A vertical flex
+
+STATUS: ✅ PERFECTLY ALIGNED - CSS strategy unified; layout differences intentional
+
+────────────────────────────────────────────────────────────────────────────
+
+SECTION 16: JAVASCRIPT IMPLEMENTATION SCOPE
+================================================================================
+
+R1 Options:
+  - Option A: High-level pseudocode only
+  - Option B: Detailed code examples with JavaScript snippets
+  - Option C: Both (pseudocode + code examples)
+
+R2A Options:
+  - Option A: High-level pseudocode only
+  - Option B: Detailed code examples with JavaScript snippets
+  - Option C: Both (pseudocode + code examples)
+
+COMPARISON:
+  ✅ IDENTICAL implementation scope options offered in both files
+  ✅ IDENTICAL descriptions of each option
+  ✅ IDENTICAL justifications
+
+ALIGNMENT NEEDED:
+  [ ] NO CHANGES - Implementation scope section is perfectly aligned
+
+STATUS: ✅ PERFECTLY ALIGNED
+
+────────────────────────────────────────────────────────────────────────────
+
+SECTION 17: DATA FLOW & RELATED PANELS REFERENCE
+================================================================================
+
+R1 Data Flow Diagram & Documentation:
+  - Shows R2A → R1 → R3 ecosystem
+  - R2A→R1: At page load (Section 1)
+  - R1→R3: Via B1/B3 (row/global load), B2/B4 (row/global clear)
+  - Sound playback: B1 immediate, B3 sequential (~400ms gaps)
+  - R3 integration: R3 receives from R1 only (read-only, no feedback to R1)
+  - State: Independent after initialization; R1 not synced if R2A changes later
+
+R2A Data Flow Diagram & Documentation:
+  - Shows R2A → R1 → R3 ecosystem
+  - R2A→R1: Via B5/B7 button clicks (user-triggered)
+  - R1→R3: Handled by R1 panel (R2A defers to R1)
+  - Sound playback: Deferred to R1 (R2A doesn't play sound)
+  - R3 integration: Same as R1 (unidirectional R1→R3)
+  - State: R2A independent from R1; R1 doesn't sync back to R2A
+
+COMPARISON:
+  ⚠️  INITIALIZATION ASYMMETRY:
+      R1 expects automatic R2A→R1 at page load
+      R2A documents user-triggered B5/B7 push only (not automatic)
+  
+  ⚠️  SOUND PLAYBACK:
+      R1: B1/B3 trigger sound directly
+      R2A: B5/B7 defer sound to R1 (no direct sound)
+  
+  ⚠️  MULTIPLE-CHORD HANDLING:
+      R2A clearly documents sequential mapping (R2A.1="C Dm G7" → R1.R2A.1/2/3)
+      R1 assumes 1:1 mapping (single chord per row)
+      → Potential architectural conflict if R1 doesn't support multi-chord loading
+
+CRITICAL ISSUES IDENTIFIED:
+
+❌ ISSUE A: R1 Initialization Not Explicitly Automatic
+   R1 Section 1 says "R1 shall receive initial data from R2A"
+   But doesn't explicitly state "R1 automatically reads R2A at page load"
+   
+   NEEDS: R1 Section 1 update: "At page load, R1 automatically reads R2A via JavaScript and populates R1 rows"
+
+❌ ISSUE B: Multiple-Chord Overflow in R1
+   R2A can send >10 chords to R1 (e.g., R2A.1="C Dm G7 F#maj7 Bbmaj13 G7b9 Cm F#dim Cmaj7 D")
+   R1 only has 10 rows (R1.R2A.1...10)
+   What happens to 11th+ chords?
+   
+   NEEDS: Clarify overflow handling:
+          Option 1: Clamp to 10 (ignore excess)
+          Option 2: Wrap to multiple rows (no, R1 only has 10)
+          Option 3: Error message to user (not Option C)
+          Recommendation: Clamp to 10 (document in both files)
+
+❌ ISSUE C: R1 Re-init Destructive to User Edits
+   R1 re-reads R2A on every page render (Section 13)
+   If user manually edited R1 values, re-init overwrites them
+   
+   NEEDS: Decide on re-init behavior:
+          Option 1: Only re-init on first page load (preserve user edits)
+          Option 2: Allow re-init but warn user (not Option C)
+          Option 3: Accept data loss (document clearly)
+          Recommendation: Only init once per session (update R1 Section 13)
+
+ALIGNMENT NEEDED:
+  [ ] R1 Section 1: Add explicit "automatic read from R2A at page load" language
+  [ ] Both sections 11: Document overflow handling (recommend: clamp to 10 rows)
+  [ ] R1 Section 13: Clarify re-init behavior (recommend: init once per session, not per render)
+  [ ] Both: Create unified data flow diagram showing both initialization and button-triggered paths
+  [ ] Both: Document multiple-chord sequencing explicitly (how are >10 chords handled?)
+
+STATUS: ⚠️  MOSTLY ALIGNED - Critical initialization and overflow handling issues need resolution
+
+================================================================================
+SUMMARY TABLE: ALIGNMENT STATUS BY SECTION
+================================================================================
+
+Section                         | R1 Status      | R2A Status     | Aligned? | Priority | Notes
+──────────────────────────────────────────────────────────────────────────────────────────────
+1. Initialization               | ⚠️  Implicit    | ✅ Clear       | ❌ NO    | CRITICAL | R1 needs explicit auto-read
+2. Rows (Layout)                | ✅ Clear       | ✅ Clear       | ✅ YES   | LOW      | Intentional layout difference
+3. Chord Validation             | ✅ Complete    | ✅ Complete    | ✅ YES   | DONE     | Perfectly aligned
+4. Invalid Chord Handling       | ✅ Complete    | ⚠️  Incomplete  | ⚠️  PARTIAL | MEDIUM | R2A needs empty-field clarification
+5. Examples                     | ✅ Complete    | ✅ Complete    | ✅ YES   | DONE     | Perfectly aligned
+6. Row Buttons (B1/B5/B6)       | ✅ Complete    | ✅ Complete    | ✅ YES*  | LOW      | Different behavior intentional
+7. Global Buttons (B3/B7/B8)    | ✅ Complete    | ✅ Complete    | ✅ YES*  | LOW      | Label & sound handling differ
+8. Help Texts                   | ✅ Complete    | ⚠️  Typo        | ✅ YES   | LOW      | Fix typo in R2A Section 13
+9. Data Extraction              | ✅ Complete    | ✅ Complete    | ✅ YES   | LOW      | Appropriate differences
+10. Regex Validation            | ✅ Complete    | ✅ Complete    | ✅ YES   | DONE     | Perfectly aligned
+11. Data Transfer               | ⚠️  Incomplete  | ⚠️  Incomplete  | ⚠️  PARTIAL | CRITICAL | Overflow handling unclear
+12. Real-time Validation        | ✅ Complete    | ✅ Complete    | ✅ YES   | LOW      | Different shortcuts OK
+13. State Persistence           | ⚠️  Destructive | ✅ Clear       | ⚠️  PARTIAL | CRITICAL | R1 re-init risk; typo in R2A
+14. HTML Structure              | ✅ Complete    | ⚠️  Incomplete  | ✅ YES   | MEDIUM   | R2A textarea rows="" needs value
+15. CSS Styling                 | ✅ Complete    | ✅ Complete    | ✅ YES   | DONE     | Perfectly aligned
+16. JavaScript Scope            | ✅ Complete    | ✅ Complete    | ✅ YES   | DONE     | Perfectly aligned
+17. Data Flow                   | ⚠️  Implicit    | ⚠️  Implicit    | ⚠️  PARTIAL | CRITICAL | Multiple issues (see above)
+
+* = Intentional design differences; not misalignment
+
+================================================================================
+RECOMMENDED UPDATES (PRIORITIZED)
+================================================================================
+
+TIER 1: CRITICAL (Block production deployment without resolution)
+────────────────────────────────────────────────────────────────────
+
+[ ] ISSUE 1A: R1 Initialization Not Explicit
+    File: R1_Build AI Instruction_3.txt, Section 1
+    Location: Line ~10-15
+    Current: "R1 shall take initial data from R2A"
+    Update: Add explicit language: "At page load, R1 automatically reads R2A panel via JavaScript and populates R1 rows 1-10 according to R2A→R1 mapping (Section 11)"
+    Impact: Clarifies automatic initialization vs user-triggered
+
+[ ] ISSUE 1B: Multiple-Chord Overflow Not Addressed
+    Files: Both R1 (Section 11) and R2A (Section 11)
+    Scenario: R2A.1 contains "C Dm G7 F#maj7 Bbmaj13 G7b9 Cm F#dim Cmaj7 D Em" (11 chords)
+    Current: R2A Section 11 says "sekventiell mapping" but doesn't address row overflow
+    Update: Add explicit overflow handling rule:
+            "If total chords from R2A.n exceed available R1 rows (>10 rows total):
+             - Chords 1-10 populate R1.R2A.1 through R1.R2A.10
+             - Excess chords are silently discarded (clamped to 10 rows)
+             - No error message (Option C); user must re-organize input"
+    Impact: Prevents undefined behavior; aligns both files on overflow strategy
+
+[ ] ISSUE 1C: R1 Re-init Destructive to User Edits
+    File: R1_Build AI Instruction_3.txt, Section 13
+    Current: "Vid ny HTML-rendering/re-init ska R1 läsa R2A igen och fyllas enligt R2A→R1 inläsning"
+    Risk: User edits R1 manually during session; page refreshes; all user edits lost
+    Update Option A: "R1 initializes from R2A ONCE at page load. Subsequent page renders do not re-init R1."
+    Update Option B: "R1 re-initializes from R2A on every render. User edits are NOT preserved."
+    Recommendation: Option A (preserve user edits)
+    Impact: Prevents accidental data loss; clarifies expected behavior
+
+────────────────────────────────────────────────────────────────────
+
+TIER 2: IMPORTANT (Production-ready but needs clarification)
+────────────────────────────────────────────────────────────────────
+
+[ ] ISSUE 2A: R2A Section 13 Typo
+    File: R2A_Build AI Instruction_11.txt, Section 13
+    Current: "Tillståndsbevarandeoch sessionhantering"
+    Fix: "Tillståndsbevarande och sessionhantering"
+    Impact: Cosmetic; easy fix
+
+[ ] ISSUE 2B: R2A Textarea rows Attribute Missing
+    File: R2A_Build AI Instruction_11.txt, Section 14
+    Current: rows="1" (or not specified)
+    Problem: Contradicts "multiline textform"; displays as single-line
+    Update: Change to rows="3" for fixed 3-line display, OR specify CSS min-height
+    Recommendation: rows="3" (fixed visible multiline)
+    Impact: Ensures multiline textarea displays correctly
+
+[ ] ISSUE 2C: R2A Character Limit Still Flagged
+    File: R2A_Build AI Instruction_11.txt (multiple sections)
+    Current: >>>200 - ADJUST AFTER TESTING<<< (Section 14, line 236)
+           >>>MAX 200 CHARS PER ROW<<< (Section 2, line 59)
+           >>>MAX 200 CHARS<<< (ASCII panel, lines 9-18)
+    Update: After testing, replace all flags with confirmed value (or keep as 200)
+    Impact: Finalizes character limit specification
+
+[ ] ISSUE 2D: Empty-Field Behavior in R2A Section 4
+    File: R2A_Build AI Instruction_11.txt, Section 4
+    Current: "Vid tomt textfält (efter trimning) och knapptryckning: a) Ingen data skickas till R1; inget händer."
+    Clarify: "If R1 already has value from prior B5/B7 load, retain it (no change). If first time, nothing happens."
+    Impact: Documents behavior explicitly
+
+[ ] ISSUE 2E: Sound Playback Coordination Unclear
+    Files: Both R1 (Section 11) and R2A (Section 11)
+    Issue: R2A B7 loads chords to R1; R1 then plays them?
+           Or does user need to manually click R1 B1/B3?
+    Recommendation: Add explicit note:
+                   "R2A Section 11: 'B5/B7 transfer to R1 only; sound playback controlled by R1 panel (user clicks R1 B1/B3).'"
+                   "R1 Section 11: 'Chords loaded from R2A are not auto-played; user must click B1/B3 in R1 to trigger sound.'"
+    Impact: Clarifies audio workflow
+
+────────────────────────────────────────────────────────────────────
+
+TIER 3: DOCUMENTATION (Nice-to-have; clarification/confirmation)
+────────────────────────────────────────────────────────────────────
+
+[ ] ISSUE 3A: Button Label Strategy
+    Files: Both (Section 6-7)
+    Current: R1 uses "LR3"/"XR1" (mnemonic for destination/action)
+            R2A uses "L"/"X"/"LA"/"XA" (shorter, generic)
+    Decision: Keep as-is? Align to single scheme?
+    Recommendation: KEEP AS-IS (appropriate to each layer; R1 shows destination, R2A generic)
+
+[ ] ISSUE 3B: Clear Coupling Philosophy
+    Files: Both (Section 6-7, 11)
+    Current: R1 B2/B4 couple R1 + R3 clear
+            R2A B6/B8 independent clear (R1 not affected)
+    Decision: Intentional design choice? Should R1 have independent option too?
+    Recommendation: DOCUMENT EXPLICITLY: "R1 clear is coupled to R3 (design choice: synchronous state).
+                                          R2A clear is independent (design choice: preservation of R1 data)."
+
+[ ] ISSUE 3C: Unified Data Flow Diagram
+    Files: Both (Section 17)
+    Current: Both have diagrams but they're separate
+    Recommendation: CREATE SINGLE UNIFIED DIAGRAM showing:
+                   1. Page load: R2A (empty) → R1 (auto-init from R2A) → R3 (empty until R1 B1/B3 clicked)
+                   2. User action: R2A B5/B7 → R1 (update chords) → (user then clicks R1 B1/B3) → R3 (play sound)
+
+================================================================================
+QUICK ACTION ITEMS
+================================================================================
+
+IMMEDIATE (Do now):
+  [X] Fix R2A Section 13 typo: "Tillståndsbevarandeoch" → "Tillståndsbevarande och"
+  [ ] Add rows="3" to R2A Section 14 textarea element
+  [ ] Update R1 Section 1 to explicitly state "automatic read from R2A at page load"
+  [ ] Add overflow handling rule to both R1 & R2A Section 11
+  [ ] Clarify R1 re-init behavior in R1 Section 13 (recommend: init once per session)
+
+BEFORE TESTING:
+  [ ] Finalize R2A character limit (confirm 200 or change, then remove >>>...<<< flags)
+  [ ] Clarify R2A Section 4 empty-field behavior (carry forward vs nothing)
+  [ ] Document sound playback coordination (when does R2A→R1 trigger sound?)
+
+OPTIONAL (Post-deployment polish):
+  [ ] Create unified data flow diagram (both panels + R3 + time sequencing)
+  [ ] Add implementation notes on clear coupling philosophy
+  [ ] Confirm button label strategy (current is good, just document why)
+
+================================================================================
+CONCLUSION
+================================================================================
+
+Overall Alignment: ~75% aligned ✅⚠️
+
+Perfectly Aligned Sections (✅):
+  - Chord validation rules (Section 3)
+  - Examples (Section 5)
+  - Data extraction (Section 9)
+  - Regex validation (Section 10)
+  - JavaScript scope (Section 16)
+  - CSS styling (Section 15)
+
+Mostly Aligned with Minor Issues (⚠️):
+  - Invalid chord handling (Section 4) - empty-field clarification needed
+  - Button functions (Sections 6-7) - intentional differences, document explicitly
+  - State persistence (Section 13) - R1 re-init issue, R2A typo
+  - HTML structure (Section 14) - textarea rows="" needs value
+  - Real-time validation (Section 12) - keyboard shortcuts differ (OK)
+  - Data transfer (Section 11) - overflow handling unclear
+  - Help texts (Section 8) - R2A feedback format documented, R1 doesn't have it
+
+Critical Issues (❌):
+  - R1 initialization not explicit (automatic read not clearly stated)
+  - Multiple-chord overflow handling not addressed
+  - R1 re-init strategy destructive to user edits
+
+Recommendation: Fix TIER 1 issues before production deployment.
+              Fix TIER 2 issues before implementation begins.
+              TIER 3 items are optional polish.
+
+Files are functionally sound and can proceed to implementation after addressing critical issues.
+
+================================================================================

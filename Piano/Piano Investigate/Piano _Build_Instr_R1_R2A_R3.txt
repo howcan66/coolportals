@@ -1,0 +1,21 @@
+<!------- R3 Panel Functionalities Below Step 1------------------------------------->
+<!------- R3 Panel Functionalities Above Step 1------------------------------------->
+<!------- R3 Panel Functionalities Above Step 1------------------------------------->
+<!--
+
+Use Piano_Overall_Layout_Instr.txt          for web layout
+
+Use R1_Funct_Redo.txt                       for R1 html frame
+
+Use R2A_Funct_Redo.txt                      for R2A html frame
+
+Use R3_Funct_Redo.txt                       for R3 html frame
+
+Use R2B_Funct_Redo.txt                      for R2A html frame
+
+Use Piano Design Style Instr.txt            for the generic web design
+
+-->
+<!------- R3 Panel Functionalities Above Step 1------------------------------------->
+<!------- R3 Panel Functionalities Above Step 1------------------------------------->
+<!------- R3 Panel Functionalities Above Step 1------------------------------------->

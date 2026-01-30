@@ -1,0 +1,548 @@
+================================================================================
+  WEBLAYOUT INSTRUKTION - FRAME FORMAT
+  Piano Design Interactive Chord Visualization Tool
+  Svenska Version
+================================================================================
+
+INNEHÅLLS ÖVERBLICK:
+================================================================================
+
+Denna instruktion beskriver:
+1. Vad frame.html är
+2. Hur weblayouten är strukturerad
+3. Hur de olika panelerna fungerar tillsammans
+4. Visuell kartläggning av layouten
+5. Hur data flödar mellan panelerna
+
+
+================================================================================
+1. VAD ÄR FRAME.HTML?
+================================================================================
+
+frame.html är en CONTAINER-fil som:
+• Visar alla 4 paneler samtidigt på samma skärm
+• Använder iframes för att ladda varje panel separat
+• Skapar ett integrerat testningsverktyg
+• Möjliggör cross-panel kommunikation
+
+Det är PERFEKT för att:
+• Testa alla komponenter tillsammans
+• Se data-flödet i realtid
+• Debugga interaktioner mellan paneler
+• Utbilda användare om arbetsflödet
+
+
+================================================================================
+2. VISUELL KARTLÄGGNING AV WEBLAYOUTEN
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                     🎹 R1-R2A-R3-R2B Integration Test Frame                 │
+│                                                                              │
+│  Data Flow: R2A (input) → R1 (validation) → R3 (display) → R2B (analysis)  │
+│                                                                              │
+│  Workflow Steps:                                                             │
+│  1. Enter chords in R2A   2. Click B5/B7   3. Validate in R1   4. Click B1 │
+│  5. R3 lights up        6. Click BR3      7. R2B shows analysis             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────┬──────────────────────────────┐
+│                              │                              │
+│  📝 R2A - BATCH INPUT        │  ✓ R1 - INPUT VALIDATION     │
+│  (Top Left)                  │  (Top Right)                 │
+│                              │                              │
+│  • Textarea för chord input  │  • 24 rader för validering   │
+│  • Knapp B5: Load All        │  • Knapp B3: Load All        │
+│  • Knapp B6: Clear All       │  • Knapp B4: Clear All       │
+│  • Stödjer flera rader       │  • Individuell row kontroll  │
+│                              │                              │
+├──────────────────────────────┼──────────────────────────────┤
+│                              │                              │
+│  🎹 R3 - PIANOGROUPS         │  📊 R2B - PIANO ANALYSIS     │
+│  (Bottom Left)               │  (Bottom Right)              │
+│                              │                              │
+│  • 24 piano-grupper          │  • Stor piano (2 oktaver)    │
+│  • Visar varje chord         │  • Visar analys-chord        │
+│  • Mode kontroller (T/4/I/→) │  • Knapp Replay/Reset        │
+│  • Click-to-play            │  • Visuell feedback          │
+│                              │                              │
+└──────────────────────────────┴──────────────────────────────┘
+
+
+================================================================================
+3. LAYOUTENS TEKNISKA STRUKTUR
+================================================================================
+
+FILSTRUKTUR:
+────────────
+
+frame.html (CONTAINER)
+│
+├─ Huvudheader (blå) - Titel + Data Flow + Workflow
+│
+├─ Huvudcontainer (2x2 grid)
+│  │
+│  ├─ iframe 1: R2A.html (📝 Batch Input)
+│  ├─ iframe 2: R1.html  (✓ Validation)
+│  ├─ iframe 3: R3.html  (🎹 Pianogroups)
+│  └─ iframe 4: R2B.html (📊 Analysis)
+│
+└─ Footer
+
+
+GRID-LAYOUT (CSS GRID):
+──────────────────────
+
+Display: grid
+Columns: 1fr 1fr (två kolumner, lika breda)
+Rows: auto auto (två rader, automatisk höjd)
+
+Resultat:
+┌──────────┬──────────┐
+│  R2A     │  R1      │  (Rad 1)
+├──────────┼──────────┤
+│  R3      │  R2B     │  (Rad 2)
+└──────────┴──────────┘
+
+
+FÄRGSCHEMA:
+───────────
+
+Background:           #1a1a1a (mörkgrå/svart)
+Header Background:    #0d47a1 (mörkblå)
+Frame Background:     #2a2a2a (mörkgrå)
+Label Background:     #1a1a1a (mörkgrå)
+Label Text:           #4dd0e1 (cyan)
+Panel Content:        #fff   (vit - laddar från iframe)
+Text Color:           #fff   (vit)
+
+
+DIMENSIONER:
+────────────
+
+Header Height:        ~80px (kompakt)
+Frame Gap:            10px (utrymme mellan frames)
+Label Height:         ~35px (kompakt)
+Total Height:         100vh (full skärmhöjd)
+Responsive:           Anpassas till skärmstorlek
+
+
+================================================================================
+4. PANELBESKRIVNINGAR OCH FUNKTIONER
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ R2A - BATCH INPUT PANEL (📝 Top Left)                                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│ SYFTE:                                                                       │
+│ Tillåter användare att mata in flera ackord på en gång (batch)              │
+│                                                                              │
+│ KOMPONENTER:                                                                 │
+│ • Textarea: Text area för chord-inmatning                                   │
+│ • B5 knapp: "Load All" - Skickar alla ackord till R1                        │
+│ • B6 knapp: "Clear All" - Raderar allt från textarea                        │
+│                                                                              │
+│ INPUT FORMAT:                                                                │
+│ Udda rader (1, 3, 5...): Ackord (t.ex. "C", "Dm", "G7")                     │
+│ Jämna rader (2, 4, 6...): Text ignoreras (kan vara lyrics)                  │
+│                                                                              │
+│ EXEMPEL INPUT:                                                               │
+│ C major                  <- rad 1: C (läses)                                │
+│ Intro                    <- rad 2: Intro (ignoreras)                        │
+│ F major                  <- rad 3: F (läses)                                │
+│ Verse                    <- rad 4: Verse (ignoreras)                        │
+│                                                                              │
+│ WORKFLOW:                                                                    │
+│ 1. Skriv ackord i textarea                                                  │
+│ 2. Klicka "B5 Load All"                                                     │
+│ 3. Ackorden valideras och skickas till R1                                   │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ R1 - INPUT VALIDATION PANEL (✓ Top Right)                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│ SYFTE:                                                                       │
+│ Validerar och testar ackord innan de skickas till R3                        │
+│                                                                              │
+│ KOMPONENTER:                                                                 │
+│ • 24 Input Rows: En rad per akkord                                          │
+│ • Varje rad har:                                                             │
+│   - Radnummer (1-24)                                                        │
+│   - Input field (för manuell inmatning)                                     │
+│   - "L" knapp: Skicka till R3 (B1)                                          │
+│   - "X" knapp: Rensa denna rad (B2)                                         │
+│ • B3 knapp: "Load All" - Skicka alla 24 ackord till R3                      │
+│ • B4 knapp: "Clear All" - Rensa alla 24 rader                               │
+│                                                                              │
+│ VALIDERING REGLER:                                                           │
+│ ✓ Stödda: C, C#, Cm, Cmaj7, C7, Cm7, etc.                                   │
+│ ✓ Format: [A-G][#b]?m?(maj7|m7|7|sus2|sus4)?\d*                             │
+│ ✓ H normaliseras till B (svensk notation)                                   │
+│ ✗ Ogiltiga: "X", "hello", "!chord", etc. → rensas automatiskt               │
+│                                                                              │
+│ WORKFLOW:                                                                    │
+│ 1. Input tas emot från R2A eller manuell inmatning                          │
+│ 2. Ackord valideras                                                         │
+│ 3. Klicka "L" eller "B3" för att skicka till R3                             │
+│ 4. R3 visar varje akkord på sitt piano                                      │
+│                                                                              │
+│ TIMING:                                                                      │
+│ • Mellan varje akkord: 400ms försening                                      │
+│ • Möjliggör visuell feedback för användaren                                 │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ R3 - PIANOGROUPS PANEL (🎹 Bottom Left)                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│ SYFTE:                                                                       │
+│ Visar 24 pianogrupper som representerar varje akkord från R1                │
+│                                                                              │
+│ KOMPONENTER:                                                                 │
+│ • 24 Pianogrupper (en per R1-rad):                                          │
+│   - Chord Label: Visar akkordnamn (t.ex. "Dm")                              │
+│   - Piano Keyboard: 7-tangsversion (C-B)                                    │
+│   - Mode Buttons:                                                            │
+│     "T" = Triad mode (3-tonigt ackord)                                      │
+│     "4" = Tetrad mode (4-tonigt ackord)                                     │
+│     "I" = Invert (rotera ackordets toner)                                   │
+│     "→" = Skicka till R2B (BR3)                                             │
+│                                                                              │
+│ VISUELL FEEDBACK:                                                            │
+│ • Vita tangenter: Naturton (C, D, E, F, G, A, B)                            │
+│ • Svarta tangenter: Halvton (C#, D#, F#, G#, A#)                            │
+│ • Gröna tangenter: Ackordets noter (när laddat)                             │
+│ • Click-to-play: Klicka på tangent för att höra ton                         │
+│                                                                              │
+│ MODE FUNKTION:                                                               │
+│ • Triad (T): 3 toner (root, third, fifth)                                   │
+│   Exempel C: C4, E4, G4                                                     │
+│ • Tetrad (4): 4 toner (root, third, fifth, seventh)                         │
+│   Exempel C: C4, E4, G4, B4                                                 │
+│ • Invert (I): Rotera toner genom oktaver                                    │
+│   Inv 0: C E G    Inv 1: E G C    Inv 2: G C E    Inv 3: C E G             │
+│                                                                              │
+│ WORKFLOW:                                                                    │
+│ 1. R1 skickar akkord till R3                                                │
+│ 2. R3 visar akkord på piano med gröna tangenter                             │
+│ 3. Användar kan klicka på tangenter för att höra                            │
+│ 4. Välj mode (Triad/Tetrad/Inversion)                                       │
+│ 5. Klicka "→" för att skicka till R2B                                       │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ R2B - PIANO ANALYSIS PANEL (📊 Bottom Right)                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│ SYFTE:                                                                       │
+│ Visar det valde ackordet på en stor piano med analys                        │
+│                                                                              │
+│ KOMPONENTER:                                                                 │
+│ • Chord Label: Visar akkordsnamn (t.ex. "Dm")                               │
+│ • Piano Keyboard: Full 2-oktav piano (C4-B5, 14 tangenter)                  │
+│ • Markering: Ackordets noter markeras i ROD                                 │
+│ • B10 knapp: "Replay" - Spela ackordet igen                                 │
+│ • B11 knapp: "Reset" - Rensa panelen                                        │
+│                                                                              │
+│ VISUELL FEEDBACK:                                                            │
+│ • Vita tangenter: Naturton                                                  │
+│ • Svarta tangenter: Halvton                                                 │
+│ • RÖDA tangenter: Noter i det valde ackordet                                │
+│ • Click-to-play: Klicka på tangent för att höra individuell ton             │
+│                                                                              │
+│ AUDIO FEATURES:                                                              │
+│ • Web Audio API syntes                                                      │
+│ • Mogen frekvensberäkning från notsnamn                                     │
+│ • ADSR-envelope (Attack, Decay, Sustain, Release)                           │
+│ • Chord playback med lätt detuning för naturligare ljud                     │
+│                                                                              │
+│ WORKFLOW:                                                                    │
+│ 1. R3 skickar ett akkord till R2B (via → knapp)                             │
+│ 2. R2B visar ackordsnamn och markerar noter                                 │
+│ 3. R2B spelar ackordet automatiskt                                          │
+│ 4. Användare kan:                                                            │
+│    - Klicka "Replay" för att spela igen                                     │
+│    - Klicka på tangenter för individuella toner                             │
+│    - Klicka "Reset" för att rensa                                           │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+5. DATA-FLÖDE MELLAN PANELER
+================================================================================
+
+COMPLETE WORKFLOW:
+──────────────────
+
+STEG 1: Input i R2A
+┌─────────────────────────────────────┐
+│ R2A Panel                           │
+│ Användare skriver: "C Dm F G"       │
+│ Klickar: "B5 Load All"              │
+└────────────────┬────────────────────┘
+                 │
+                 ↓ (data skickas till R1)
+                 
+STEG 2: Validering i R1
+┌─────────────────────────────────────┐
+│ R1 Panel                            │
+│ • Kontrollerar: C ✓, Dm ✓, F ✓, G ✓│
+│ • Fyller input-fälten med giltiga   │
+│ • Väntar på användarklikar          │
+└────────────────┬────────────────────┘
+                 │
+                 ↓ (Användare klickar B1 eller B3)
+                 
+STEG 3: Visning i R3
+┌─────────────────────────────────────┐
+│ R3 Panel                            │
+│ • Visar 4 pianogrupper              │
+│ • Grön markering på noterna:        │
+│   - C: C4, E4, G4                   │
+│   - Dm: D4, F4, A4                  │
+│   - F: F4, A4, C5                   │
+│   - G: G4, B4, D5                   │
+│ • Användare kan välja mode          │
+└────────────────┬────────────────────┘
+                 │
+                 ↓ (Användare klickar → knapp)
+                 
+STEG 4: Analys i R2B
+┌─────────────────────────────────────┐
+│ R2B Panel                           │
+│ • Visar ett ackord i taget          │
+│ • Röd markering på noterna          │
+│ • Spelar ackordet                   │
+│ • Visar ackordsnamn                 │
+└─────────────────────────────────────┘
+
+
+CROSSFRAME COMMUNICATION:
+─────────────────────────
+
+Kommunikation mellan iframes använder window-objekt:
+
+window.R1 = {
+  receiveChordFromR1(chord, row),
+  receiveChordBatch(array),
+  clearPianoGroup(row)
+}
+
+window.R2B = {
+  setChord(data)
+}
+
+window.resetR2B()
+
+• Kräver same-origin policy
+• Fungerar med localhost HTTP-server
+• Eller via file:// protocol (ibland)
+
+
+DATASIGNALER:
+──────────────
+
+R2A → R1:
+  Input: ["C", "Dm", "F", "G"]
+  Validering: ["C", "Dm", "F", "G"] ✓
+
+R1 → R3:
+  chord: "C"
+  row: 1
+  mode: "triad"
+
+R3 → R2B:
+  {
+    chordName: "Dm",
+    notes: ["D4", "F4", "A4"],
+    mode: "triad",
+    inversion: 0,
+    analysis: {...}
+  }
+
+
+================================================================================
+6. ANVÄNDARCENARIOS
+================================================================================
+
+SCENARIO 1: LÄRA SIG ACKORDDEFINITIONER
+────────────────────────────────────────
+
+1. Öppna frame.html i webbläsare
+2. I R2A, skriv olika ackord:
+   C
+   Cm
+   C7
+   Cmaj7
+3. Klicka "B5 Load All"
+4. Se vilka noter som är olika mellan dem
+5. Höra skillnaden när R3 spelar
+
+
+SCENARIO 2: TESTA ACKORDBYTNINGAR
+──────────────────────────────────
+
+1. Skriv en ackordssekvens i R2A:
+   C
+   Intro
+   F
+   Verse
+   G
+   Chorus
+   C
+   Outro
+
+2. Klicka "B5 Load All"
+3. I R1, se hur R3 lysas upp nachvis
+4. Observera övergångar mellan ackord
+
+
+SCENARIO 3: INVERTERA ACKORD
+──────────────────────────────
+
+1. Ladda ett ackord (t.ex. "Dm")
+2. I R3, klicka "I" knapp flera gånger
+3. Se hur noterna rotas genom oktaver
+4. Höra hur inverteringen ändrar ljud
+
+
+SCENARIO 4: ANALYS I R2B
+────────────────────
+
+1. Ladda ett ackord i R1
+2. I R3, klicka → knapp
+3. R2B visar stora piano med röda noter
+4. Klicka på tangenter för individuella toner
+5. Klicka "Replay" för att höra ackordet igen
+
+
+================================================================================
+7. FELSÖKNING
+================================================================================
+
+PROBLEM: Iframes laddar inte
+LÖSNING:
+• Kontrollera att R1.html, R2A.html, R2B.html, R3.html finns i samma mapp
+• Öppna med HTTP-server (inte file://)
+• Kontrollera browser-konsol för fel (F12)
+
+
+PROBLEM: Data flödar inte mellan paneler
+LÖSNING:
+• Same-origin policy kräver HTTP-server
+• Använd: python -m http.server 8000
+• Navigera till: http://localhost:8000/frame.html
+
+
+PROBLEM: Ackordsvalidering misslyckas
+LÖSNING:
+• Kontrollera stavning (små bokstäver)
+• Stödda format: C, Cm, C7, Cmaj7, C#, Cb, etc.
+• H normaliseras automatiskt till B
+
+
+PROBLEM: Ingen ljud
+LÖSNING:
+• Kontrollera webbläsarens volym
+• Tillåt Audio Context (kan behövas godkännas)
+• Testa click-to-play på tangenterna först
+
+
+================================================================================
+8. KEYBOARD SHORTCUTS (OPTIONAL)
+================================================================================
+
+Föreslagna tangentbordskortkommandon (kan implementeras):
+
+F1         - Visa hjälp
+R          - Replay akkordet
+Space      - Play/Pause
+→ / Ctrl+→ - Nästa ackord
+← / Ctrl+← - Föregående ackord
+I          - Invertera
+T          - Triad mode
+4          - Tetrad mode
+C          - Rensa allt
+S          - Spara progression
+
+
+================================================================================
+9. RESPONSIV DESIGN
+================================================================================
+
+DESKTOP (1920x1080):
+• Alla 4 paneler synliga
+• Bra övergripande bild
+• Enkelt att jobba
+
+TABLET (768x1024):
+• 2x2 layout anpassas
+• Kan behöva scrolla vertikalt
+• Touch-vänlig interface
+
+MOBIL (375x812):
+• Paneler staplas vertikalt
+• Fokusera på en panel åt gången
+• Mindre skärmyta
+
+
+================================================================================
+10. TEKNISKA SPECIFIKATIONER
+================================================================================
+
+TEKNOLOGI:
+───────────
+• HTML5
+• CSS3 (Grid, Flexbox)
+• JavaScript (Web Audio API, SVG)
+• No external dependencies
+• Self-contained
+
+BROWSER STÖD:
+──────────────
+✓ Chrome/Chromium
+✓ Firefox
+✓ Safari
+✓ Edge
+✓ Opera
+
+PERFORMANCE:
+─────────────
+• Typ lasningstid: <1s
+• Audio lag: <50ms
+• No server-side processing
+• Offline capable
+
+
+================================================================================
+SAMMANFATTNING
+================================================================================
+
+frame.html är ett CONTAINER-system som integrera 4 specialiserade paneler:
+
+R2A  → Batch input
+R1   → Validering
+R3   → Visuell display
+R2B  → Analys
+
+Tillsammans skapar de ett komplett interaktivt musikteoriverktyg för att:
+✓ Mata in och validera ackord
+✓ Visualisera ackorddefinitioner
+✓ Höra och analysera ljud
+✓ Lära sig musikteori interaktivt
+
+
+================================================================================
+END OF WEBLAYOUT INSTRUKTION
+================================================================================
+
+Skapad: 25 januari 2026
+Format: Textbaserad instruktion
+Språk: Svenska
+Público: Ja

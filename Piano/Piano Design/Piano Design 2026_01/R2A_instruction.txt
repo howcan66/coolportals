@@ -1,0 +1,105 @@
+                R2A FRAME - UPDATE TRACKING & CURRENT STATE
+                =============================================
+                    Date: January 25, 2026
+                    Status: Updates in progress
+
+                    RECENT CHANGES (Session: Jan 25, 2026)
+                    ======================================
+                    ✓ Timestamp format changed: YY.MM.DD • HH.MM (applied globally to all panels)
+                    ✓ R2A panel header renamed: "R2A - Batch Input" → "R2A→R1" (clarifies data flow direction)
+                    ✓ R2A column width set to ~35% via CSS grid (integration.html main grid-template-columns: 30% 35% 35%)
+                    ✓ R2A header label centered; B5/B6 moved into header and right-aligned
+
+EXISTING DOCUMENTATION
+======================
+Comprehensive R2A specification: R2A_Build AI Instruction_11.txt (689 lines)
+- Contains full functional requirements, validation rules, data flow diagrams
+- Defines button behaviors (B5/B7 Load, B6/B8 Clear)
+- Specifies chord validation grammar (R2A.X - Strict Mode)
+- Documents invalid chord handling (R2A.XC - Silent Mode)
+
+CURRENT IMPLEMENTATION (integration.html)
+==========================================
+Location: Lines 155-175 in integration.html
+
+Panel Structure:
+- Panel ID: panel-r2a
+- Header: "R2A - Batch Input" + timestamp
+- Grid: #r2a-grid (10 rows of textareas)
+- Buttons: B5 (LR1B4), B6 (XR2A), B7 (LA), B8 (XA)
+
+Buttons Present:
+- B5 "LR1B4" (Load/Green): Loads chords from R2A to R1
+- B6 "XR2A" (Clear/Red): Clears current R2A row
+- Global B7 "LA": Load all rows to R1 (implied, needs verification)
+- Global B8 "XA": Clear all rows (implied, needs verification)
+
+CSS Classes Applied:
+- .panel: White background, flex column layout
+- .panel-header: Blue header with timestamp
+- .panel-body: Scrollable content area
+- .btn-bar: Horizontal button container
+- .grid-10: Grid layout for rows
+
+DISCUSSION & UPDATE CHECKLIST
+==============================
+[ ] Verify button handler functions exist:
+    - handleB5Click() / handleLR1B4Click() - Load row to R1
+    - handleB6Click() / handleXR2AClick() - Clear row
+    - handleB7Click() / handleLAClick() - Load all rows
+    - handleB8Click() / handleXAClick() - Clear all rows
+
+[ ] Verify chord validation function:
+    - validateChord() - Must follow R2A.X grammar rules
+    - Handles all chord formats specified in instruction
+
+[ ] Verify data flow:
+    - B5/B7 → validate chords → send to R1 fillR1() function
+    - B6/B8 → clear textareas → no side effects on R1
+    - Invalid chords silently ignored (no error message)
+
+[ ] Layout verification:
+    - 10 textarea rows visible and scrollable
+    - B5/B6 buttons below each row (side-by-side)
+    - B7/B8 global buttons below all rows (centered, side-by-side)
+    - Proper spacing (8-12px horizontal, 12-16px vertical)
+
+[ ] Styling verification:
+    - Button colors: Green for Load, Red for Clear
+    - Font sizes: 0.7rem for buttons, 0.8rem for header
+    - Textarea height: Scrollable for multiple lines
+    - Focus/hover states defined
+
+[ ] Timestamp functionality:
+    - Display format: yy.mm.dd • HH.mm
+    - ID: r2a-time
+    - Updated on page load
+
+KNOWN ISSUES (To Be Addressed)
+==============================
+TODO Errors (Session Jan 25, 2026):
+1) Centering Label R2A→R1: RESOLVED
+    - Implemented: #panel-r2a .panel-header > span { flex:1; text-align:center; }
+    - Result: Label centered with buttons on the right
+
+2) Moving Buttons B5/B6 to Top Header Row: RESOLVED
+    - Buttons are now in header and right-aligned within .btn-bar
+
+PENDING UPDATES
+===============
+(List any changes you want to make to R2A)
+
+ACTION ITEMS
+============
+1. What specific R2A functionality needs updating?
+2. Are all button handlers properly wired in integration.html?
+3. Should button labels be renamed (consistent with recent R1 changes)?
+4. Any CSS/styling improvements needed?
+5. Data validation rules need review/updates?
+
+REFERENCE LINKS
+===============
+- Main spec: R2A_Build AI Instruction_11.txt
+- Main code: integration.html (lines 155-175, plus handler functions)
+- Related: Piano_buttons_spec1.txt (button reference)
+- Related: LR1O_instruction.txt (similar tracking format)

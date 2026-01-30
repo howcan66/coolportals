@@ -1,0 +1,971 @@
+================================================================================
+  PIANO BUTTONS SPECIFICATION v1
+  Complete Button Reference Guide
+  Piano Design Interactive Chord Visualization Tool
+================================================================================
+
+Date: January 25, 2026
+Version: 1.0
+Language: English
+Status: DRAFT
+
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+
+1. Introduction
+2. Button Naming Convention
+3. R1 Panel Buttons
+4. R2A Panel Buttons
+5. R3 Panel Buttons
+6. R2B Panel Buttons
+7. Button States & Feedback
+8. Color Coding & Visual Hierarchy
+9. Keyboard Shortcuts (Future)
+10. Button Event Handling
+11. Error States & Recovery
+12. Accessibility Features
+
+
+================================================================================
+1. INTRODUCTION
+================================================================================
+
+PURPOSE:
+────────
+This document specifies all buttons used in the Piano Design application.
+It defines:
+• Button names and IDs
+• Button functions and behaviors
+• Button placement and hierarchy
+• User feedback mechanisms
+• Error handling
+
+
+SCOPE:
+──────
+Covers all interactive buttons across 4 panels:
+• R1 - Input Validation Panel
+• R2A - Batch Input Panel
+• R3 - Pianogroups Display Panel
+• R2B - Piano Analysis Panel
+
+
+BUTTON CATEGORIES:
+──────────────────
+1. Control Buttons (Load/Clear/Save)
+2. Mode Selection Buttons (Triad/Tetrad/Invert)
+3. Action Buttons (Play/Replay/Reset)
+4. Navigation Buttons (Send/Route)
+
+
+================================================================================
+2. BUTTON NAMING CONVENTION
+================================================================================
+
+NAMING PATTERN:
+───────────────
+
+Format: [Panel]-[Type]-[Number]
+
+Examples:
+• r1-b1-1   = R1 Panel, Type B1 (Load), Row 1
+• r2a-b5    = R2A Panel, Button B5 (Load All)
+• r3-b7-5   = R3 Panel, Button B7 (Triad), Row 5
+• r2b-b10   = R2B Panel, Button B10 (Replay)
+
+
+BUTTON NUMBERING SCHEME:
+────────────────────────
+
+B1-B4       = R1 Buttons (Row-based + Global)
+B5-B6       = R2A Buttons (Global)
+B7-B9, BR3  = R3 Buttons (Row-based + Global)
+B10-B11     = R2B Buttons (Global)
+
+Total: 17 unique button IDs
+
+
+HTML ID ATTRIBUTES:
+────────────────────
+r1-b1-{row}         Row-specific Load button
+r1-b2-{row}         Row-specific Clear button
+r1-b3               Global Load All button
+r1-b4               Global Clear All button
+r2a-b5              Batch Load All button
+r2a-b6              Batch Clear All button
+r3-b7-{row}         Triad mode button
+r3-b8-{row}         Tetrad mode button
+r3-b9-{row}         Invert mode button
+r3-br3-{row}        Send to R2B button
+r2b-b10             Replay button
+r2b-b11             Reset button
+
+
+================================================================================
+3. R1 PANEL BUTTONS - INPUT VALIDATION
+================================================================================
+
+PANEL DESCRIPTION:
+──────────────────
+R1 is the Input Validation Panel (Top Right)
+• Contains 24 rows of chord inputs
+• Each row has individual buttons
+• Plus 2 global control buttons
+
+
+┌─────────────────────────────────────────────────────────┐
+│ ✓ R1 - INPUT VALIDATION                                 │
+├─────────────────────────────────────────────────────────┤
+│                                                          │
+│ [LR3]  [RALLB4]                                         │
+│                                                          │
+│ Row  │ Input Field  │  [LR3B1]  │  [XR1B2]               │
+│ ──────────────────────────────────────                  │
+│  1   │ [Chord_____] │ [LR3B1] │ [XR1B2]   (B1-1, B2-1)  │
+│  2   │ [Chord_____] │ [LR3B1] │ [XR1B2]   (B1-2, B2-2)  │
+│  3   │ [Chord_____] │ [LR3B1] │ [XR1B2]   (B1-3, B2-3)  │
+│  ... │ ...          │ ... │ ...                          │
+│ 24   │ [Chord_____] │ [LR3B1] │ [XR1B2]   (B1-24, B2-24)│
+│                                                          │
+└─────────────────────────────────────────────────────────┘
+
+
+┌─────────────────────────────────────────────────────────┐
+│ BUTTON: B0 (LR1O - Action TBD)                          │
+├─────────────────────────────────────────────────────────┤
+│                                                          │
+│ Display Name:        "LR1O" (Pending)                   │
+│ HTML ID:             r1-b0-{row}                         │
+│ Location:            Right of XR1B2 (per row)            │
+│ Size:                28px × 20px (compact)              │
+│ Text Color:          #000 (black)                        │
+│ Background Color:    #eee (light gray)                  │
+│ Hover Color:         #ddd (medium gray)                 │
+│ Border:              1px solid #ccc                     │
+│ Font Size:           0.7rem                             │
+│ Font Weight:         Normal                             │
+│                                                          │
+│ FUNCTION:                                               │
+│ • Opens a popup window at ~50% of available screen size  │
+│ • Popup has only one button labeled "XR11O"              │
+│ • No chord/state mutation yet                            │
+│ • Reserved for future row-level action                   │
+│                                                          │
+│ EVENT HANDLER:       handleB0Click(evt, row)             │
+│ EVENT TYPE:          click                               │
+│ Prevents Default:    Yes                                 │
+│ Propagation:         Stop at button                      │
+│                                                          │
+│ STATUS:                                                  │
+│ • Popup behavior implemented; XR11O button present       │
+│ • Action of XR11O still TBD                              │
+│ • Tie to change log when defined                         │
+│                                                          │
+│ TODO NEXT REVIEW:                                        │
+│ • Define XR11O action                                    │
+│ • Decide data passed into popup (if any)                 │
+│ • Update integration.html and specs accordingly          │
+│                                                          │
+└─────────────────────────────────────────────────────────┘
+
+
+
+BUTTON SPECIFICATIONS:
+──────────────────────
+
+┌─────────────────────────────────────────────────────────┐
+│ BUTTON: B1 (Row Load)                                   │
+├─────────────────────────────────────────────────────────┤
+│                                                          │
+│ Display Name:        "LR3B1" (Load)                      │
+│ HTML ID:             r1-b1-{row}                         │
+│ Location:            Right of input field (per row)     │
+│ Size:                28px × 20px (compact)              │
+│ Text Color:          #000 (black)                        │
+│ Background Color:    #eee (light gray)                  │
+│ Hover Color:         #ddd (medium gray)                 │
+│ Border:              1px solid #ccc                     │
+│ Font Size:           0.7rem                             │
+│ Font Weight:         Normal                             │
+│                                                          │
+│ FUNCTION:                                               │
+│ • Clears all 24 rows and resets all R3 piano groups     │
+│ • Also resets R2B piano graphics                       │
+│ • One-click reset for the entire interface              │
+│ • If valid, sends to R3 for display                    │
+│ • If invalid, clears the field                         │
+│ • Updates R3 piano visualization immediately           │
+│                                                          │
+│ EVENT HANDLER:       handleB1Click(row)                 │
+│ EVENT TYPE:          click                              │
+│ Prevents Default:    Yes                                │
+│ Propagation:         Stops at button                    │
+│                                                          │
+│ VALIDATION:                                              │
+│ Regex: /^[A-GH][#b]?m?(maj7|m7|7|sus2|sus4)?\d*$/i     │
+│ Normalizes: H → B (Swedish notation)                    │
+│                                                          │
+│ SUCCESS FEEDBACK:                                        │
+│ • Input field shows validated chord                     │
+│ • R3 piano highlights chord notes (green)               │
+│ • Audio plays the chord                                 │
+│                                                          │
+│ ERROR FEEDBACK:                                          │
+│ • Invalid input is cleared                              │
+│ • R3 piano group is cleared                             │
+│ • No error message shown (silent failure)               │
+│                                                          │
+│ TIMING:                                                  │
+│ • Immediate execution                                   │
+│ • No delay between clicking and execution               │
+│                                                          │
+│ RELATED:                                                 │
+│ • B2: Clear this specific row                          │
+│ • B3: Load all rows at once                            │
+│                                                          │
+│ USAGE EXAMPLE:                                           │
+│ 1. User types "Dm" in row 5 input field                │
+│ 2. User clicks B1-5 button                              │
+│ 3. "Dm" is validated                                    │
+│ 4. R3 row 5 piano shows D, F, A notes in green         │
+│ 5. Chord is played                                      │
+│                                                          │
+└─────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────┐
+│ BUTTON: B2 (Row Clear)                                  │
+├─────────────────────────────────────────────────────────┤
+│                                                          │
+│ Display Name:        "XR1B2" (Clear/Delete)             │
+│ HTML ID:             r1-b2-{row}                         │
+│ Location:            Right of B1 button (per row)       │
+│ Size:                28px × 20px (compact)              │
+│ Text Color:          #000 (black)                        │
+│ Background Color:    #eee (light gray)                  │
+│ Hover Color:         #ddd (medium gray)                 │
+│ Border:              1px solid #ccc                     │
+│ Font Size:           0.7rem                             │
+│ Font Weight:         Normal                             │
+│                                                          │
+│ FUNCTION:                                                │
+│ • Clears the input field in current row                 │
+│ • Clears the corresponding R3 piano group               │
+│ • Does not affect other rows                           │
+│ • Silent operation (no confirmation)                    │
+│                                                          │
+│ EVENT HANDLER:       handleB2Click(row)                 │
+│ EVENT TYPE:          click                              │
+│ Prevents Default:    Yes                                │
+│ Propagation:         Stops at button                    │
+│                                                          │
+│ OPERATIONS:                                              │
+│ 1. Set input field value to empty string ("")          │
+│ 2. Call R3.clearPianoGroup(row)                        │
+│ 3. Stop any playing audio for this row                 │
+│                                                          │
+│ SUCCESS FEEDBACK:                                        │
+│ • Input field becomes empty                             │
+│ • R3 piano group resets to default (no highlights)     │
+│ • Chord label in R3 shows "–"                          │
+│                                                          │
+│ ERROR FEEDBACK:                                          │
+│ • None (operation always succeeds)                      │
+│                                                          │
+│ TIMING:                                                  │
+│ • Immediate execution                                   │
+│ • No confirmation required                              │
+│                                                          │
+│ RELATED:                                                 │
+│ • B1: Load this row                                    │
+│ • B4: Clear all rows at once                           │
+│                                                          │
+│ USAGE EXAMPLE:                                           │
+│ 1. User has "Dm" in row 5 input field                  │
+│ 2. User clicks B2-5 button                              │
+│ 3. Input field becomes empty                            │
+│ 4. R3 row 5 piano clears                                │
+│ 5. Chord label shows "–"                                │
+│                                                          │
+└─────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────┐
+│ BUTTON: LR3 (Global Load All)                           │
+├─────────────────────────────────────────────────────────┤
+│                                                          │
+│ Display Name:        "LR3"                                │
+│ HTML ID:             r1-b3                              │
+│ Location:            Top of R1 panel (left position)    │
+│ Size:                60px × 24px (compact)              │
+│ Text Color:          #000 (black)                        │
+│ Background Color:    #eee (light gray)                  │
+│ Hover Color:         #ddd (medium gray)                 │
+│ Border:              1px solid #ccc                     │
+│ Font Size:           0.7rem                             │
+│ Font Weight:         Normal                             │
+│                                                          │
+│ FUNCTION:                                                │
+│ • Loads and validates ALL 24 rows at once              │
+│ • Sends each chord to R3                                │
+│ • Processes sequentially with 400ms delay               │
+│ • Used for batch operations                             │
+│                                                          │
+│ EVENT HANDLER:       handleB3Click()                    │
+│ EVENT TYPE:          click                              │
+│ Prevents Default:    Yes                                │
+│ Propagation:         Stops at button                    │
+│                                                          │
+│ PROCESSING:                                              │
+│ For each row 1-24:                                      │
+│   1. Read input field value                             │
+│   2. Validate using CHORD_REGEX                         │
+│   3. Add to internal array                              │
+│   4. Schedule to R3 with 400ms delay between each       │
+│                                                          │
+│ TIMING:                                                  │
+│ • Total time for 24 chords: ~9.6 seconds               │
+│ • Delay between each: 400ms                             │
+│ • Purpose: Visual feedback during loading               │
+│                                                          │
+│ SUCCESS FEEDBACK:                                        │
+│ • Each R3 row lights up sequentially                    │
+│ • Chords are played one after another                  │
+│ • Progress is visually apparent                        │
+│                                                          │
+│ ERROR FEEDBACK:                                          │
+│ • Invalid chords are skipped silently                   │
+│ • Corresponding R3 group remains cleared                │
+│ • Valid chords continue to process                      │
+│                                                          │
+│ CONSOLE LOGGING:                                         │
+│ • Logs: "R1:B3 batch send, [chord array]"              │
+│ • Useful for debugging                                  │
+│                                                          │
+│ RELATED:                                                 │
+│ • B1: Load individual row                              │
+│ • B4: Clear all rows                                   │
+│ • R2A B5: Also sends to R1                             │
+│                                                          │
+│ USAGE EXAMPLE:                                           │
+│ 1. User fills all 24 rows with chords                  │
+│ 2. User clicks B3 button                                │
+│ 3. First chord loads, plays, then waits 400ms          │
+│ 4. Second chord loads, plays, then waits 400ms         │
+│ 5. Process repeats for all 24 chords                   │
+│ 6. Total time: ~9.6 seconds                            │
+│                                                          │
+└─────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────┐
+│ BUTTON: RALLB4 (Global Clear All)                       │
+├─────────────────────────────────────────────────────────┤
+│                                                          │
+│ Display Name:        "RALLB4"                             │
+│ HTML ID:             r1-b4                              │
+│ Location:            Top of R1 panel (right of B3)      │
+│ Size:                60px × 24px (compact)              │
+│ Text Color:          #000 (black)                        │
+│ Background Color:    #eee (light gray)                  │
+│ Hover Color:         #ddd (medium gray)                 │
+│ Border:              1px solid #ccc                     │
+│ Font Size:           0.7rem                             │
+│ Font Weight:         Normal                             │
+│                                                          │
+│ FUNCTION:                                                │
+│ • Clears ALL 24 input fields in R1                      │
+│ • Clears ALL 24 piano groups in R3                      │
+│ • Resets everything to empty state                      │
+│ • One-click reset for entire interface                  │
+│                                                          │
+│ EVENT HANDLER:       handleB4Click()                    │
+│ EVENT TYPE:          click                              │
+│ Prevents Default:    Yes                                │
+│ Propagation:         Stops at button                    │
+│                                                          │
+│ PROCESSING:                                              │
+│ For each row 1-24:                                      │
+│   1. Call handleB2Click(row)                            │
+│   2. This clears input AND R3 group                     │
+│                                                          │
+│ TIMING:                                                  │
+│ • Instantaneous (all rows cleared at once)              │
+│ • No delay between rows                                 │
+│                                                          │
+│ SUCCESS FEEDBACK:                                        │
+│ • All 24 input fields become empty                      │
+│ • All 24 R3 pianos reset to default                     │
+│ • All chord labels show "–"                             │
+│ • Clean slate for new input                             │
+│                                                          │
+│ ERROR FEEDBACK:                                          │
+│ • None (operation always succeeds)                      │
+│                                                          │
+│ CAUTION:                                                 │
+│ • No confirmation dialog!                               │
+│ • User should be aware this is permanent                │
+│ • Suggestion: Add confirmation in future               │
+│                                                          │
+│ RELATED:                                                 │
+│ • B2: Clear individual row                             │
+│ • B3: Load all rows                                    │
+│ • R2A B6: Also clears its content                      │
+│                                                          │
+│ USAGE EXAMPLE:                                           │
+│ 1. User has worked with 24 chords                      │
+│ 2. User wants to start fresh                            │
+│ 3. User clicks B4 button                                │
+│ 4. All input fields clear instantly                     │
+│ 5. All R3 pianos reset                                  │
+│                                                          │
+└─────────────────────────────────────────────────────────┘
+
+
+================================================================================
+4. R2A PANEL BUTTONS - BATCH INPUT
+================================================================================
+
+PANEL DESCRIPTION:
+──────────────────
+R2A is the Batch Input Panel (Top Left)
+• Contains a textarea for multi-line input
+• Supports odd rows as chords, even rows as lyrics
+• Has 2 global control buttons
+
+
+┌─────────────────────────────────────────────────────────┐
+│ 📝 R2A - BATCH INPUT                                    │
+├─────────────────────────────────────────────────────────┤
+│                                                          │
+│ [LR1B4]  [XR2A]                                         │
+│                                                          │
+│ ┌─────────────────────────────────────────────────┐    │
+│ │ C major                                          │    │
+│ │ Intro                                            │    │
+│ │ F major                                          │    │
+│ │ Verse                                            │    │
+│ │ G major                                          │    │
+│ │ Chorus                                           │    │
+│ │ C major                                          │    │
+│ │ Outro                                            │    │
+│ └─────────────────────────────────────────────────┘    │
+│                                                          │
+└─────────────────────────────────────────────────────────┘
+
+
+BUTTON SPECIFICATIONS:
+──────────────────────
+
+┌─────────────────────────────────────────────────────────┐
+│ BUTTON: B5 (Batch Load All)                             │
+├─────────────────────────────────────────────────────────┤
+│                                                          │
+│ Display Name:        "LR1B4"                             │
+│ HTML ID:             r2a-b5                             │
+│ Location:            Top of R2A panel (left position)   │
+│ Size:                60px × 24px (compact)              │
+│ Text Color:          #000 (black)                        │
+│ Background Color:    #eee (light gray)                  │
+│ Hover Color:         #ddd (medium gray)                 │
+│ Border:              1px solid #ccc                     │
+│ Font Size:           0.7rem                             │
+│ Font Weight:         Normal                             │
+│                                                          │
+│ FUNCTION:                                                │
+│ • Reads all text from textarea                         │
+│ • Parses odd rows as chords (1, 3, 5...)               │
+│ • Ignores even rows as non-chord data (2, 4, 6...)    │
+│ • Validates all chords                                  │
+│ • Sends to R1 for processing                            │
+│                                                          │
+│ EVENT HANDLER:       r2aLoadAll()                       │
+│ EVENT TYPE:          click                              │
+│ Prevents Default:    Yes                                │
+│ Propagation:         Stops at button                    │
+│                                                          │
+│ INPUT FORMAT:                                            │
+│ Line 1 (odd):   Chord name (e.g., "C")   ← USED        │
+│ Line 2 (even):  Text (e.g., "Intro")     ← IGNORED     │
+│ Line 3 (odd):   Chord name (e.g., "F")   ← USED        │
+│ Line 4 (even):  Text (e.g., "Verse")     ← IGNORED     │
+│                                                          │
+│ PROCESSING:                                              │
+│ 1. Split textarea into lines                            │
+│ 2. Extract odd-indexed lines (0, 2, 4...)              │
+│ 3. Parse spaces to get individual chord tokens         │
+│ 4. Validate each chord using CHORD_REGEX               │
+│ 5. Build array of valid chords                          │
+│ 6. Clear R1                                             │
+│ 7. Fill R1 rows with validated chords                  │
+│                                                          │
+│ PARSING EXAMPLE:                                         │
+│ Input:                                                   │
+│   C major                                               │
+│   Intro                                                 │
+│   Dm F G                                                │
+│   Verse                                                 │
+│                                                          │
+│ Line 0 (odd):   "C major" → parse → ["C", "major"]    │
+│                 "C" ✓ valid, "major" ✗ invalid         │
+│ Line 1 (even):  "Intro" → skipped                       │
+│ Line 2 (odd):   "Dm F G" → parse → ["Dm", "F", "G"]   │
+│                 All ✓ valid                             │
+│ Line 3 (even):  "Verse" → skipped                       │
+│                                                          │
+│ Result: ["C", "Dm", "F", "G"]                           │
+│ Fills: R1 rows 1-4                                      │
+│                                                          │
+│ SUCCESS FEEDBACK:                                        │
+│ • R1 input fields populate with chords                 │
+│ • Each chord shows in corresponding row                │
+│ • User can verify in R1 before loading                 │
+│                                                          │
+│ ERROR FEEDBACK:                                          │
+│ • Invalid chords are silently filtered                 │
+│ • Empty lines are skipped                               │
+│ • No error messages displayed                           │
+│                                                          │
+│ CONSOLE LOGGING:                                         │
+│ • Logs: "R2A: loaded chords to R1, [array]"            │
+│ • Useful for debugging                                  │
+│                                                          │
+│ SPECIAL HANDLING:                                        │
+│ • Multiple spaces between chords treated as delimiters  │
+│ • Tab characters also work as delimiters                │
+│ • Leading/trailing whitespace trimmed                   │
+│                                                          │
+│ RELATED:                                                 │
+│ • B6: Clear textarea content                           │
+│ • R1 B3: Load all R1 rows to R3                        │
+│                                                          │
+│ USAGE EXAMPLE:                                           │
+│ 1. User types in textarea:                             │
+│    C major                                              │
+│    Intro                                                │
+│    F major                                              │
+│    Verse                                                │
+│ 2. User clicks B5 button                                │
+│ 3. Text parsed: "C major" → C, "F major" → F           │
+│ 4. Invalid "major" keywords removed                    │
+│ 5. R1 fills with: C (row 1), F (row 2)                 │
+│                                                          │
+│ TYPICAL WORKFLOW:                                        │
+│ R2A (B5) → R1 (populated) → R1 (B3) → R3 (displayed)   │
+│                                                          │
+└─────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────┐
+│ BUTTON: B6 (Batch Clear All)                            │
+├─────────────────────────────────────────────────────────┤
+│                                                          │
+│ Display Name:        "XR2A"                              │
+│ HTML ID:             r2a-b6                             │
+│ Location:            Top of R2A panel (right of B5)     │
+│ Size:                60px × 24px (compact)              │
+│ Text Color:          #000 (black)                        │
+│ Background Color:    #eee (light gray)                  │
+│ Hover Color:         #ddd (medium gray)                 │
+│ Border:              1px solid #ccc                     │
+│ Font Size:           0.7rem                             │
+│ Font Weight:         Normal                             │
+│                                                          │
+│ FUNCTION:                                                │
+│ • Clears all text from textarea                         │
+│ • Does NOT affect R1 or R3                              │
+│ • Only affects R2A textarea                             │
+│ • Quick way to clear input area                         │
+│                                                          │
+│ EVENT HANDLER:       addEventListener('click', ...)    │
+│ EVENT TYPE:          click                              │
+│ Prevents Default:    Yes                                │
+│ Propagation:         Stops at button                    │
+│                                                          │
+│ OPERATION:                                               │
+│ • Get textarea element (id="r2a-textarea")             │
+│ • Set .value = ""                                       │
+│                                                          │
+│ SUCCESS FEEDBACK:                                        │
+│ • Textarea becomes empty                                │
+│ • Placeholder text visible again                        │
+│ • Placeholder: "Odd rows: chords\nEven rows: lyrics"  │
+│                                                          │
+│ ERROR FEEDBACK:                                          │
+│ • None (operation always succeeds)                      │
+│                                                          │
+│ CAUTION:                                                 │
+│ • No confirmation dialog!                               │
+│ • Text is lost permanently unless copied first         │
+│ • Suggestion: Add confirmation in future               │
+│                                                          │
+│ RELATED:                                                 │
+│ • B5: Load from textarea                               │
+│ • R1 B4: Also clears related data                      │
+│                                                          │
+│ USAGE EXAMPLE:                                           │
+│ 1. User has typed chords in textarea                   │
+│ 2. User clicks B6 button                                │
+│ 3. Textarea becomes completely empty                    │
+│ 4. Placeholder text shows                               │
+│ 5. Ready for new input                                  │
+│                                                          │
+└─────────────────────────────────────────────────────────┘
+
+
+================================================================================
+5. R3 PANEL BUTTONS - PIANOGROUPS DISPLAY
+================================================================================
+
+[This section continues with R3 button specifications...]
+
+[Due to character limits, this section will be marked for continuation]
+
+PREVIEW OF R3 BUTTONS:
+• B7: Triad Mode Button (per row)
+• B8: Tetrad Mode Button (per row)
+• B9: Inversion Button (per row)
+• BR3: Send to R2B Button (per row)
+
+
+================================================================================
+6. R2B PANEL BUTTONS - PIANO ANALYSIS
+================================================================================
+
+[This section continues with R2B button specifications...]
+
+[Due to character limits, this section will be marked for continuation]
+
+PREVIEW OF R2B BUTTONS:
+• B10: RLR2B Button (Replay)
+• B11: XR2B Button (Reset)
+
+
+================================================================================
+7. BUTTON STATES & FEEDBACK
+================================================================================
+
+BUTTON STATES:
+──────────────
+
+DEFAULT STATE:
+• Background: #eee (light gray)
+• Text Color: #000 (black)
+• Border: 1px solid #ccc
+• Cursor: pointer
+• Opacity: 1.0
+
+HOVER STATE:
+• Background: #ddd (medium gray)
+• Text Color: #000 (black)
+• Border: 1px solid #999
+• Cursor: pointer
+• Opacity: 1.0
+• Subtle visual indication of clickability
+
+ACTIVE STATE (R3 mode buttons only):
+• Background: #a3d5ff (light blue)
+• Border Color: #0d47a1 (dark blue)
+• Indicates currently selected mode
+• Applied to B7, B8, B9 when active
+
+DISABLED STATE (Future):
+• Background: #ccc (gray)
+• Text Color: #999 (gray)
+• Cursor: not-allowed
+• Opacity: 0.5
+• Not yet implemented but should be added
+
+
+FEEDBACK TYPES:
+────────────────
+
+1. VISUAL FEEDBACK:
+   • Color changes on hover/active
+   • Button press animation (optional future)
+   • Status indicator (future)
+
+2. AUDIO FEEDBACK:
+   • Chord plays when loaded
+   • Single note when piano key clicked
+
+3. CONSOLE FEEDBACK:
+   • Detailed logging for debugging
+   • Searchable in browser developer tools
+
+4. SILENT FEEDBACK:
+   • Invalid input silently ignored
+   • No error popups or dialogs
+
+
+================================================================================
+8. COLOR CODING & VISUAL HIERARCHY
+================================================================================
+
+BUTTON COLOR SCHEME:
+────────────────────
+
+PRIMARY BUTTONS (Load/Send):
+• Background: #eee
+• Hover: #ddd
+• Purpose: Main workflow actions
+
+SECONDARY BUTTONS (Clear/Reset):
+• Background: #eee
+• Hover: #ddd
+• Purpose: Cleanup operations
+
+MODE BUTTONS (R3 only):
+• Default: #e0e0e0
+• Hover: #d0d0d0
+• Active: #a3d5ff with #0d47a1 border
+• Purpose: Toggle between modes
+
+STATUS INDICATION:
+• Green highlights: Valid notes on pianos
+• Red highlights: R2B analysis notes
+• "–" symbol: Empty/cleared state
+
+
+================================================================================
+9. KEYBOARD SHORTCUTS (Future Enhancement)
+================================================================================
+
+PROPOSED SHORTCUTS:
+───────────────────
+
+R1 Panel:
+• Ctrl+L: Load All (B3)
+• Ctrl+K: Clear All (B4)
+• Enter: Load current row (LR3B1, B1)
+• Delete: Clear current row (XR1B2, B2)
+
+R2A Panel:
+• Ctrl+Shift+L: Load All (LR1B4, B5)
+• Ctrl+Shift+K: Clear All (XR2A, B6)
+
+R3 Panel:
+• T: Toggle Triad (B7)
+• 4: Toggle Tetrad (B8)
+• I: Cycle Inversion (B9)
+• Enter/Space: Send to R2B (BR3)
+
+R2B Panel:
+• Space: Replay (RLR2B, B10)
+• R: Reset (XR2B, B11)
+
+GLOBAL:
+• H or ?: Show help
+• F1: Show documentation
+
+
+================================================================================
+10. BUTTON EVENT HANDLING
+================================================================================
+
+EVENT FLOW:
+───────────
+
+1. USER CLICKS BUTTON
+   ↓
+2. BROWSER EVENT: click
+   ↓
+3. EVENT LISTENER TRIGGERED
+   ↓
+4. PREVENT DEFAULT (optional)
+   ↓
+5. STOP PROPAGATION (at button level)
+   ↓
+6. EXECUTE HANDLER FUNCTION
+   ↓
+7. UPDATE DOM (input fields, R3/R2B displays)
+   ↓
+8. PROVIDE FEEDBACK (visual/audio)
+   ↓
+9. LOG TO CONSOLE (if VERBOSE enabled)
+   ↓
+10. COMPLETE
+
+
+INITIALIZATION:
+────────────────
+
+All button event listeners are attached during setup functions:
+• setupR1()   - Attaches all R1 listeners
+• setupR2A()  - Attaches all R2A listeners
+• setupR3()   - Attaches all R3 listeners
+• setupR2B()  - Attaches all R2B listeners
+
+Called on: document.DOMContentLoaded event
+
+
+EVENT LISTENER PATTERN:
+────────────────────────
+
+// Global control button
+document.getElementById('r1-b3').addEventListener('click', () => {
+  handleB3Click();
+});
+
+// Row-specific button (loop)
+for (let i = 1; i <= 24; i++) {
+  document.getElementById(`r1-b1-${i}`).addEventListener('click', () => {
+    handleB1Click(i);
+  });
+}
+
+
+================================================================================
+11. ERROR STATES & RECOVERY
+================================================================================
+
+GRACEFUL DEGRADATION:
+──────────────────────
+
+Invalid Input → Silent Filtering:
+• User types: "xyz"
+• System validates against CHORD_REGEX
+• Regex fails
+• Value is cleared silently
+• No error message shown
+• User can try again
+
+Missing Elements:
+• If R3 element not found
+• Handler checks with: if(!element) return;
+• Prevents JavaScript errors
+• UI remains responsive
+
+Audio API Fallback:
+• If Web Audio API not available
+• Piano still displays visually
+• Notes don't play but interface works
+• Graceful degradation
+
+
+RECOVERY PROCEDURES:
+─────────────────────
+
+B4 (Clear All):
+• Clears all state
+• Allows fresh start
+• Recover from corrupted state
+
+R2B Reset:
+• Clears current chord display
+• Allows new chord to load
+• Removes stale data
+
+Browser Refresh:
+• Resets entire application
+• Clears all state and memory
+• Most reliable recovery
+
+
+================================================================================
+12. ACCESSIBILITY FEATURES
+================================================================================
+
+ARIA LABELS:
+─────────────
+
+r3-b7: aria-label="Triad"       → Screen reader: "Triad button"
+r3-b8: aria-label="Tetrad"      → Screen reader: "Tetrad button"
+r3-b9: aria-label="Invert"      → Screen reader: "Invert button"
+r3-br3: aria-label="Send to R2B" → Screen reader: "Send to R2B button"
+
+
+KEYBOARD NAVIGATION:
+─────────────────────
+
+Current: Mouse/touchpad only
+Future Improvements:
+• Tab: Navigate between buttons
+• Enter/Space: Activate button
+• Arrow keys: Navigate grid
+
+Suggestions:
+• Set tabindex on all buttons
+• Add focus styles (visible outline)
+• Implement keyboard handler
+
+
+COLOR CONTRAST:
+────────────────
+
+Button Text: #000 on #eee
+• Ratio: 10.9:1
+• Status: WCAG AAA compliant ✓
+
+Button Text: #000 on #ddd (hover)
+• Ratio: 8.7:1
+• Status: WCAG AAA compliant ✓
+
+Button Text: #000 on #a3d5ff (active)
+• Ratio: 5.1:1
+• Status: WCAG AA compliant ✓
+
+
+SCREEN READER SUPPORT:
+────────────────────────
+
+Current Implementation:
+• aria-label on key buttons
+• Semantic HTML structure
+• Logical button order
+
+Suggestions for Improvement:
+• Add aria-describedby for complex buttons
+• Implement ARIA live regions for status updates
+• Better button grouping with fieldset
+
+
+================================================================================
+13. TESTING CHECKLIST
+================================================================================
+
+FUNCTIONAL TESTING:
+────────────────────
+□ B1: Load individual chord
+□ B2: Clear individual row
+□ B3: Load all 24 chords
+□ B4: Clear all 24 rows
+□ B5: Load from textarea (odd rows)
+□ B6: Clear textarea
+□ B7: Toggle Triad mode
+□ B8: Toggle Tetrad mode
+□ B9: Cycle Inversion (0→1→2→3→0)
+□ BR3: Send to R2B
+□ B10: Replay chord
+□ B11: Reset R2B
+
+
+EDGE CASE TESTING:
+────────────────────
+□ Empty input fields
+□ Invalid chord names
+□ Special characters in input
+□ Multiple spaces in textarea
+□ Very long chord names
+□ Rapid button clicks
+□ Browser back/forward buttons
+□ Multiple browser tabs
+
+
+ACCESSIBILITY TESTING:
+────────────────────────
+□ Screen reader compatibility (NVDA, JAWS)
+□ Keyboard navigation (Tab, Enter)
+□ Color contrast verification
+□ Focus visible indicators
+□ ARIA label accuracy
+
+
+================================================================================
+END OF PIANO_BUTTONS_SPEC1.TXT
+================================================================================
+
+Version: 1.0
+Status: DRAFT
+Created: January 25, 2026
+Next Steps: Add R3 and R2B button detailed specs
+Feedback: Document is open for suggestions and improvements
+

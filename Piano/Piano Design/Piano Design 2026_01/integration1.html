@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>All-in-One Integration: R2A → R1 → R3 → R2B</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #1a1a1a;
+      color: #fff;
+      height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 8px;
+      padding: 8px;
+    }
+    header {
+      background: #0d47a1;
+      border-radius: 4px;
+      padding: 4px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 0.75rem;
+      line-height: 1;
+    }
+    .flow, .steps {
+      display: flex;
+      gap: 6px;
+      font-size: 0.65rem;
+      line-height: 1;
+      color: #b3e5fc;
+    }
+    main {
+      display: grid;
+      grid-template-columns: 15% 35% 50%;
+      grid-template-rows: minmax(0, 1fr) minmax(0, 1.5fr);
+      gap: 8px;
+      min-height: 0;
+    }
+    section.panel {
+      background: #fff;
+      color: #000;
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    #panel-r2a .panel-body {
+      border-top: 2px solid #999;
+      padding-top: 8px;
+    }
+    #panel-r2a { grid-column: 2; grid-row: 1; }
+    #panel-r2b { grid-column: 3; grid-row: 1; }
+   
+    #panel-r3 { grid-column: 2 / 4; grid-row: 2; }
+    .panel-header {
+      padding: 4px 6px;
+      border-bottom: 1px solid #ddd;
+      font-weight: bold;
+      font-size: 0.8rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .panel-body { padding: 4px; overflow: auto; flex: 1; min-height: 0; }
+    #panel-r3 .panel-body { padding: 5px; margin: 0; overflow: auto; display: flex; flex-wrap: wrap; width: 100%; text-align: left; justify-content: flex-start; align-items: flex-start; align-content: flex-start; }
+    .r3-group { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 800px; margin: 5px; padding: 0; }
+    .grid-10 { display: grid; grid-template-columns: 1fr; gap: 3px; }
+    .row { display: flex; gap: 4px; align-items: center; }
+    .row label { width: 20px; text-align: right; font-size: 0.7rem; color: #555; }
+    .row input, .row textarea { flex: 1; padding: 3px 4px; font-size: 1.0rem; }
+    #r1-grid .row input { width: 12ch; flex: 0 0 auto; }
+    #r2a-grid .row textarea { flex: 0.7; }
+    .btn { padding: 2px 6px; font-size: 0.7rem; border: 1px solid #ccc; background: #eee; cursor: pointer; }
+    .btn:hover { background: #ddd; }
+    .btn-bar { display: flex; gap: 3px; }
+    .r3-group-label { font-size: 0.6rem; font-weight: bold; text-align: center; min-height: 11px; line-height: 1; margin: 0; padding: 0; width: 100%; max-width: 800px; align-self: center; }
+    .r3-group-piano { width: 100%; max-width: 800px; margin: 0; padding: 0; aspect-ratio: 6 / 1; align-self: center; }
+    .r3-group-buttons { display: flex; gap: 2px; justify-content: center; margin-top: 2px; width: 100%; max-width: 800px; align-self: center; }
+    .r3-group-buttons .r3-radio { width: 28px; height: 28px; padding: 0; }
+    .r3-button-bar { display: flex; gap: 3px; justify-content: center; margin-top: 3px; padding-top: 3px; border-top: 1px solid #ddd; margin: 0; padding: 0; }
+    .chord-label { font-size: 0.6rem; font-weight: bold; margin: 0; padding: 0; text-align: center; min-height: 11px; line-height: 1; }
+    /* R1 center B3/B4 */
+    #panel-r1 .panel-header { align-items: center; }
+    #panel-r1 .panel-header .btn-bar { justify-content: center; }
+    /* R3 small radio buttons */
+    .r3-radio { width: 16px; height: 16px; padding: 0; border-radius: 50%; border: 1px solid #555; background: #e0e0e0; font-weight: bold; }
+    .r3-radio:hover { background: #d0d0d0; }
+    .r3-radio.active { background: #a3d5ff; border-color: #0d47a1; }
+    footer { font-size: 0.65rem; color: #bbb; text-align: center; padding: 2px; }
+    #r2b-chord {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #0d47a1;
+    }
+    #r2b-chord {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #0d47a1;
+    }
+    .key:hover { filter: brightness(0.95); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🎹 All-in-One Integration: R2A → R1 → R3 → R2B</h1>
+    <div class="flow">
+      <span>R1 (validation)</span><span>→</span>
+      <span>R2A (batch input)</span><span>→</span>
+      <span>R3 (display)</span><span>→</span>
+      <span>R2B (analysis)</span>
+    </div>
+    <div class="steps">
+      <span>1. Enter chords in R2A</span>
+      <span>2. B5/B7 load</span>
+      <span>3. Check R1</span>
+      <span>4. B1/B3 to R3</span>
+      <span>5. BR3 to R2B</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- R1 Panel -->
+    <section class="panel" id="panel-r1">
+      <div class="panel-header">
+        <span>R1 - Input Validation</span>
+        <span id="r1-time"></span>
+      </div>
+      <div class="panel-body">
+        <div class="btn-bar" style="margin-bottom:6px;">
+          <button class="btn" id="r1-b3">LR3</button>
+          <button class="btn" id="r1-b4">RALLB4</button>
+        </div>
+        <div class="grid-10" id="r1-grid"></div>
+      </div>
+    </section>
+
+    <!-- R2A Panel -->
+    <section class="panel" id="panel-r2a">
+      <div class="panel-header">
+        <span>R2A→R1</span>
+        <span id="r2a-time"></span>
+      </div>
+      <div class="panel-body">
+        <div class="btn-bar" style="margin-bottom:4px;">
+          <button class="btn" id="r2a-b5">LR1B4</button>
+          <button class="btn" id="r2a-b6">XR2A</button>
+        </div>
+        <textarea id="r2a-textarea" rows="20" style="width:100%; flex:1; font-size:1.0rem; padding:3px 4px; border:1px solid #ccc; font-family:Arial, sans-serif;" placeholder="Odd rows: chords&#10;Even rows: lyrics (ignored)"></textarea>
+      </div>
+    </section>
+
+    <!-- R3 Panel -->
+    <section class="panel" id="panel-r3">
+      <div class="panel-header">
+        <span>R3 - Pianogroups</span>
+      </div>
+      <div class="panel-body" id="r3-body">
+      </div>
+    </section>
+
+    <!-- R2B Panel -->
+    <section class="panel" id="panel-r2b">
+      <div class="panel-header">
+        <span>R2B - Analysis Piano</span>
+        <div class="r2b-chord-label">Chord: <span id="r2b-chord">–</span></div>
+        <div class="btn-bar">
+          <button class="btn" id="r2b-b10">RLR2B</button>
+          <button class="btn" id="r2b-b11">XR2B</button>
+        </div>
+      </div>
+      <div class="panel-body">
+        <svg class="piano-r2b" id="r2b-svg" viewBox="0 0 300 150"></svg>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Single-file integration removes the need for localhost. Open directly.
+  </footer>
+
+  <script>
+    // ===== Debug logging =====
+    const VERBOSE = true;
+    function log(...args){ if(VERBOSE) console.log('[Integration]', ...args); }
+    // ===== Utilities =====
+    const ts = () => {
+      const d = new Date();
+      const yy = String(d.getFullYear()).slice(-2);
+      const mm = String(d.getMonth()+1).padStart(2,'0');
+      const dd = String(d.getDate()).padStart(2,'0');
+      const hh = String(d.getHours()).padStart(2,'0');
+      const mi = String(d.getMinutes()).padStart(2,'0');
+      return `${yy}.${mm}.${dd} • ${hh}.${mi}`;
+    };
+
+    // ===== R1 Validation =====
+    const CHORD_REGEX = /^[A-GH][#b]?m?(maj7|m7|7|sus2|sus4)?\d*$/i;
+    const normalizeHB = c => c.replace(/^h/i, 'B');
+    const validateChord = c => {
+      if (!c) return '';
+      const x = normalizeHB(c.trim());
+      return CHORD_REGEX.test(x) ? x : '';
+    };
+
+    // ===== R2A Setup =====
+    function setupR2A() {
+      document.getElementById('r2a-time').textContent = ts();
+      document.getElementById('r2a-b5').addEventListener('click', () => r2aLoadAll());
+      document.getElementById('r2a-b6').addEventListener('click', () => document.getElementById('r2a-textarea').value = '');
+    }
+    const parseChords = txt => txt.trim().split(/\s+/).filter(Boolean);
+    function resetR1(){ for (let i=1;i<=24;i++){ document.getElementById(`r1-input-${i}`).value=''; window.R3.clearPianoGroup(i);} }
+    function fillR1(chords){ for (let i=0;i<Math.min(chords.length,24);i++){ document.getElementById(`r1-input-${i+1}`).value = validateChord(chords[i]) || ''; } }
+    function triggerR1Handlers(limit){ let d=0; for(let i=1;i<=limit;i++){ const val=document.getElementById(`r1-input-${i}`).value.trim(); if(val) setTimeout(()=>window.handleB1Click(i), d), d+=400; } }
+    function r2aLoadAll() {
+      const textarea = document.getElementById('r2a-textarea');
+      const lines = textarea.value.split('\n');
+      const chords = [];
+        log('R2A: lines count', lines.length);
+      
+      // Extract odd rows (1-indexed, so lines 0, 2, 4... are odd rows 1, 3, 5...)
+      for (let i = 0; i < lines.length; i += 2) {
+        const line = lines[i].trim();
+        if (line) {
+          const parsed = parseChords(line);
+          parsed.forEach(chord => {
+            const valid = validateChord(chord);
+            if (valid) chords.push(valid);
+          });
+        }
+      }
+      
+      resetR1();
+      fillR1(chords);
+        log('R2A: loaded chords to R1', chords);
+    }
+
+    // ===== R1 Setup =====
+    function setupR1(){
+      document.getElementById('r1-time').textContent = ts();
+      const grid = document.getElementById('r1-grid');
+      for (let i=1;i<=24;i++){
+        // LR1O stays placeholder until defined in specs
+        const row = document.createElement('div');
+        row.className = 'row';
+        row.innerHTML = `<label>${i}</label><input id='r1-input-${i}' maxlength='10' placeholder='Chord'/><button class='btn' id='r1-b1-${i}'>LR3B1</button><button class='btn' id='r1-b2-${i}'>XR1B2</button><button class='btn' id='r1-b0-${i}'>LR1O</button>`;
+        grid.appendChild(row);
+      }
+      document.getElementById('r1-b3').addEventListener('click', () => handleB3Click());
+      document.getElementById('r1-b4').addEventListener('click', () => handleB4Click());
+      for (let i=1;i<=24;i++){
+        document.getElementById(`r1-b1-${i}`).addEventListener('click', () => handleB1Click(i));
+        document.getElementById(`r1-b2-${i}`).addEventListener('click', () => handleB2Click(i));
+        document.getElementById(`r1-b0-${i}`).addEventListener('click', (evt) => handleB0Click(evt, i));
+      }
+      window.handleB1Click = handleB1Click;
+    }
+    function handleB0Click(evt, row){
+      if(evt){ evt.preventDefault(); evt.stopPropagation(); }
+      const w = Math.round(window.screen.availWidth * 0.5);
+      const h = Math.round(window.screen.availHeight * 0.5);
+      const features = `width=${w},height=${h},toolbar=0,location=0,menubar=0,status=0,scrollbars=0,resizable=yes`;
+      const win = window.open('', `LR1O-${row}`, features);
+      if(!win){ log('R1:B0 popup blocked', { row }); return; }
+      const tsStr = (() => {
+        const d = new Date();
+        const yy = String(d.getFullYear()).slice(-2);
+        const mm = String(d.getMonth()+1).padStart(2,'0');
+        const dd = String(d.getDate()).padStart(2,'0');
+        const hh = String(d.getHours()).padStart(2,'0');
+        const mi = String(d.getMinutes()).padStart(2,'0');
+        return yy + '.' + mm + '.' + dd + ' • ' + hh + '.' + mi;
+      })();
+      const style1 = '* { margin: 0; padding: 0; box-sizing: border-box; }';
+      const style2 = 'body { font-family: Arial, sans-serif; background: #fff; color: #000; display: flex; flex-direction: column; height: 100vh; }';
+      const style3 = 'section.panel { background: #fff; color: #000; border-radius: 6px; display: flex; flex-direction: column; min-height: 0; flex: 1; }';
+      const style4 = '.panel-header { padding: 4px 6px; border-bottom: 1px solid #ddd; font-weight: bold; font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center; }';
+      const style5 = '.panel-body { padding: 4px; overflow: auto; flex: 1; min-height: 0; }';
+      const style6 = '.btn { padding: 2px 6px; font-size: 0.7rem; border: 1px solid #ccc; background: #eee; cursor: pointer; color: #000; } .btn:hover { background: #ddd; }';
+      const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>R3 - Piano Groups Blank Window</title><style>' + 
+        style1 + style2 + style3 + style4 + style5 + style6 + 
+        '</style></head><body><section class="panel"><div class="panel-header"><span>R3 - Piano Groups Blank Window</span><span>' + tsStr + '</span></div>' +
+        '<div class="panel-body"><button class="btn" id="xr1o">XR1O</button></div></section></body></html>';
+      win.document.write(html);
+      win.document.close();
+      win.focus();
+      log('R1:B0 opened window', { row, width:w, height:h });
+    }
+      function handleB1Click(row){ const raw=document.getElementById(`r1-input-${row}`).value.trim(); const v=validateChord(raw); log('R1:B1 row', row, 'value', raw, 'validated', v); if(!v){ window.R3.clearPianoGroup(row); return; } window.R3.receiveChordFromR1(v, row); }
+    function handleB2Click(row){ document.getElementById(`r1-input-${row}`).value=''; window.R3.clearPianoGroup(row); }
+      function handleB3Click(){ const arr=[]; for(let i=1;i<=24;i++){ const v=validateChord(document.getElementById(`r1-input-${i}`).value.trim())||''; arr.push(v); } log('R1:B3 batch send', arr); if(window.R3?.receiveChordBatch){ window.R3.receiveChordBatch(arr); } else { let d=0; arr.forEach((c,idx)=>{ if(c) setTimeout(()=>window.R3.receiveChordFromR1(c, idx+1), d), d+=400; }); } }
+    function handleB4Click(){
+      for(let i=1;i<=24;i++) handleB2Click(i);
+      if(window.resetR2B) window.resetR2B(); // Also reset R2B piano graphics
+    }
+
+    // ===== R3 Setup =====
+    let R3_mode='triad', R3_inv=0; let R3_currentRow=null, R3_currentChord=null;
+    function setupR3(){
+      const container = document.getElementById('r3-body');
+      for(let i=1;i<=24;i++){  // one group per R1 row
+        const group=document.createElement('div'); group.className='r3-group';
+        const label=document.createElement('div'); label.className='r3-group-label'; label.id=`r3-label-${i}`; label.textContent='–';
+        const svg=document.createElementNS('http://www.w3.org/2000/svg','svg'); svg.classList.add('piano-r3', 'r3-group-piano'); svg.setAttribute('viewBox','0 0 200 100'); svg.setAttribute('preserveAspectRatio','xMidYMin meet'); svg.id=`r3-svg-${i}`;
+        const btnBar=document.createElement('div'); btnBar.className='r3-group-buttons';
+        const b7=document.createElement('button'); b7.className='r3-radio'; b7.id=`r3-b7-${i}`; b7.setAttribute('aria-label','Triad'); b7.textContent='T';
+        const b8=document.createElement('button'); b8.className='r3-radio'; b8.id=`r3-b8-${i}`; b8.setAttribute('aria-label','Tetrad'); b8.textContent='4';
+        const b9=document.createElement('button'); b9.className='r3-radio'; b9.id=`r3-b9-${i}`; b9.setAttribute('aria-label','Invert'); b9.textContent='I';
+        const br3=document.createElement('button'); br3.className='r3-radio'; br3.id=`r3-br3-${i}`; br3.setAttribute('aria-label','Send to R2B'); br3.textContent='→';
+        btnBar.appendChild(b7); btnBar.appendChild(b8); btnBar.appendChild(b9); btnBar.appendChild(br3);
+        group.appendChild(label); group.appendChild(svg); group.appendChild(btnBar); container.appendChild(group); renderR3Piano(i);
+        
+        b7.addEventListener('click',()=>{R3_mode='triad'; updateR3RadioButtons(i);});
+        b8.addEventListener('click',()=>{R3_mode='tetrad'; updateR3RadioButtons(i);});
+        b9.addEventListener('click',()=>{R3_inv=(R3_inv+1)%4; updateR3RadioButtons(i);});
+        br3.addEventListener('click',()=>{ 
+          // Get the chord from THIS group (row i), not global R3_currentChord
+          const label = document.getElementById(`r3-label-${i}`);
+          const chordName = label ? label.textContent.trim() : '';
+          if(chordName && chordName !== '–'){
+            // Recompute notes based on current mode and inversion
+            const freshNotes = computeVoicing(chordName, R3_mode, R3_inv);
+            const payload={ chordName, notes:freshNotes, mode:R3_mode, inversion:R3_inv, analysis: analyzeChord(chordName), source:'R3', timestamp:Date.now() }; 
+            log('R3:send to R2B', payload, 'from row', i);
+            if(window.resetR2B) window.resetR2B(); // Reset R2B first
+            R2B_playing=false; // Allow new chord to play immediately
+            if(window.R2B && window.R2B.setChord) window.R2B.setChord(payload);
+          } else {
+            log('R3:BR3 blocked - no chord in row', i);
+          }
+        });
+      }
+      window.R3 = { receiveChordFromR1, receiveChordBatch, clearPianoGroup };
+    }
+    function renderR3Piano(idx){
+      const svg=document.getElementById(`r3-svg-${idx}`);
+      const notes=['C','D','E','F','G','A','B']; const w=200/7; // white keys
+      let x=0; notes.forEach(n=>{ const r=document.createElementNS('http://www.w3.org/2000/svg','rect'); r.setAttribute('x',x); r.setAttribute('y',0); r.setAttribute('width',w); r.setAttribute('height','100'); r.setAttribute('fill','#f5f5f5'); r.setAttribute('stroke','#ccc'); r.setAttribute('class','key'); r.setAttribute('data-note',n); svg.appendChild(r);
+      // Add white key label
+      const txt=document.createElementNS('http://www.w3.org/2000/svg','text'); txt.setAttribute('x',x+w/2); txt.setAttribute('y','90'); txt.setAttribute('text-anchor','middle'); txt.setAttribute('font-size','14'); txt.setAttribute('font-weight','bold'); txt.setAttribute('fill','#333'); txt.setAttribute('pointer-events','none'); txt.textContent=n; svg.appendChild(txt);
+      x+=w; });
+      // Black keys: C# D# F# G# A# at positions 0.7, 1.7, 3.7, 4.7, 5.7
+      const blackPos=[{note:'C#',x:0.7}, {note:'D#',x:1.7}, {note:'F#',x:3.7}, {note:'G#',x:4.7}, {note:'A#',x:5.7}];
+      blackPos.forEach(b=>{
+        const xPos=b.x*w;
+        const r=document.createElementNS('http://www.w3.org/2000/svg','rect');
+        r.setAttribute('x',xPos); r.setAttribute('y',0); r.setAttribute('width',w*0.5); r.setAttribute('height','60');
+        r.setAttribute('fill','#1a1a1a'); r.setAttribute('stroke','#000'); r.setAttribute('class','key');
+        r.setAttribute('data-note',b.note); svg.appendChild(r);
+        // Add black key label
+        const txt=document.createElementNS('http://www.w3.org/2000/svg','text');
+        txt.setAttribute('x',xPos+w*0.25); txt.setAttribute('y','35'); txt.setAttribute('text-anchor','middle');
+        txt.setAttribute('font-size','10'); txt.setAttribute('font-weight','bold'); txt.setAttribute('fill','#fff'); txt.setAttribute('pointer-events','none');
+        txt.textContent=b.note; svg.appendChild(txt);
+      });
+      // Enable click-to-play using a default octave (4)
+      svg.querySelectorAll('.key').forEach(k=>{
+        k.addEventListener('click',()=>{
+          const base=k.getAttribute('data-note');
+          if(!base) return;
+          const playN=base.includes('#') ? `${base}4` : `${base}4`;
+          playNote(playN);
+        });
+      });
+    }
+    function receiveChordFromR1(name, row){ if(!name||!row) return; R3_currentRow=row; const notes=computeVoicing(name, R3_mode, R3_inv); R3_currentChord={ chordName:name, notes }; updateR3(row, name, notes); }
+      function receiveChordFromR1(name, row){ if(!name||!row) return; log('R3:receive from R1', {name,row,mode:R3_mode,inv:R3_inv}); R3_currentRow=row; const notes=computeVoicing(name, R3_mode, R3_inv); R3_currentChord={ chordName:name, notes }; updateR3(row, name, notes); }
+    function receiveChordBatch(arr){ if(!Array.isArray(arr)||arr.length!==24) return; let d=0; arr.forEach((name,i)=>{ const row=i+1; if(!name){ clearPianoGroup(row); return; } setTimeout(()=>{ R3_currentRow=row; const notes=computeVoicing(name, R3_mode, R3_inv); R3_currentChord={ chordName:name, notes }; updateR3(row,name,notes); }, d); d+=400; }); }
+      function receiveChordBatch(arr){ if(!Array.isArray(arr)||arr.length!==24) return; log('R3:batch receive', arr); let d=0; arr.forEach((name,i)=>{ const row=i+1; if(!name){ clearPianoGroup(row); return; } setTimeout(()=>{ R3_currentRow=row; const notes=computeVoicing(name, R3_mode, R3_inv); R3_currentChord={ chordName:name, notes }; updateR3(row,name,notes); }, d); d+=400; }); }
+    function clearPianoGroup(row){ const lbl=document.getElementById(`r3-label-${row}`); if(lbl) lbl.textContent='–'; const svg=document.getElementById(`r3-svg-${row}`); svg?.querySelectorAll('.key').forEach(k=>{ const n=k.getAttribute('data-note'); const isBlack=n.includes('#'); k.setAttribute('fill', isBlack?'#1a1a1a':'#f5f5f5'); }); if(R3_currentRow===row){ R3_currentRow=null; R3_currentChord=null; } }
+    function updateR3(row,name,notes){
+      const lbl=document.getElementById(`r3-label-${row}`);
+      const svg=document.getElementById(`r3-svg-${row}`);
+      if(!lbl || !svg) return;
+      lbl.textContent=name;
+      svg.querySelectorAll('.key').forEach(k=>{ const n=k.getAttribute('data-note'); const isBlack=n.includes('#'); k.setAttribute('fill', isBlack?'#1a1a1a':'#f5f5f5'); });
+      notes.forEach(n=>{ const el=svg.querySelector(`[data-note="${n.replace(/[45]$/, '')}"]`); if(el) el.setAttribute('fill','#8fd694'); });
+      playChord(notes); // give audible feedback when B1 sends to R3
+    }
+    // ===== Chord Voicing Table (Music Theory Correct) =====
+    const CHORD_TABLE = {
+      'C':   {tri: ['C4','E4','G4'],   tet: ['C4','E4','G4','B4']},
+      'C#':  {tri: ['C#4','E#4','G#4'], tet: ['C#4','E#4','G#4','B#4']},
+      'D':   {tri: ['D4','F#4','A4'],  tet: ['D4','F#4','A4','C#5']},
+      'D#':  {tri: ['D#4','F##4','A#4'], tet: ['D#4','F##4','A#4','C##5']},
+      'E':   {tri: ['E4','G#4','B4'],  tet: ['E4','G#4','B4','D#5']},
+      'F':   {tri: ['F4','A4','C5'],   tet: ['F4','A4','C5','E5']},
+      'F#':  {tri: ['F#4','A#4','C#5'], tet: ['F#4','A#4','C#5','E#5']},
+      'G':   {tri: ['G4','B4','D5'],   tet: ['G4','B4','D5','F#5']},
+      'G#':  {tri: ['G#4','B#4','D#5'], tet: ['G#4','B#4','D#5','F##5']},
+      'A':   {tri: ['A4','C#5','E5'],  tet: ['A4','C#5','E5','G#5']},
+      'A#':  {tri: ['A#4','C##5','E#5'], tet: ['A#4','C##5','E#5','G##5']},
+      'B':   {tri: ['B4','D#5','F#5'], tet: ['B4','D#5','F#5','A#5']},
+      'Cm':  {tri: ['C4','Eb4','G4'],  tet: ['C4','Eb4','G4','Bb4']},
+      'C#m': {tri: ['C#4','E4','G#4'], tet: ['C#4','E4','G#4','B4']},
+      'Dm':  {tri: ['D4','F4','A4'],   tet: ['D4','F4','A4','C5']},
+      'D#m': {tri: ['D#4','F#4','A#4'], tet: ['D#4','F#4','A#4','C#5']},
+      'Em':  {tri: ['E4','G4','B4'],   tet: ['E4','G4','B4','D5']},
+      'Fm':  {tri: ['F4','Ab4','C5'],  tet: ['F4','Ab4','C5','Eb5']},
+      'F#m': {tri: ['F#4','A4','C#5'], tet: ['F#4','A4','C#5','E5']},
+      'Gm':  {tri: ['G4','Bb4','D5'],  tet: ['G4','Bb4','D5','F5']},
+      'G#m': {tri: ['G#4','B4','D#5'], tet: ['G#4','B4','D#5','F#5']},
+      'Am':  {tri: ['A4','C5','E5'],   tet: ['A4','C5','E5','G5']},
+      'A#m': {tri: ['A#4','C#5','E#5'], tet: ['A#4','C#5','E#5','G#5']},
+      'Bm':  {tri: ['B4','D5','F#5'],  tet: ['B4','D5','F#5','A5']},
+      'C7':  {tri: ['C4','E4','G4'],   tet: ['C4','E4','G4','Bb4']},
+      'C#7': {tri: ['C#4','E#4','G#4'], tet: ['C#4','E#4','G#4','B4']},
+      'D7':  {tri: ['D4','F#4','A4'],  tet: ['D4','F#4','A4','C5']},
+      'D#7': {tri: ['D#4','F##4','A#4'], tet: ['D#4','F##4','A#4','C#5']},
+      'E7':  {tri: ['E4','G#4','B4'],  tet: ['E4','G#4','B4','D5']},
+      'F7':  {tri: ['F4','A4','C5'],   tet: ['F4','A4','C5','Eb5']},
+      'F#7': {tri: ['F#4','A#4','C#5'], tet: ['F#4','A#4','C#5','E5']},
+      'G7':  {tri: ['G4','B4','D5'],   tet: ['G4','B4','D5','F5']},
+      'G#7': {tri: ['G#4','B#4','D#5'], tet: ['G#4','B#4','D#5','F#5']},
+      'A7':  {tri: ['A4','C#5','E5'],  tet: ['A4','C#5','E5','G5']},
+      'A#7': {tri: ['A#4','C##5','E#5'], tet: ['A#4','C##5','E#5','G#5']},
+      'B7':  {tri: ['B4','D#5','F#5'], tet: ['B4','D#5','F#5','A5']},
+      'Cm7': {tri: ['C4','Eb4','G4'],  tet: ['C4','Eb4','G4','Bb4']},
+      'C#m7': {tri: ['C#4','E4','G#4'], tet: ['C#4','E4','G#4','B4']},
+      'Dm7': {tri: ['D4','F4','A4'],   tet: ['D4','F4','A4','C5']},
+      'D#m7': {tri: ['D#4','F#4','A#4'], tet: ['D#4','F#4','A#4','C#5']},
+      'Em7': {tri: ['E4','G4','B4'],   tet: ['E4','G4','B4','D5']},
+      'Fm7': {tri: ['F4','Ab4','C5'],  tet: ['F4','Ab4','C5','Eb5']},
+      'F#m7': {tri: ['F#4','A4','C#5'], tet: ['F#4','A4','C#5','E5']},
+      'Gm7': {tri: ['G4','Bb4','D5'],  tet: ['G4','Bb4','D5','F5']},
+      'G#m7': {tri: ['G#4','B4','D#5'], tet: ['G#4','B4','D#5','F#5']},
+      'Am7': {tri: ['A4','C5','E5'],   tet: ['A4','C5','E5','G5']},
+      'A#m7': {tri: ['A#4','C#5','E#5'], tet: ['A#4','C#5','E#5','G#5']},
+      'Bm7': {tri: ['B4','D5','F#5'],  tet: ['B4','D5','F#5','A5']},
+      'Cmaj7': {tri: ['C4','E4','G4'],   tet: ['C4','E4','G4','B4']},
+      'C#maj7': {tri: ['C#4','E#4','G#4'], tet: ['C#4','E#4','G#4','B#4']},
+      'Dmaj7': {tri: ['D4','F#4','A4'],  tet: ['D4','F#4','A4','C#5']},
+      'D#maj7': {tri: ['D#4','F##4','A#4'], tet: ['D#4','F##4','A#4','C##5']},
+      'Emaj7': {tri: ['E4','G#4','B4'],  tet: ['E4','G#4','B4','D#5']},
+      'Fmaj7': {tri: ['F4','A4','C5'],   tet: ['F4','A4','C5','E5']},
+      'F#maj7': {tri: ['F#4','A#4','C#5'], tet: ['F#4','A#4','C#5','E#5']},
+      'Gmaj7': {tri: ['G4','B4','D5'],   tet: ['G4','B4','D5','F#5']},
+      'G#maj7': {tri: ['G#4','B#4','D#5'], tet: ['G#4','B#4','D#5','F##5']},
+      'Amaj7': {tri: ['A4','C#5','E5'],  tet: ['A4','C#5','E5','G#5']},
+      'A#maj7': {tri: ['A#4','C##5','E#5'], tet: ['A#4','C##5','E#5','G##5']},
+      'Bmaj7': {tri: ['B4','D#5','F#5'], tet: ['B4','D#5','F#5','A#5']},
+      'Cmm': {tri: ['C4','Eb4','Gb4'], tet: ['C4','Eb4','Gb4','Bbb4']},
+      'Dmm': {tri: ['D4','F4','Ab4'],  tet: ['D4','F4','Ab4','Cb5']},
+      'Emm': {tri: ['E4','G4','Bb4'],  tet: ['E4','G4','Bb4','Db5']},
+      'Gmm': {tri: ['G4','Bb4','Db5'], tet: ['G4','Bb4','Db5','E5']},
+      'Amm': {tri: ['A4','C5','Eb5'],  tet: ['A4','C5','Eb5','Gb5']},
+      'Bmm': {tri: ['B4','D5','F5'],   tet: ['B4','D5','F5','Ab5']}
+    };
+    function computeVoicing(name, mode, inv){
+      if(!name) return [];
+      const norm = name.replace(/^H/i, 'B');
+      const entry = CHORD_TABLE[norm];
+      if(!entry) return [];
+      const notes = mode==='tetrad' ? entry.tet : entry.tri;
+      return notes;
+    }
+    function analyzeChord(name){ return { type:'Chord', intervals:['R','M3','P5'], quality:'Major', position:'Root Position', extensions:[], alterations:[] }; }
+    function replayR3(){ if(!R3_currentChord||!R3_currentRow) return; R3_currentChord.notes=computeVoicing(R3_currentChord.chordName, R3_mode, R3_inv); updateR3(R3_currentRow, R3_currentChord.chordName, R3_currentChord.notes); }
+
+    function updateR3RadioButtons(row){
+      const b7=document.getElementById(`r3-b7-${row}`);
+      const b8=document.getElementById(`r3-b8-${row}`);
+      const b9=document.getElementById(`r3-b9-${row}`);
+      if(!b7||!b8||!b9) return;
+      b7.classList.toggle('active', R3_mode==='triad');
+      b8.classList.toggle('active', R3_mode==='tetrad');
+      b9.classList.toggle('active', R3_inv>0);
+    }
+
+    // ===== R2B Setup =====
+    let R2B_current=null, R2B_playing=false;
+    function setupR2B(){ renderR2BPiano(); document.getElementById('r2b-b10').addEventListener('click',()=>{ if(R2B_current) playChord(R2B_current.notes); }); document.getElementById('r2b-b11').addEventListener('click', resetR2B); window.R2B={ setChord }; window.resetR2B=resetR2B; }
+    function renderR2BPiano(){ 
+      const svg=document.getElementById('r2b-svg'); 
+      const notes=['C','D','E','F','G','A','B']; 
+      const oct=[4,5]; 
+      const total=notes.length*oct.length; 
+      const w=300/total; 
+      
+      // First: Draw all white keys
+      let x=0; 
+      oct.forEach(o=>{ 
+        notes.forEach(n=>{ 
+          const r=document.createElementNS('http://www.w3.org/2000/svg','rect'); 
+          r.setAttribute('x',x); r.setAttribute('y',0); r.setAttribute('width',w); r.setAttribute('height','150'); 
+          r.setAttribute('fill','#f5f5f5'); r.setAttribute('stroke','#999'); r.setAttribute('class','key'); 
+          r.setAttribute('data-note',n+o); 
+          svg.appendChild(r);
+          x+=w; 
+        }); 
+      }); 
+      
+      // Second: Draw all black keys (on top of white)
+      x=0; 
+      oct.forEach(o=>{ 
+        notes.forEach(n=>{ 
+          if(n==='E'||n==='B'){ x+=w; return; } 
+          const rect=document.createElementNS('http://www.w3.org/2000/svg','rect'); 
+          const bkW=w*0.8; 
+          rect.setAttribute('x', x + (w*0.75) - (bkW/2)); rect.setAttribute('y', 0); 
+          rect.setAttribute('width', bkW); rect.setAttribute('height', '60'); 
+          rect.setAttribute('fill', '#1a1a1a'); rect.setAttribute('stroke', '#000'); rect.setAttribute('class', 'key'); 
+          rect.setAttribute('data-note', n+'#'+o); 
+          svg.appendChild(rect);
+          x+=w; 
+        }); 
+      }); 
+      
+      // Third: Draw all text labels (on top of everything)
+      x=0;
+      oct.forEach(o=>{ 
+        notes.forEach(n=>{ 
+          const txt=document.createElementNS('http://www.w3.org/2000/svg','text'); 
+          txt.setAttribute('x',x+w/2); txt.setAttribute('y','75'); txt.setAttribute('text-anchor','middle');
+          txt.setAttribute('dominant-baseline','middle');
+          txt.setAttribute('font-size','16'); txt.setAttribute('font-weight','bold'); 
+          txt.setAttribute('fill','#000'); txt.setAttribute('pointer-events','none'); 
+          txt.textContent=n; 
+          svg.appendChild(txt);
+          x+=w; 
+        }); 
+      }); 
+      
+      // Fourth: Draw black key labels
+      x=0;
+      oct.forEach(o=>{ 
+        notes.forEach(n=>{ 
+          if(n==='E'||n==='B'){ x+=w; return; }
+          const txt=document.createElementNS('http://www.w3.org/2000/svg','text'); 
+          txt.setAttribute('x', x + (w*0.75)); txt.setAttribute('y', '30'); txt.setAttribute('text-anchor','middle'); 
+          txt.setAttribute('dominant-baseline','middle'); txt.setAttribute('font-size','9'); 
+          txt.setAttribute('font-weight','bold'); txt.setAttribute('fill','#fff'); txt.setAttribute('pointer-events','none'); 
+          txt.textContent=n+'#'; 
+          svg.appendChild(txt);
+          x+=w; 
+        }); 
+      }); 
+      
+      svg.querySelectorAll('.key').forEach(k=>k.addEventListener('click',()=> playNote(k.getAttribute('data-note')))); 
+    }
+    function setChord(data){ if(!data||typeof data.chordName!=='string'||!Array.isArray(data.notes)||data.notes.length===0){ resetR2B(); return; } R2B_current=data; markR2B(data.notes); updateAnalysis(data); playChord(data.notes); }
+      function setChord(data){ if(!data||typeof data.chordName!=='string'||!Array.isArray(data.notes)||data.notes.length===0){ resetR2B(); return; } R2B_current=data; log('R2B:setChord', data); markR2B(data.notes); updateAnalysis(data); playChord(data.notes); }
+    function markR2B(notes){
+      const svg=document.getElementById('r2b-svg');
+      // Clear previous marks
+      svg.querySelectorAll('.key').forEach(k=>{
+        const dn=k.getAttribute('data-note');
+        const isBlack=dn.includes('#');
+        k.setAttribute('fill', isBlack?'#1a1a1a':'#f5f5f5');
+      });
+      // Mark a single octave per pitch class (prefer 4th octave)
+      notes.forEach(n=>{
+        const base=n.replace(/[0-9]/g,''); // strip octave
+        const pref=`${base}4`;
+        const alt=`${base}5`;
+        const el=svg.querySelector(`[data-note="${pref}"]`) || svg.querySelector(`[data-note="${alt}"]`);
+        if(el) el.setAttribute('fill','#e53935');
+      });
+    }
+    function updateAnalysis(d){
+      // Only update the chord label now
+      document.getElementById('r2b-chord').textContent = d.chordName ?? 'Chord Label';
+    }
+    function clearAnalysis(){
+      // Reset chord label, other analysis fields removed
+      document.getElementById('r2b-chord').textContent='Chord Label';
+    }
+    function resetR2B(){ const svg=document.getElementById('r2b-svg'); svg.querySelectorAll('.key').forEach(k=>{ const n=k.getAttribute('data-note'); const isBlack=n.includes('#'); k.setAttribute('fill', isBlack?'#1a1a1a':'#f5f5f5'); }); R2B_current=null; clearAnalysis(); }
+
+    // ===== Audio (Web Audio API) =====
+    let AUDIO_CTX=null, AUDIO_MASTER=null;
+    function getAudio(){
+      if(!AUDIO_CTX){
+        const Ctx=window.AudioContext||window.webkitAudioContext;
+        AUDIO_CTX=new Ctx();
+        AUDIO_MASTER=AUDIO_CTX.createGain();
+        AUDIO_MASTER.gain.value=0.2;
+        AUDIO_MASTER.connect(AUDIO_CTX.destination);
+      }
+      return { ctx:AUDIO_CTX, master:AUDIO_MASTER };
+    }
+    function noteToFreq(note){
+      if(!note) return 440;
+      const m=note.match(/^([A-GH])([#b]?)(\d)$/i);
+      if(!m) return 440;
+      let [, ltr, acc, oct]=m; oct=parseInt(oct,10);
+      const name=ltr.toUpperCase()==='H'?'B':ltr.toUpperCase();
+      const key=(name+(acc||'')).toUpperCase();
+      const semis={C:0,'C#':1,DB:1,D:2,'D#':3,EB:3,E:4,F:5,'F#':6,GB:6,G:7,'G#':8,AB:8,A:9,'A#':10,BB:10,B:11};
+      const semi=semis[key];
+      if(semi===undefined) return 440;
+      const midi=(oct+1)*12 + semi; // MIDI note number
+      return 440 * Math.pow(2, (midi-69)/12);
+    }
+    function triggerTone(freq, dur=0.8, when=0, detune=0){
+      const { ctx, master }=getAudio();
+      const osc=ctx.createOscillator();
+      const gain=ctx.createGain();
+      osc.type='sine';
+      osc.frequency.value=freq;
+      osc.detune.value=detune;
+      gain.gain.setValueAtTime(0.0001, ctx.currentTime+when);
+      gain.gain.exponentialRampToValueAtTime(1.0, ctx.currentTime+when+0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+when+dur);
+      osc.connect(gain).connect(master);
+      osc.start(ctx.currentTime+when);
+      osc.stop(ctx.currentTime+when+dur+0.05);
+    }
+    function playNote(note){ const f=noteToFreq(note); triggerTone(f, 0.5, 0, 0); }
+    function playChord(notes){
+      if(!Array.isArray(notes)||!notes.length) return;
+      if(R2B_playing) return;
+      R2B_playing=true;
+      const { ctx }=getAudio();
+      const now=ctx.currentTime;
+      notes.forEach((n, idx)=>{
+        const f=noteToFreq(n);
+        const detune=(idx - (notes.length-1)/2)*4; // slight spread
+        triggerTone(f, 1.0, 0, detune);
+      });
+      setTimeout(()=>{ R2B_playing=false; }, 1100);
+    }
+
+    // ===== Initialize all =====
+    function init(){ setupR2A(); setupR1(); setupR3(); setupR2B(); }
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

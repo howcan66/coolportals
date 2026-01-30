@@ -1,0 +1,854 @@
+﻿<!-------R1 Panel Functionalities ------------------------------------->
+
+<-- R1 : Piano Panel, webb frame (10 rows × 3 cols: Textform + B1 + B2)
++----------------------------------------------------------------------------+
+| R1 : Piano Panel, webb frame                                               |
+|                                                                            |
+| Rows start blank; filled by R2A B5 button (up to 10 rows)  [8-12px gap]   |
+|                                                                            |
+| Row 1:  [Textform: __________ (max 10 chars)]  [B1]  [B2]  (~12-16px)      |
+| Row 2:  [Textform: __________ (max 10 chars)]  [B1]  [B2]                  |
+| Row 3:  [Textform: __________ (max 10 chars)]  [B1]  [B2]                  |  
+| Row 4:  [Textform: __________ (max 10 chars)]  [B1]  [B2]                  |
+| Row 5:  [Textform: __________ (max 10 chars)]  [B1]  [B2]                  |
+| Row 6:  [Textform: __________ (max 10 chars)]  [B1]  [B2]                  |
+| Row 7:  [Textform: __________ (max 10 chars)]  [B1]  [B2]                  |
+| Row 8:  [Textform: __________ (max 10 chars)]  [B1]  [B2]                  |
+| Row 9:  [Textform: __________ (max 10 chars)]  [B1]  [B2]                  |
+| Row 10: [Textform: __________ (max 10 chars)]  [B1]  [B2]                  |
+|                                                                            |
+|                    Button Functions (Row-level):                           |
+|                                                                            |
+| - B1 "LR3" (green #8fd694):  Load R1.R2A.n → R3.n + play sound           |
+| - B2 "XR1" (red #f4a6a6):    Clear R1.R2A.n + R3.n, no sound             |
+|                                                                            |
+| [~~~~~~~~  B3 "LR3" (outlined)  ~~~~~~~~]  [~~~~~~~~  B4 "XR1"  ~~~~~~~~]  |
+|                          (~12-16px gap)                                    |
+|                                                                            |
+| Button Functions (Global - below rows):                                    |
+| - B3 "LR3" (green outlined, distinct from B1): Load all → R3 + play        |
+| - B4 "XR1" (red, matches B2):                  Clear all, no sound         |
+|                                                                            |
+| Help & Info:                                                               |
+| R1.1: "Ackordinmatning: börja med rottecken (A–G/H), följ R1.X regler"     |
+| Placeholder: "Ex: Cmaj7, G7b9 (max 10 tecken)"                             |
+| Timestamp (footer): yy.mm.dd  •  HH.mm (e.g., "26.01.24" • "14.37")        |
+|                                                                            |
++----------------------------------------------------------------------------+
+-->
+
+<!-------Data Flow Diagram: R2A ↔ R1 ↔ R3 Ecosystem ---------------------->
+
+   [R2A Panel]                [R1 Panel]                [R3 Panel]
+   (10 textareas)             (10 textforms)            (10 textforms)
+   
+   State: BLANK               State: BLANK              State: BLANK
+   (default on load)          (default on load)         (default on load)
+   
+        │                          │                           │
+        │  User enters chords       │                          │
+        │  (space-separated)        │                          │
+        ▼                           │                          │
+   [R2A.1-10 filled]                │                          │
+        │                           │                          │
+        │  User clicks B5/B7        │                          │
+        │  (Load button)            │                          │
+        ├──────────────────────────────────────────────────────┤
+        │  STEP 1: RESET all R1     │                          │
+        │  STEP 2: READ R2A.n       │                          │
+        │  STEP 3: VALIDATE chords  │                          │
+        │  STEP 4: FILL R1.R2A.1-10 │                          │
+        │  STEP 5: CLAMP to 10 max  │                          │
+        │                           ▼                          │
+        │                      [R1.R2A.1-10 filled]            │
+        │                           │                          │
+        │                           │  User clicks B1/B3       │
+        │                           │  (Send button)           │
+        │                           ├──────────────────────────┤
+        │                           │  TRANSFER chord data     │
+        │                           │  PLAY sound (~400ms gap) │
+        │                           │                          ▼
+        │                           │                     [R3.R2A.1-10 filled]
+        │                           │                          │
+        │  B6/B8 (Clear)            │                          │
+        │  CLEARS R2A only          │                          │
+        │  (R1 not affected)        │                          │
+        ▼                           ▼                          ▼
+
+Key Design Decisions:
+- B5/B7 is DESTRUCTIVE: Clears ALL R1 rows first, then fills with new chords
+- B6/B8 is INDEPENDENT: Clears R2A only; R1 keeps its data
+- Overflow handling: >10 chords → CLAMP to 10 silently (no error message)
+- No auto-sync: R1 updates ONLY on explicit B5/B7 button press (user-triggered)
+- Page reload: All panels reset to BLANK (no persistence)
+
+<!-------End Data Flow Diagram ─────────────────────────────────────────>
+
+Piano Single Entry Forms:
+
+1. Initialisering
+   - R1 textforms börjar TOMMA (blank by default).
+   - R1 accepterar ENDAST giltiga ackord enligt R1.X.
+   - R1 uppdateras genom R2A B5/B7 knapptryckningar (user-triggered, inte automatisk).
+   - Systemet ska fungera även om R2A är tomt.
+   - Aktiva lägen: Option B (Strict Mode, se R1.X) och Option C (Silent Clear, se R1.XC).
+
+   R2A→R1 uppdatering (vid B5/B7 klick i R2A):
+   - B5 klick: RESET alla R1 textforms (R1.R2A.1 till R1.R2A.10 → tomma)
+   - Läs R2A.n innehål (space-separated chords)
+   - Validera varje ackord enligt R1.X
+   - FILL: Mappa sequentiellt till R1.R2A.1, R1.R2A.2, ... R1.R2A.10
+   - CLAMP: Om >10 ackord, ignorera överskjutande tyst (Option C)
+   - Unfilled R1 rows: Lämna tomma (blank)
+
+2. R1‑rader (R1.R2A.n)
+   - R1 består av 10 rader: R1.R2A.1 till R1.R2A.10.
+   - Varje rad innehåller:
+       a) Ett textfält (max 10 tecken) ska vara blank som default. Ingen hjälptext.
+       b) B1‑knapp (tre tecken) direkt efter textfältet – etikett: "LR3".
+       c) B2‑knapp (tre tecken) direkt efter B1 – etikett: "XR1".
+   - Textfältet får endast innehålla giltiga ackord enligt R1.X.
+   - Placering (rad): Textfältet placeras först. Direkt till höger om textfältet placeras B1 ("LR3"), och direkt till höger om B1 placeras B2 ("XR1"). Alla tre är inline på samma rad.
+   - Mellanrum (rad): ~8–12 px mellan textfält och B1; ~8–12 px mellan B1 och B2; ~12–16 px vertikalt mellan rader.
+
+3. R1.X – Chord Validation Rules (Strict Mode – Option B)
+   Alla R1.R2A.n textfält måste följa strikt ackordgrammatik:
+
+   1. Rot: A, B, C, D, E, F, G, H
+      - Notation: "H" motsvarar B (tysk notation). Systemet kan acceptera både "B" och "H"; vid ljud/engine‑mappning ska "H" tolkas som B.
+      - UI‑normalisering: i visning används kanonisk form "B"; inmatat "H" normaliseras till "B".
+   2. Olyckstecken (valfritt): # eller b
+   3. Kvalitet (valfritt):
+            - m, maj, dim, aug, sus
+         - Notering: "m" tolkas som minor; "maj" för major (t.ex. Cmaj7); "aug" för augmented.
+   4. Extension (valfritt):
+        - 2, 4, 5, 6, 7, 9, 11, 13
+   5. Alterationer (valfritt):
+        - #5, b5, #9, b9, #11, b13
+   6. Additions (valfritt):
+        - add9, add11, add13
+   7. Maximal längd: 10 tecken totalt (inklusive alla delar).
+   8. Ogiltiga ackord får inte skickas till R3.
+
+   Ordning (kanonisk): Rot (+ olyckstecken) + kvalitet + extension + alterationer + additions.
+   Exempel på kombinationer: "Cm7", "Cmaj7#9", "G7b9", "F#dim", "Bbmaj13".
+   Formell validering (exempel): använd regex i valideringsmodul; ordningen ovan ska följas och total längd <= 10.
+
+   Begränsningar (Strict Mode):
+   - Slash‑ackord/inversioner ej tillåtna (t.ex. "C/E" är ogiltigt).
+   - Parenteser och mellanslag ej tillåtna (t.ex. "C7(b9)", "C maj 7" är ogiltiga).
+   - Additions får inte duplicera en redan angiven extension (t.ex. "Cmaj7add7" är ogiltigt).
+   - Additions kan samexistera med extensioner om de avser olika siffror (t.ex. "Cmaj7add11" är tillåtet).
+
+4. R1.XC – Invalid Chord Handling (Option C)
+   - Vid ogiltigt ackord och knapptryckning (B1 eller B3):
+       a) Textfältet ska tömmas automatiskt.
+       b) R3 ska inte uppdateras med ogiltigt ackord.
+       c) Inget ljud ska spelas.
+   - Vid tomt textfält (efter trimning) och knapptryckning:
+       a) Om föregående värde existerar i R3.n: behållas (ingen uppdatering).
+       b) Om första gång (R3.n är tom): inget händer.
+   - Ingen felindikering ska visas (ej röd border, ej error icon).
+   - Rensning ska ske tyst och omedelbart.
+
+5. Exempel
+   Giltiga ackord:
+     - C
+     - Cm
+     - Cm7
+     - Cmaj7
+     - Dm9
+     - F#dim
+     - G7b9
+     - Bbmaj13
+
+   Ogiltiga ackord (exempel):
+     - C##11
+     - Zmaj7
+     - 7Cmaj
+     - C/E
+     - C7(b9)
+     - Cmaj7add7
+
+6. Radknappar
+   B1 – "LR3" Bara inget annat
+       - Laddar R1.R2A.n till R3.n.
+       - Om B1 skulle adressera en elfte position (n > 10) ignoreras klicket; inga nya pianogrupper skapas eller ersätts.
+       - Spelar ljud för det aktuella ackordet.
+       - Kräver giltigt ackord.
+       - Färg/stil: ljusgrön primär stil (t.ex. #8fd694) för att signalera "load/play".
+
+   B2 – "XR1" Bara inget annat
+       - Rensar endast aktuell rad i R1 (R1.R2A.n).
+       - Rensar motsvarande R3.n.
+       - Erase = sätt textfält till tom sträng.
+       - Spelar inget ljud.
+       - Färg/stil: ljusröd/rosa ton (t.ex. #f4a6a6) för att signalera "clear".
+
+7. Globala knappar (placerade under R1‑raderna, bredvid varandra)
+   B3 – "LR3" är knappnamn
+       - Laddar alla giltiga R1‑värden till R3.
+       - Spelar ljud för alla giltiga ackord (sekventiellt uppifrån och ned, ~400 ms mellanrum).
+       - Ogiltiga ackord rensas enligt R1.XC.
+       - OBS: B3 har samma etikett som B1 ("LR3") men är global; i UI ska det tydligt framgå att B3 påverkar alla rader.
+       - Färg/stil: ljusgrön, men sekundär/outlined variant (t.ex. kontur i #8fd694) för att särskilja från B1.
+
+   B4 – "XR1" är knappnamn
+       - Rensar alla R1‑fält.
+       - Rensar alla R3‑fält.
+       - Spelar inget ljud.
+       - Färg/stil: ljusröd/rosa ton (t.ex. #f4a6a6) matchande B2.
+   - Placering (global): B3 och B4 placeras direkt under raderna, horisontellt bredvid varandra.
+   - Justering (global): centrerad justering i panelen; konsekvent mellanrum ~12–16 px ovanför globalknapparna och ~12–16 px mellan B3 och B4.
+
+8. Hjälptexter
+   R1.1 – Kort hjälpmikrocopy (inline, placerad ovanför raderna eller i panelhuvud):
+      "Ackordinmatning: börja med rottecken (A–G/H), följ regler i R1.X"
+   R1.1a – Placeholder i varje textfält:
+      "Ex: Cmaj7, G7b9 (max 10 tecken)"
+   R1.1b – Tooltip vid fokus/hover (aktiveras efter ~500 ms fokus):
+        "Ange ackord enligt ordning: Rot (+#|b) + kvalitet (m|maj|dim|sus) + extension (2|4|5|6|7|9|11|13) + alteration (#5|b5|#9|b9|#11|b13) + additions (add9|add11|add13). Max 10 tecken; inga mellanslag/parenteser; inga slash‑ackord."
+   R1.1c – Tillgänglighet/ARIA:
+      aria‑label: "Ackordfält rad n (t.ex. 'Ackordfält rad 1')"; aria‑describedby kopplas till R1.1; role="textbox" eller <input type="text">.
+      Button ARIA:
+         B1: aria‑label="Ladda ackord från rad n till R3 och spela ljud" (ex. "Ladda ackord från rad 1 till R3 och spela ljud")
+         B2: aria‑label="Rensa rad n" (ex. "Rensa rad 1")
+         B3: aria‑label="Ladda alla giltiga ackord till R3 och spela ljud"
+         B4: aria‑label="Rensa alla ackord"
+   R1.2 – Tidsstämpel i HTML:
+      Visas i panelens sidfot/HTML‑footer.
+      Format1: yy.mm.dd  •  Format2: HH.mm (24‑timmar)
+      Exempel: "26.01.24" och "14.37".
+   R1.3 – Språk:
+      Standard: svenska. Alternativ engelska hjälpmikrocopy kan visas: "Chord input: start with root (A–G/B/H), follow R1.X rules".
+   R1.4 – Felindikering:
+      Ingen explicit felindikering. Vid ogiltig inmatning rensas fält tyst enligt R1.XC.
+
+9. Ljudregler
+   - B1 spelar ett ackord.
+   - B3 spelar alla ackord sekventiellt med kort paus (ca 400 ms).
+   - B2 och B4 spelar inget ljud.
+
+10. Formell validering (regex)
+   - Inmatning ska vara skiftlägesokänslig; ledande/trailande blanksteg trimmade; interna blanksteg ej tillåtna.
+   - Följande regex kan användas för strikt validering (inkl längdkravet 10 tecken):
+        ^(?=.{1,10}$)[A-GH](?:#|b)?(?:maj|m|dim|sus)?(?:2|4|5|6|7|9|11|13)?(?:(?:#|b)(?:5|9|11|13))?(?:add(?:9|11|13))?$
+    - Använd regex med i‑flagga (skiftlägesokänslig matchning).
+    - Regex är baseline; följande regler kräver extra programmatisk kontroll:
+       • Förbjud "addX" om samma X redan förekommer som extension (t.ex. "Cmaj7add7" ska avvisas).
+       • Bekräfta att ordningen följer R1.X (regex redan styr detta, men kontrollera vid behov).
+       • Normalisera rot "H"→"B" vid visning (påverkar ej ljud/engine‑mappning).
+    - Kort valideringschecklista:
+       1) Trimming av inmatning.
+       2) Regex‑matchning (i‑flagga).
+       3) Avvisa duplicerande add/extension.
+       4) Bekräfta inga mellanslag/parenteser/slash (regex täcker detta).
+       5) Normalisera H→B i UI.
+   - Exempel som matchar: C, Cm, Cm7, Cmaj7, Dm9, F#dim, G7b9, Bbmaj13.
+   - Exempel som ej matchar: C##11, Zmaj7, 7Cmaj.
+
+11. R2A→R1 och R1→R3 Dataöverföring
+
+   R2A→R1 (B5/B7 Trigger – User Action):
+   
+   B5 (Row-level Load from R2A.n):
+   - STEP 1 RESET: Rensa ALLA R1 textforms (R1.R2A.1 till R1.R2A.10 → tomma)
+   - STEP 2 READ: Extrahera space-separated ackord från R2A.n (ex. "C Dm G7 F#maj7")
+   - STEP 3 VALIDATE: Testa varje ackord mot R1.X regex (i-flagga)
+   - STEP 4 FILL: Mappa giltiga ackord sequentiellt till R1.R2A.1, R1.R2A.2, R1.R2A.3, ... R1.R2A.10
+   - STEP 5 CLAMP: Om >10 ackord totalt, ignorera överskjutande tyst (Option C)
+   - RESULT: Unfilled R1 rows förblir tomma (ex. om 3 ackord, R1.R2A.4-10 = blank)
+   
+   B7 (Global Load from All R2A.1-10):
+   - STEP 1 RESET: Rensa ALLA R1 textforms (R1.R2A.1 till R1.R2A.10 → tomma)
+   - STEP 2 READ: Iterera R2A.1 → R2A.10; extrahera ALLA space-separated ackord från varje rad
+   - STEP 3 VALIDATE: Testa varje ackord mot R1.X regex
+   - STEP 4 FILL: Mappa giltiga ackord sequentiellt till R1.R2A.1, R1.R2A.2, ... R1.R2A.10 (global pool)
+   - STEP 5 CLAMP: Om total ackord >10, ignorera överskjutande tyst (Option C)
+   - RESULT: R1 rader fylls i ordning; unfilled rows = blank
+   
+   Exempel: R2A.1="C Dm G7", R2A.2="F#maj7 Bbmaj13", B7 klickad
+   → R1.R2A.1="C", R1.R2A.2="Dm", R1.R2A.3="G7", R1.R2A.4="F#maj7", R1.R2A.5="Bbmaj13", R1.R2A.6-10=blank
+
+   R1→R3 (Button Click – Sound Playback & API Calls):
+   - B1 (rad): Läs R1.R2A.n, validera, anropa R3.receiveChordFromR1(chordName, rowIndex) och spela ljud
+   - B3 (global): Samla alla 10 ackord i array, anropa R3.receiveChordBatch(chordArray), eller fallback till receiveChordFromR1 för varje rad med ~400ms mellanrum
+   - B2/B4 (clear): Anropa R3.clearPianoGroup(rowIndex) för relevant rad(er), inget ljud
+   - Innehål i R3: Normaliserad ackordsträng (UI-kanonisk form, ex. "B" istället för "H"); max 10 tecken; inga mellanslag/parenteser/slash
+
+12. Realtidsvalidering & UX-beteende
+   - Validering: vid varje tangentbordsinmatning, validera direkt (ingen debounce-fördröjning).
+   - Visuell feedback: ingen visuell förändring under inmatning; endast tystning vid fokusförlust om ogiltigt.
+   - Tangentbordsstöd:
+      • Tab: navigera mellan textfält och knappar i logisk ordning (rad för rad, vänster→höger).
+      • Enter: aktivera B1 för aktuell rad (om fokus på textfält).
+      • Shift+Enter: aktivera B3 (global load).
+   - Fokushanterings: vid tab från B2, fokusera nästa rad's textfält (eller B3 om sista rad).
+
+13. Tillståndsbevarande och sessionhantering
+   - R1-värdena och motsvarande R3-värdena ska bevaras under hela sessionen (ej reset vid sidan-refresh).
+   - R1 uppdateras ENDAST vid explicit B1/B3 klick (ej automatisk synk från R2A).
+   - Om R2A uppdateras, uppdateras R1 INTE automatiskt; user måste klicka B5/B7 för att pusha data till R1.
+   - Vid ny HTML-rendering/page reload: R1 och R3 börjar TOMMA (blank default). Ingen auto-init från R2A.
+
+14. HTML Structure & Semantic Markup
+   
+   /* ===== PURPOSE: Define the HTML layout for R1 panel =====
+      GOAL: Create a clean, accessible form with 10 rows for chord input
+      KEY PRINCIPLE: Use semantic HTML (<fieldset>, <form>, <section>) so 
+      screen readers understand the structure; not just visual layout.
+      ===== */
+
+   CONTAINER & STRUCTURE (the big picture):
+   - Container: <section id="r1-panel" class="r1-piano-panel"> för hela panelen.
+   - Header: <div class="r1-header"> innehåller <h2> paneltitel och <p class="r1-help"> för R1.1 hjälptexten.
+   - Form wrapper: <form id="r1-form" class="r1-form"> kapslar alla rader och globala knappar.
+   
+   /* Why <fieldset>? Groups related form controls (input + buttons) logically.
+      Makes it clear that B1 & B2 belong to that specific chord input row. */
+   
+   ROW STRUCTURE (what users interact with):
+   - Row structure: Varje rad är en <fieldset class="r1-row" id="r1-row-n"> (n=1…10) innehållande:
+       a) <input type="text" class="r1-textform" id="r1-textform-n" placeholder="..." maxlength="10" 
+          aria-label="Ackordfält rad n" aria-describedby="r1-help" />
+       b) <button type="button" class="btn-row btn-load" id="r1-btn-b1-n" aria-label="Ladda ackord till R3 och spela ljud (rad n)">LR3</button>
+       c) <button type="button" class="btn-row btn-clear" id="r1-btn-b2-n" aria-label="Rensa rad n">XR1</button>
+   
+   /* Why aria-label? Helps people using screen readers understand what each button does.
+      Why aria-describedby? Links input to help text so screen readers explain the rules. */
+   
+   GLOBAL BUTTONS (actions that affect ALL rows):
+   - Global buttons: <div class="r1-global-buttons"> innehåller:
+       a) <button type="button" class="btn-global btn-load-all" id="r1-btn-b3" aria-label="Ladda alla giltiga ackord till R3">LR3</button>
+       b) <button type="button" class="btn-global btn-clear-all" id="r1-btn-b4" aria-label="Rensa alla ackord">XR1</button>
+   
+   FOOTER & DATA (metadata):
+   - Footer: <div class="r1-footer"> för tidsstämpel (R1.2).
+   - Data attributes: Använd data-row="n" på varje row för JavaScript-referensering.
+   
+   /* Why data-row? Lets JavaScript easily find which row was clicked without parsing IDs. */
+
+   CSS CLASS NAMING CONVENTION (organizing style rules):
+   /* Why naming matters? Makes CSS easy to find & update. Clear prefixes = clear ownership.
+      r1- = "this belongs to R1 panel"; btn- = "this is a button style" */
+   
+   - Prefix: r1- för panelspecifika element, btn- för knappar.
+   - Row buttons: .btn-row, .btn-load, .btn-clear
+   - Global buttons: .btn-global, .btn-load-all, .btn-clear-all
+   - States: .is-invalid, .is-focused, .is-disabled (för framtida use-case)
+   - Textform: .r1-textform (input)
+
+   JAVASCRIPT DATA BINDING (connecting HTML to code logic):
+   /* Why needed? JavaScript needs to find, update, and listen to HTML elements.
+      These patterns make that connection organized and reliable. */
+   
+   - Lagra referens till alla 10 input-element i array: r1Inputs = [...document.querySelectorAll('.r1-textform')]
+   - Lagra referens till global button handlers: r1ButtonsGlobal = {b3: ..., b4: ...}
+   - Event listeners: 'input', 'blur', 'focus', 'click' på respektive element.
+   - State management: Använd objekt { rowN: { value: '', r3Value: '' } } för sessionsbevarandeoch lagring.
+
+15. CSS Styling Guidelines
+   /* ===== PURPOSE: Define visual design and interaction feedback for R1 panel =====
+      GOAL: Create a dark, music-focused UI with semantic color coding and smooth interactions
+      KEY PRINCIPLE: Colors carry meaning (green=load/play, red=clear/reset), not just aesthetics.
+                     This helps users learn button functions through color association.
+                     Smooth transitions (opacity, colors) give users visual feedback.
+      ===== */
+
+   Color Palette:
+   /* Why these colors? Green and red are universal for "go/play" and "stop/clear" actions.
+      Dark background (#2b2b2b) matches Piano_Design_Style_Instr.txt aesthetic (music software style).
+      Light text on dark background reduces eye strain during long sessions. */
+   - Primary green (Load/Play): #8fd694
+   - Secondary red (Clear/Reset): #f4a6a6
+   - Background panel: #2b2b2b (från Piano_Design_Style_Instr.txt)
+   - Border/divider: #444
+   - Text color: white (#ffffff)
+   - Secondary text: #ddd
+   - Input border: #555
+   - Input background: white (#ffffff) when focused, #2b2b2b when unfocused
+
+   Button Styling:
+   /* Why separate button styles? Different button types signal different actions:
+      Row buttons are filled (solid color) = quick, local action on ONE row.
+      Global buttons are outlined = slower, affects ALL rows, needs visual warning.
+      Hover/active states use opacity (not color change) = better visual performance. */
+   - B1 & B2 (row-level):
+       • Padding: 4px 8px
+       • Border-radius: 4px
+       • Font-weight: normal
+       • Font-size: ~0.9rem
+       • Border: none
+       • Cursor: pointer
+       • Transition: background-color 0.2s, opacity 0.2s
+   - B1 (Load): background-color: #8fd694, color: white (primary filled)
+   - B2 (Clear): background-color: #f4a6a6, color: white (primary filled)
+   - B3 (Load All): background-color: transparent, border: 2px solid #8fd694, color: #8fd694 (outlined variant)
+   - B4 (Clear All): background-color: #f4a6a6, color: white (matches B2)
+   - Hover state: opacity: 0.8
+   - Active/Pressed: opacity: 0.6
+   - Disabled state: opacity: 0.5, cursor: not-allowed
+
+   Input Textform Styling:
+   /* Why white input on dark background? Contrast makes it easy to see where you're typing.
+      Max-width of 120px forces discipline: users can only fit ~10 characters, matching R1.2 spec.
+      This prevents accidental long entries and keeps layout compact. */
+   - Padding: 4px 8px
+   - Border: 1px solid #555
+   - Border-radius: 4px
+   - Font-family: Arial, sans-serif
+   - Font-size: ~1rem
+   - Background-color: white
+   - Color: black
+   - Max-width: 120px (approx 10 char width at normal font)
+   - Transition: border-color 0.2s
+
+   Input States:
+   - Focus: border-color: #8fd694 (green highlight, no red error border per R1.4)
+   - Blur (valid): border-color: #555 (reset to normal)
+   - Blur (invalid): auto-clear field per R1.XC; no visual error indication
+
+   Row Layout & Spacing:
+   /* Why Flexbox? It automatically aligns inputs and buttons horizontally, handles wrapping on mobile,
+      and spaces items evenly without manual pixel-tweaking. Gap property replaces margin math.
+      This makes responsive design easier and more maintainable. */
+   - Vertical gap between rows: ~12-16 px (margin-bottom or gap in flex container)
+   - Horizontal gap textform→B1: ~8-12 px
+   - Horizontal gap B1→B2: ~8-12 px
+   - Row container: display: flex, align-items: center, gap: 10px
+   - Use flexbox to maintain alignment and spacing consistency
+
+   Global Buttons Container:
+   - Margin-top: ~12-16 px (above global buttons)
+   - Display: flex, justify-content: center, gap: ~12-16 px
+   - Flex-basis or min-width per button to ensure equal spacing
+   - Optionally use display: grid for precise alignment
+
+   Typography:
+   /* Why specific font sizes? Hierarchy (h2 > normal > help text) guides the eye to what's important.
+      Small font-size (0.8rem) for timestamp doesn't demand attention; button text is readable but compact.
+      Consistency across font-family (Arial) prevents rendering oddities across browsers. */
+   - Panel title (h2): font-size: ~1.2rem, font-weight: bold, color: white
+   - Help text (R1.1): font-size: ~0.9rem, color: #ddd, margin-bottom: 10px
+   - Button text: font-size: ~0.85rem, font-weight: normal, letter-spacing: 0.5px
+   - Placeholder text: font-size: ~0.85rem, color: #999
+   - Timestamp (footer): font-size: ~0.8rem, color: #ccc, margin-top: 10px
+
+   Responsive Considerations:
+   - Mobile (< 600px): Consider single-column layout or smaller button padding (2px 4px)
+   - Tablet (600px–1024px): Maintain current layout, test spacing on various screen sizes
+   - Desktop (> 1024px): Current layout optimal
+   - Note: Prioritize accessibility over responsive breakpoints; maintain minimum 44px touch target for buttons
+
+   Focus & Accessibility Styling:
+   /* Why visible focus indicators? Keyboard users need to see where they are.
+      WCAG AA contrast (4.5:1 text ratio) ensures readability for low-vision users.
+      Outline-offset (2px) prevents outline from clipping button text.
+      Do NOT remove focus indicators; modern browsers show them subtly by default. */
+   - Focus-visible outline: 2px solid #8fd694 for all interactive elements
+   - Outline offset: 2px
+   - Do not remove browser focus indicator; enhance it instead
+   - High contrast mode compatibility: Ensure text/button contrast meets WCAG AA (4.5:1 for text)
+
+   Transition & Animation:
+   /* Why 0.2s transitions? Fast enough (< 300ms) that users feel responsive interaction,
+      but slow enough to see the change. Longer transitions (500ms+) feel sluggish.
+      Opacity changes are GPU-accelerated and don't trigger layout recalculations (performance win).
+      Sound playback should NOT have visual animation delays; sounds feel delayed if buttons lag visually. */
+   - Button hover/active: Use opacity change (0.2s ease)
+   - Input focus: Use border-color change (0.2s ease)
+   - No heavy animations; keep UX responsive and snappy
+   - Sound playback (B1/B3) should not have visual animation delay
+
+16. JavaScript Implementation (Option B: Code Examples)
+
+   /* ===== PURPOSE: Define how R1 interacts with user input and communicates with R3 =====
+      GOAL: Validate chords in real-time, handle button clicks, and send valid chords to R3 pianogroups
+      KEY PRINCIPLE: Validation happens on blur (after user finishes typing), not during typing.
+                     This avoids annoying "invalid" messages while user is mid-chord.
+                     Only valid chords are sent to R3; invalid ones are silently cleared (per R1.XC).
+      ARCHITECTURE: 
+         1. validateChord() - Single source of truth for chord validation (used by B1, B2, B3, B4)
+         2. handleB*Click() - Button handlers that call validate → send to R3
+         3. Input blur listener - Auto-validates when user leaves the field
+         4. State object - Tracks {rowN: {value, r3Value}} for session persistence
+      ===== */
+
+   Chord Validation Regex:
+   /* Why this regex? It enforces R1.2 constraints:
+      - /^(?=.{1,10}$)/ : Lookahead checks 1-10 character limit BEFORE matching the rest
+      - [A-GH] : Root note must be A-G or H (H→B normalization after regex)
+      - (?:#|b)? : Optional sharp or flat (accidental)
+      - Rest of pattern : Optional quality (maj, m, dim, aug), intervals (2,4,5,6,7,9,11,13), alterations (#b), extensions
+      
+      Why lookahead? Simpler than string.length check after regex. Prevents regex from matching 
+      "Cmaj7add9sus11" (18 chars); regex stops before wasting CPU cycles.
+      
+      Why strict about duplicates? "Cmaj7add7" is ambiguous (conflicting 7th definition).
+      The match check after regex catches this edge case. */
+   ```javascript
+   const CHORD_REGEX = /^(?=.{1,10}$)[A-GH](?:#|b)?(?:maj|m|dim|aug|sus)?(?:2|4|5|6|7|9|11|13)?(?:(?:#|b)(?:5|9|11|13))?(?:add(?:9|11|13))?$/i;
+   
+   function validateChord(chord) {
+     const trimmed = chord.trim();
+     if (!trimmed) return null;
+     if (!CHORD_REGEX.test(trimmed)) return null;
+     // Check for duplicate add/extension (e.g., "Cmaj7add7")
+     const match = trimmed.match(/(\d+).*add(\d+)/i);
+     if (match && match[1] === match[2]) return null;
+     // Normalize H→B for UI display (canonical form)
+     return trimmed.replace(/^H/i, 'B');
+   }
+   ```
+
+   B1 Row Load Handler:
+   /* Why handleB1Click(rowIndex)? Each row needs its own button handler with context.
+      Row index (1-10) maps directly to R3 pianogroup index. This 1:1 mapping is critical.
+      
+      Logic:
+      1. Get the input value for this row
+      2. If empty, do nothing (keep existing R3 value, don't disturb other rows)
+      3. If invalid, clear the field silently (per R1.XC; no error message)
+      4. If valid, send to R3 AND play sound immediately
+      
+      Why play sound? Users expect immediate audio feedback when they click "Load".
+      Timing: Sound starts ~0ms after button click (before R3 visual updates).
+      This makes the interaction feel responsive and snappy. */
+   ```javascript
+   function handleB1Click(rowIndex) {
+     const input = document.getElementById(`r1-textform-${rowIndex}`);
+     const chord = input.value.trim();
+     
+     if (!chord) {
+       // Empty field: keep existing R3 value (no change)
+       return;
+     }
+     
+     const validated = validateChord(chord);
+     if (!validated) {
+       // Invalid chord: clear field silently per R1.XC
+       input.value = '';
+       return;
+     }
+     
+     // Valid chord: transfer to R3 using new API contract
+     if (window.R3 && window.R3.receiveChordFromR1) {
+       window.R3.receiveChordFromR1(validated, rowIndex);
+     }
+     
+     // Play sound (via R3 or local audio engine)
+     playChordSound(validated, 400);
+   }
+   ```
+
+   B3 Global Load Handler:
+   /* Why B3 is different: It sends ALL 10 chords at once to R3.
+      This uses R3's receiveChordBatch() function (faster than calling receiveChordFromR1 10 times).
+      
+      Logic:
+      1. Loop through all 10 inputs
+      2. Validate each chord (empty string = blank, invalid = clear field + empty string in array)
+      3. Build array [valid1, "", valid3, "", ...] with empty strings for cleared/blank rows
+      4. Send entire array to R3 in one call
+      
+      Why empty strings? R3 needs to know "row 2 is intentionally blank" vs "row 2 wasn't updated yet".
+      Empty strings in the array tell R3 to clear those pianogroups; undefined/null would be ambiguous.
+      
+      Why clear invalid chords? B3 might load data from R2A that has some invalid chords.
+      Silently clearing them (not showing error) prevents confusion; user can review R2A if needed. */
+   ```javascript
+   function handleB3Click() {
+     // Collect all 10 chords (empty strings for blanks)
+     const chordArray = [];
+     const r1Inputs = document.querySelectorAll('.r1-textform');
+     
+     r1Inputs.forEach((input) => {
+       const chord = input.value.trim();
+       
+       if (!chord) {
+         chordArray.push("");  // Empty string for cleared/blank rows
+         return;
+       }
+       
+       const validated = validateChord(chord);
+       if (!validated) {
+         input.value = '';  // Clear invalid chords
+         chordArray.push("");
+         return;
+       }
+       
+       chordArray.push(validated);  // Add valid chord to array
+     });
+     
+     // Send entire batch to R3 using new API contract
+     if (window.R3 && window.R3.receiveChordBatch) {
+       window.R3.receiveChordBatch(chordArray);
+     } else {
+       // Fallback: iterate and call receiveChordFromR1 for each row with 400ms gaps
+       let soundDelay = 0;
+       chordArray.forEach((chord, index) => {
+         if (chord && window.R3 && window.R3.receiveChordFromR1) {
+           setTimeout(() => {
+             window.R3.receiveChordFromR1(chord, index + 1);
+             playChordSound(chord);
+           }, soundDelay);
+           soundDelay += 400;
+         }
+       });
+     }
+   }
+   ```
+
+   B2 Row Clear Handler:
+   ```javascript
+   function handleB2Click(rowIndex) {
+     const input = document.getElementById(`r1-textform-${rowIndex}`);
+     input.value = '';
+     
+     // Clear R3 pianogroup using new API contract
+     if (window.R3 && window.R3.clearPianoGroup) {
+       window.R3.clearPianoGroup(rowIndex);
+     }
+     
+     // No sound
+   }
+   ```
+
+   B4 Global Clear Handler:
+   ```javascript
+   function handleB4Click() {
+     const r1Inputs = document.querySelectorAll('.r1-textform');
+     r1Inputs.forEach((input, index) => {
+       input.value = '';
+       
+       // Clear each R3 pianogroup using new API contract
+       if (window.R3 && window.R3.clearPianoGroup) {
+         window.R3.clearPianoGroup(index + 1);
+       }
+     });
+     
+     // No sound
+   }
+   ```
+
+   Invalid Chord Handling (R1.XC):
+   ```javascript
+   function clearFieldSilently(input) {
+     input.value = '';
+     // No visual error indication (no red border, no icon)
+     // Field clears immediately on blur if invalid
+   }
+   ```
+
+   Sound Playback Function:
+   ```javascript
+   function playChordSound(chord, delayMs = 0) {
+     // Implementation depends on audio engine (e.g., Tone.js, Web Audio API)
+     // Example pseudocode:
+     // setTimeout(() => {
+     //   audioEngine.playChord(chord, { duration: 400ms, voicing: 'triad' });
+     // }, delayMs);
+   }
+   ```
+
+   Session State Management (localStorage):
+   ```javascript
+   const R1_STATE_KEY = 'r1-panel-state';
+   
+   function saveR1State() {
+     const state = {};
+     document.querySelectorAll('.r1-textform').forEach((input, index) => {
+       state[`row${index + 1}`] = input.value;
+     });
+     localStorage.setItem(R1_STATE_KEY, JSON.stringify(state));
+   }
+   
+   function restoreR1State() {
+     const saved = localStorage.getItem(R1_STATE_KEY);
+     if (!saved) return;
+     
+     const state = JSON.parse(saved);
+     document.querySelectorAll('.r1-textform').forEach((input, index) => {
+       input.value = state[`row${index + 1}`] || '';
+     });
+   }
+   ```
+
+   Event Listeners Setup:
+   ```javascript
+   document.addEventListener('DOMContentLoaded', () => {
+     // Row buttons (B1/B2)
+     for (let i = 1; i <= 10; i++) {
+       document.getElementById(`r1-btn-b1-${i}`).addEventListener('click', () => handleB1Click(i));
+       document.getElementById(`r1-btn-b2-${i}`).addEventListener('click', () => handleB2Click(i));
+     }
+     
+     // Global buttons (B3/B4)
+     document.getElementById('r1-btn-b3').addEventListener('click', handleB3Click);
+     document.getElementById('r1-btn-b4').addEventListener('click', handleB4Click);
+     
+     // Input validation on blur (invalid → clear silently)
+     document.querySelectorAll('.r1-textform').forEach((input, index) => {
+       input.addEventListener('blur', () => {
+         const chord = input.value.trim();
+         if (chord && !validateChord(chord)) {
+           clearFieldSilently(input);
+         }
+       });
+     });
+     
+     // Keyboard shortcuts
+     document.addEventListener('keydown', (e) => {
+       if (e.key === 'Enter') {
+         const active = document.activeElement;
+         if (active.classList.contains('r1-textform')) {
+           const rowNum = parseInt(active.id.split('-').pop());
+           handleB1Click(rowNum); // Enter = activate B1 for current row
+         }
+       }
+       if (e.shiftKey && e.key === 'Enter') {
+         e.preventDefault();
+         handleB3Click(); // Shift+Enter = B3 global load
+       }
+     });
+     
+     // Session persistence
+     restoreR1State();
+     document.addEventListener('beforeunload', saveR1State);
+   });
+   ```
+
+17. Related Panels Reference & Data Flow
+
+   Panel Relationships Overview:
+   R1 operates within a three-panel ecosystem: R2A (input source), R1 (processing/display), and R3 (output target).
+   
+   Data Flow Diagram:
+
+   +─────────────────────────────────────────────────────────────────────+
+   |                        PIANO PANEL ECOSYSTEM                        |
+   +─────────────────────────────────────────────────────────────────────+
+   |                                                                     |
+   |  [R2A Panel]             [R1 Panel]              [R3 Panel]         |
+   |  (Input Form)            (Processing)           (Output/Display)    |
+   |                                                                     |
+   |  Textforms with          Chord validation,       Chord display      |
+   |  chord chords            normalization,          with sound         |
+   |                          state management        playback control   |
+   |                                                                     |
+   |  R2A[1..10]   ────────>  R1.R2A[1..10]  ────>   R3[1..10]           |
+   |  (unvalidated)           (validated,            (normalized,        |
+   |                          normalized)            canonical form)     |
+   |                                                                     |
+   |                ◄────  B1/B3 triggers  ────────────────────────      |
+   |                       data transfer & sound play                    |
+   |                                                                     |
+   +─────────────────────────────────────────────────────────────────────+
+
+   R2A → R1 Data Flow (Initialization):
+   - Trigger: Page load (eller HTML re-init per Section 13)
+   - Source: R2A panel (sibling panel containing raw chord textforms)
+   - Process: 
+      1) Read up to 10 values from R2A[1..10]
+      2) Trim whitespace and apply case-insensitivity (R1.X, Section 3)
+      3) Validate each value against chord rules (R1.X validation)
+      4) If valid: populate R1.R2A.n textfield
+      5) If invalid: skip/clear per R1.XC (Section 4)
+   - Destination: R1 input fields (R1.R2A.1 through R1.R2A.10)
+   - Frequency: Once per page load; no continuous sync during session (Section 13)
+
+   R1 → R3 Data Flow (User Actions):
+   - Trigger 1: B1 button click (row-level load)
+      • Action: Read R1.R2A.n value, validate, transfer to R3.n, play sound
+      • Data: Normalized chord string (max 10 chars, "H"→"B" conversion)
+      • Destination: R3.n (corresponding row in R3 panel)
+   - Trigger 2: B3 button click (global load all)
+      • Action: Iterate rows 1→10, validate each, transfer to R3, play sounds sequentially
+      • Data: All valid normalized chords from R1
+      • Destination: R3[1..10] (all R3 rows)
+   - Trigger 3: B2/B4 button click (row/global clear)
+      • Action: Clear R1 field and corresponding R3 field
+      • Data: Empty string (tom fält)
+      • Destination: R1.R2A.n + R3.n (row-level), or all (global)
+
+   R3 Panel Integration:
+   - R3 receives chord data from R1 via API calls (read-only from R3's perspective)
+   - R3 API functions called by R1 (per API Contract):
+      1) receiveChordFromR1(chordName, rowIndex): Single chord + row index for pianogroup update
+      2) receiveChordBatch(chordArray): Array of 10 chords for batch global load
+      3) clearPianoGroup(rowIndex): Clear specific pianogroup
+   - R3 uses pianogroup data to:
+      1) Display chords visually (piano visualization, chord name labels, etc.)
+      2) Trigger sound synthesis/playback (via audio engine)
+      3) Maintain state for user session (per Section 13)
+   - R3 does NOT send data back to R1 (unidirectional flow: R1 → R3)
+   - R3 panel details (layout, visualization, sound engine) are beyond R1 scope; R1 only sends normalized chord data via API Contract.
+
+   Data Format Specification:
+   - R2A format: Plain text strings, unvalidated, may contain spaces/invalid syntax
+   - R1 format: Validated chord strings (max 10 chars), following R1.X rules (Section 3)
+   - R3 format: Normalized chord strings (same as R1, but "H" always converted to "B" for display)
+   - Timestamp (R1.2): yy.mm.dd HH.mm format (e.g., "26.01.24 14.37")
+
+   State Synchronization:
+   - R1 state is independent from R2A after initialization (no continuous polling)
+   - R1 state syncs to R3 only on button click (B1/B3/B2/B4)
+   - R1 session state persists across page reload (localStorage/sessionStorage per Section 13)
+   - If R2A changes externally, R1 is not affected until next page re-init
+
+18. Implementation Checklist
+
+   Before HTML Conversion:
+   - [ ] Verify all 10 row inputs have correct IDs (r1-textform-1 to r1-textform-10)
+   - [ ] Ensure maxlength="10" on all textareas
+   - [ ] Confirm B1-B4 button IDs match JavaScript handlers
+   - [ ] Test chord validation regex with all quality types (maj/m/dim/aug/sus)
+   - [ ] Verify H→B normalization in validateChord() function
+   - [ ] Implement R3 API functions (setPianoGroup, clearPianoGroup)
+   - [ ] Add localStorage persistence for session recovery
+   - [ ] Add ARIA labels to all buttons per §8
+   - [ ] Test keyboard shortcuts (Enter for B1, Shift+Enter for B3)
+   - [ ] Verify silent clear behavior on blur (invalid → clear, no error)
+   - [ ] Test overflow guard (n > 10 ignored per B1 spec §6)
+   - [ ] Verify color contrast: #8fd694 on #2b2b2b, #f4a6a6 on #2b2b2b (WCAG AA)
+
+   Post-Implementation Testing:
+   - [ ] Valid chord input ("Cmaj7", "G7b9", "F#dim")
+   - [ ] Invalid chord filtering ("C##11", "Zmaj7" → clear silently)
+   - [ ] Duplicate add/extension rejection ("Cmaj7add7" → invalid)
+   - [ ] H→B normalization (input "Hm" → display "Bm")
+   - [ ] Row-level load (B1 single chord to R3 + sound)
+   - [ ] Global load (B3 all valid chords sequentially with ~400ms gaps)
+   - [ ] Row clear (B2 clears R1.n + R3.n, no sound)
+   - [ ] Global clear (B4 clears all R1 + R3)
+   - [ ] Keyboard support (Tab between fields, Enter activates B1, Shift+Enter activates B3)
+   - [ ] Session persistence (reload page, data restored from localStorage)
+   - [ ] Cross-panel flow (R2A→R1 via B5/B7, R1→R3 via B1/B3 complete sequence)
+   - [ ] Sound playback timing (~400ms sequential gap for B3)
+   - [ ] Empty field handling (B1 on empty field keeps existing R3 value)
+   - [ ] Focus management (tab order correct, focus visible outlines present)
+
+
+<!-------R1 Panel Functionalities Above ------------------------------------->
+
+
+Referenser: Simple Chord according to Copilot:
+
+🎹 C Triads (3‑note chords)
+Chord name	Notes	Explanation
+C major (C)	C–E–G	Major third + perfect fifth
+C minor (Cm)	C–E♭–G	Minor third + perfect fifth
+C diminished (Cdim)	C–E♭–G♭	Minor third + diminished fifth
+C augmented (Caug / C+)	C–E–G♯	Major third + augmented fifth
+C suspended 2 (Csus2)	C–D–G	Replaces the third with a major second
+C suspended 4 (Csus4)	C–F–G	Replaces the third with a perfect fourth
+
+Examples of C as a tetrad
+Here are common C tetrads:
+Chord name	Notes	Explanation
+Cmaj7	C–E–G–B	Major triad + major 7th
+C7 (dominant)	C–E–G–B♭	Major triad + minor 7th
+Cm7	C–E♭–G–B♭	Minor triad + minor 7th
+Cm(maj7)	C–E♭–G–B	Minor triad + major 7th
+Cdim7	C–E♭–G♭–B♭♭	Diminished triad + diminished 7th
+Cø7 (half‑diminished)	C–E♭–G♭–B♭	Diminished triad + minor 7th

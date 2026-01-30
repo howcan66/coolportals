@@ -1,0 +1,26 @@
+<-- R2B Panel Functionalities
+R2B Present Selected R3 Piano Graphical Chord over two octaves. Piano keys white and black shall have the notes marked
+
+R2B Shall play the full chord or individual key notes.
+R2B Button is B10 "LR2B" Play the loaded R2B Chord
+R2B Button is B11 "XR2B" Reset R2B Data
+
+R2B – Analysis and Alternate Chords (Chord Analysis Frame):
+   - Purpose: 
+      - Displays the analysis of a selected chord from R3 or manual input.
+      - Visualizes the selected chord on a virtual piano spanning **two octaves (C4 to B5)** with marked keys.
+      - Displays the result of analyzing the chord (e.g., triad, tetrad, inversion, alternative chords, etc.).
+   - Components:
+      a. Visual Piano Keyboard: A graphical 2-octave piano, with white and black keys (C4 to B5).
+      b. Text Analysis Section: Displays information about the chord:
+         - List of notes in the chord and their analysis.
+         - Description of the selected chord type (e.g., "Triad," "Tetrad").
+         - Display of alternative chords or inversions.
+			a Button B10 in R2B. B10 shall play the chord in R2B
+   - Workflow:
+      - Chord data comes from R3 when a user clicks on a specific chord or action buttons (B5 B6 B7 (e.g., Triad, Tetrad, Inversion).
+      - Marked keys display the corresponding tones of the chord.
+
+
+
+-->

@@ -1,0 +1,95 @@
+R3 Panel Functionalities
+------------------------
+
+1. R3 presenterar ackordgrafik i form av pianografik.
+   - Varje pianografik visar en oktav med vita och svarta tangenter.
+   - Tangenternas notnamn ska alltid visas direkt på tangenterna.
+   - Noter får aldrig döljas eller ersättas av annan grafik.
+
+2. Pianografiken består av 10 fasta pianogrupper:
+   - Dessa benämns R3.Pianogroup.1 till R3.Pianogroup.10.
+   - Samtliga 10 pianogrupper ska placeras horisontellt på samma rad.
+   - Ingen radbrytning får förekomma.
+   - Pianogrupperna ska ligga kant‑i‑kant utan mellanrum.
+   - R3-panelens bredd utgör 85% av sidans bredd.
+   - De 10 pianogrupperna ska tillsammans fylla hela denna bredd.
+   - Varje pianogrupp ska automatiskt anpassa sin bredd så att alla 10 får plats.
+   - Pianogruppens höjd ska skalas proportionellt till dess bredd.
+   - Ingen del av R3.Pianogroup får visa sidans bakgrund:
+       * Ingen padding
+       * Ingen margin
+       * Ingen vit yta mellan grupperna
+
+3. Tonmarkering i R3 är exkluderad:
+   - Triad‑markering: exkluderas
+   - Tetrad‑markering: exkluderas
+   - Inversions‑markering: exkluderas
+
+4. Knappar för R3:
+   - B7: Show Triad (funktion exkluderad)
+   - B8: Show Tetrad (funktion exkluderad)
+   - B9: Show Inversions (funktion exkluderad)
+   - BR3: Load into R2B ("LR2B")
+
+5. Placering av knappar:
+   - Knapparna B7, B8, B9 och BR3 ska placeras i en horisontell rad direkt under pianografiken.
+   - Knapparna ska vara centrerade horisontellt i R3-panelen.
+   - Knapparna ska vara små och runda.
+   - Ingen text ska visas under knapparna.
+   - Avståndet mellan knapparna ska vara jämnt.
+   - Knapparnas rad ska ligga direkt under R3.Pianogroup-raden utan mellanliggande element.
+
+6. R3-panelens bakgrundsfärg:
+   - R3-panelens bakgrundsfärg är vit.
+
+
+R3 Input From R1
+----------------
+
+1. R3 får alltid sitt aktiva ackord från R1.
+   - R1 ansvarar för att välja eller aktivera ett ackord.
+   - Det ackord som är aktivt i R1 ska omedelbart göras tillgängligt för R3.
+
+2. R3 ska ta emot ackordet som en strukturerad datasträng:
+   - Format: Ackordnamn (t.ex. "Cmaj7", "Dm", "F#dim")
+   - Endast ett ackord åt gången är aktivt.
+
+3. När R3 tar emot ett nytt ackord från R1:
+   - R3 ska uppdatera alla sina 10 pianogrupper med detta ackord.
+   - R3 ska visa ackordnamnet över varje pianogrupp.
+   - R3 ska markera de tangenter som ingår i ackordet.
+   - Ingen annan källa får ändra R3:s aktiva ackord.
+
+4. R3 ska alltid betrakta det senaste ackordet från R1 som det aktuella.
+   - Tidigare ackord ska ignoreras.
+   - Ingen historik sparas i R3.
+
+5. R3 får inte själv generera eller ändra ackord.
+   - R3 är en ren presentationspanel.
+
+
+R3 Input From R1 via B1 och B3
+------------------------------
+
+1. R3 kan ta emot ackord från R1 på två sätt:
+   - Ett ackord i taget via B1.
+   - En lista av ackord via B3.
+
+2. B1 – Skicka ett ackord från R1 till R3:
+   - R3 uppdaterar EN pianogrupp åt gången.
+   - Ackorden fylls i R3.Pianogroup i ordning:
+       * Första B1 → R3.Pianogroup.1
+       * Andra B1 → R3.Pianogroup.2
+       * ... upp till R3.Pianogroup.10
+   - Varje pianogrupp visar:
+       * Ackordnamn överst
+       * Pianografik under
+       * Markerade ackordnoter
+
+3. B3 – Skicka ALLA ackord från R1 till R3:
+   - R3 rensar alla pianogrupper.
+   - R3 fyller grupperna med R1:s ackordlista, ett ackord per grupp.
+   - Max 10 ackord visas.
+
+4. R3 genererar aldrig egna ackord.
+   - Endast R1 bestämmer vilka ackord som skickas via B1 eller B3.

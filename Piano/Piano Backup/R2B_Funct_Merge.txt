@@ -1,0 +1,54 @@
+<!------- R2B Panel Functionalities Below ------------------------------------->
+
+<!--
++------------------------------------------+
+| R2B : Chord Analysis Panel               |  
+|                                          |
+| - Chord Name Laber from R3               | 
+| - Virtual Piano (2 Octaves)              |
+|   Piano graphics. white & Black keys     |
+|   incl. notes                            |
+| - Highlight Notes                        |
+| - Chord should played when B7 B8 B9 B10  |
+|                                          |
+| - Individual notes shall be played       |
+|                                          |
+| - Chord Type                             |
+| - Receive Chords from R3 Panel           |
+| - Chord Analysis done in R2A, R1, E3     |
+|                                          |
+|                                          |
+| - Buttons placed under piano graphic     |
+| - B10: Play Chords R2B		   |
+| - B11: "X" Reset Chord R2B               |
+| - B11: Placed to the right of B10        |
+|                                          |
++------------------------------------------+
+
+
+
+
+-->
+
+R2B – Analysis and Alternate Chords (Chord Analysis Frame):
+   - Purpose: 
+      - Displays the analysis of a selected chord from R3 or manual input.
+      - Visualizes the selected chord on a virtual piano spanning **two octaves (C4 to B5)** with marked keys.
+      - Displays the result of analyzing the chord (e.g., triad, tetrad, inversion, alternative chords, etc.).
+	  - Displays the visual and interactive playback of the selected chord.
+   - Components:
+      a. Visual Piano Keyboard: A graphical 2-octave piano, with white and black keys (C4 to B5).
+	  b. B10 Button "L" will load the the last loaded chord to R2A again
+	  c. B11 Button "X" will reset the last loaded chord to R2A again
+      d. Text Analysis Section: Displays information about the chord:
+         - List of notes in the chord and their analysis.
+
+   - Workflow:
+      - Chord data comes from R3 when a user clicks on a specific chord or action buttons (B5 B6 B7 (e.g., Triad, Tetrad, Inversion).
+      - Marked keys display the corresponding tones of the chord.
+	  - Keys in the two octaves can play the sound of the note
+	  - R3 chord data populate the R2B Pianographic,
+	  - Chord should be visualised and the chord notes should be played att the same time
+
+		
+-->

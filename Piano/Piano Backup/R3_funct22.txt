@@ -1,0 +1,161 @@
+R3 Panel Functionalities
+------------------------
+
+1. R3 presenterar ackordgrafik i form av pianografik.
+   - Varje pianografik visar en oktav med vita och svarta tangenter.
+   - Tangenternas notnamn ska alltid visas direkt på tangenterna.
+   - Noter får aldrig döljas eller ersättas av annan grafik.
+
+2. Pianografiken består av 10 fasta pianogrupper:
+   - Dessa benämns R3.Pianogroup.1 till R3.Pianogroup.10.
+   - Samtliga 10 pianogrupper ska placeras horisontellt på samma rad.
+   - Ingen radbrytning får förekomma.
+   - Pianogrupperna ska ligga kant‑i‑kant utan mellanrum.
+   - R3-panelens bredd utgör 85% av sidans bredd (R1 upptar 15%).
+   - De 10 pianogrupperna ska tillsammans fylla hela denna bredd.
+   - Varje pianogrupp ska automatiskt anpassa sin bredd så att alla 10 får plats.
+   - Pianogruppens höjd ska skalas proportionellt till dess bredd för att bibehålla korrekta pianoproportioner.
+   - Ingen del av R3.Pianogroup får visa sidans bakgrund:
+       * Ingen padding
+       * Ingen margin
+       * Ingen vit yta mellan grupperna
+
+3. Tonmarkering i R3 är exkluderad:
+   - Triad‑markering: exkluderas
+   - Tetrad‑markering: exkluderas
+   - Inversions‑markering: exkluderas
+   - Endast ackordnoter får markeras när ett ackord visas; inga extra overlays
+
+4. Knappar för R3:
+   - B7: Triad (funktion exkluderad, minimal rund knapp utan text)
+   - B8: Tetrad (funktion exkluderad, minimal rund knapp utan text)
+   - B9: Inversion (funktion exkluderad, minimal rund knapp utan text)
+   - BR3: Load into R2B ("LR2B")
+
+5. BR3‑funktion:
+   - BR3 ska skicka det SENAST AKTIVA ackordet i R3 (från R1/B1/B3) till R2B.
+   - BR3 skickar alltid ett (1) ackord, aldrig en lista.
+
+6. Placering av knappar:
+   - Knapparna B7, B8, B9 och BR3 ska placeras i en horisontell rad direkt under pianografiken.
+   - Knapparna ska vara centrerade horisontellt i R3-panelen.
+   - Knapparna ska vara små och runda, utan text på eller under knapparna (endast ikon/färgindikator om behövs).
+   - Avståndet mellan knapparna ska vara jämnt.
+   - Knapparnas rad ska ligga direkt under R3.Pianogroup-raden utan mellanliggande element.
+
+7. R3-panelens bakgrundsfärg:
+   - R3-panelens bakgrundsfärg är vit.
+
+R3 Input From R1
+----------------
+
+1. R3 får alltid sitt aktiva ackord från R1.
+   - R1 ansvarar för att välja eller aktivera ett ackord.
+   - Det ackord som är aktivt i R1 ska omedelbart göras tillgängligt för R3.
+
+2. R3 ska ta emot ackordet som en strukturerad datasträng:
+   - Format: Ackordnamn (t.ex. "Cmaj7", "Dm", "F#dim")
+   - Endast ett ackord åt gången är aktivt.
+
+3. När R3 tar emot ett nytt ackord från R1:
+   - Ackordnamn visas ovanför pianografiken (överlappar ej tangenter).
+   - Tangenter för ackordets toner markeras; inga triad/tetrad/inversions‑overlays.
+   - Ingen annan källa får ändra R3:s aktiva ackord.
+
+4. R3 ska alltid betrakta det senaste ackordet från R1 som det aktuella.
+   - Tidigare ackord ska ignoreras.
+   - Ingen historik sparas i R3.
+
+5. R3 får inte själv generera eller ändra ackord.
+   - R3 är en ren presentationspanel.
+   - Endast R1 får bestämma vilket ackord som är aktivt.
+
+
+3. R1.X – Chord Validation Rules (Strict Mode – Option B)
+   Alla R1.R2A.n textfält måste följa strikt ackordgrammatik:
+
+   1. Rot: A, B, C, D, E, F, G
+   2. Olyckstecken (valfritt): # eller b
+   3. Kvalitet (valfritt):
+        - maj, min, dim, aug, sus, dom
+   4. Extension (valfritt):
+        - 2, 4, 5, 6, 7, 9, 11, 13
+   5. Alterationer (valfritt):
+        - #5, b5, #9, b9, #11, b13
+   6. Additions (valfritt):
+        - add9, add11, add13
+   7. Maximal längd: 10 tecken totalt.
+   8. Ogiltiga ackord får inte skickas till R3.
+
+4. R1.XC – Invalid Chord Handling (Option C)
+   - Vid ogiltigt ackord och knapptryckning (B1 eller B3):
+       a) Textfältet ska tömmas automatiskt.
+       b) R3 ska inte uppdateras med ogiltigt ackord.
+       c) Inget ljud ska spelas.
+   - Ingen felindikering ska visas.
+   - Rensning ska ske tyst och omedelbart.
+
+5. Exempel
+   Giltiga ackord:
+     - Cmaj7
+     - Dm9
+     - F#dim
+     - G7b9
+     - Bbmaj13
+
+   Ogiltiga ackord:
+     - Hm7
+     - C##11
+     - Zmaj7
+     - 7Cmaj
+
+6. Radknappar
+   B1 – "LR3"
+       - Laddar R1.R2A.n till R3.n.
+         - Om B1 skulle adressera en elfte position (n > 10) ignoreras klicket; inga nya pianogrupper skapas eller ersätts.
+       - Spelar ljud för det aktuella ackordet.
+       - Kräver giltigt ackord.
+
+   B2 – "XR1"
+         - Rensar den aktuella R1‑raden.
+         - Rensar motsvarande R3‑pianogrupp (samma index).
+         - Erase = sätt textfält på raden till tom sträng.
+       - Spelar inget ljud.
+
+7. Globala knappar (placerade under R1‑raderna, bredvid varandra)
+   B3 – "LR3" (Load All)
+       - Laddar alla giltiga R1‑värden till R3.
+       - Spelar ljud för alla giltiga ackord.
+       - Ogiltiga ackord rensas enligt R1.XC.
+
+   B4 – "XR1" (Reset All)
+       - Rensar alla R1‑fält.
+       - Rensar alla R3‑fält.
+       - Spelar inget ljud.
+
+8. Hjälptexter
+   R1.1 – "Input for chords start with caption characters"
+   R1.2 – Vid HTML‑generering ska en tidsstämpel inkluderas:
+          Format: yy.dd.dd hour.minute
+
+9. Ljudregler
+   - B1 spelar ett ackord.
+   - B3 spelar alla ackord.
+   - B2 och B4 spelar inget ljud.
+   
+<--
+
+
+
+<!-- Gör ej fler aktiviter nedan
+Om du vill kan jag nu:
+
+göra en slutlig ren version
+
+skapa en HTML/JS‑implementeringsplan
+
+analysera R2A eller R3 på samma nivå
+
+eller bygga ett flödesschema över hela R1‑logiken
+-->
+

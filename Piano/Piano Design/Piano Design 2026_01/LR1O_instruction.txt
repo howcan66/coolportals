@@ -1,0 +1,44 @@
+LR1O Instruction Placeholder
+============================
+
+Purpose
+-------
+Define and track LR1O (R1 row button B0) behavior: open a minimal popup window at 50% screen size with a single button labeled XR11O.
+
+Current Behavior (agreed)
++-------------------------
++- On click, preventDefault/stopPropagation.
++- Opens a new window sized to 50% of available screen width/height.
++- Window features: no toolbar, no location bar, no menubar, no status bar, no scrollbars; resizable allowed.
++- Layout: matches R1 panel structure exactly:
++  * panel-header with "R3 - Piano Groups Blank Window" and timestamp (same style as R1 header)
++  * panel-body with XR1O button centered directly below
++- Button: labeled "XR1O" (singular), styled to match main frames (padding 2px 6px, font-size 0.7rem, #eee background, #ccc border, #ddd hover).
++- Timestamp format: YY.MM.DD • HH.MM (matches integration.html timestamp format).
++- Logging: console log in popup ("XR1O window ready") and log in opener with row/size; handles popup-blocker gracefully.
+
+Discussion Checklist (future changes)
+-------------------------------------
+1) Should XR11O perform any action (e.g., send data back, close window, trigger R3/R2B)?
+2) Do we need to pass row/chord data into the popup?
+3) Should multiple LR1O windows be allowed (per-row naming) or single instance?
+4) Any security constraints (noopener/noreferrer) needed beyond current feature set?
+5) Accessibility: aria-labels for XR11O button, focus management on open.
+6) Close behavior: manual only vs. auto-close after action.
+
+Open Questions
+--------------
+- What should XR11O actually do when clicked?
+- Should the popup receive context (row, chord value)?
+- Should we block multiple popups or reuse one instance?
+
+Decision Log
+------------
+- 2026-01-25: Initial implementation: popup window 50% screen, single XR11O button, no further behavior.
+
+Action Items
+------------
+- Decide XR11O button behavior and data flow.
+- Add aria-label/focus handling if needed.
+- If behavior defined, update integration.html and specs accordingly.
+- Add tests/manual steps for popup-blocker scenarios.

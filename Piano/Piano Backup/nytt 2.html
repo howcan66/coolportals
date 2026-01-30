@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chord Input and Analysis Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #FFFFFF;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 2fr 2fr; /* R1, R2A, R2B horizontally */
+            grid-template-rows: 3fr 1fr; /* First row for R1, R2A, R2B; second row for R3 */
+            height: 100vh;
+            gap: 1px; /* Small spacing between panels */
+            border: 1px solid #CCCCCC;
+        }
+
+        .frame {
+            border: 1px solid #CCCCCC;
+            border-radius: 4px; /* Smooth edges for better aesthetics */
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        #r1 {
+            background-color: #F8F8F8; /* Light gray for clarity */
+            grid-row: 1 / span 2; /* Spans the full height of layout */
+        }
+
+        #r2a {
+            background-color: #FFFFFF;
+        }
+
+        #r2b {
+            background-color: #FFFFFF;
+        }
+
+        #r3 {
+            background-color: #F1F1F1;
+            grid-column: 2 / span 2; /* R3 spans across R2A and R2B columns */
+        }
+
+        /* Button styles with soft colors */
+        button {
+            background-color: #DDF3FF;
+            color: #007BFF; /* Soft blue text color */
+            border: 1px solid #B2E0FF; /* Light blue border */
+            padding: 8px 12px;
+            margin: 5px;
+            border-radius: 5px; /* Slightly rounded corners for button */
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background-color: #B2E0FF; /* Light blue hover effect */
+            color: #0056B3; /* Dark blue text on hover */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- R1: Piano Entry Panel -->
+        <div id="r1" class="frame">
+            <h3>R1: Piano Entry Panel</h3>
+            <textarea id="r1-text-input" rows="3" placeholder="Chords loaded from R2A..." style="width: 100%;"></textarea>
+            <p>Manual chord input:</p>
+            <button onclick="alert('OK button clicked')">B1: OK</button>
+            <button onclick="resetR1()">B2: X</button>
+            <button onclick="alert('Load all data into R3')">B3: OK</button>
+            <button onclick="resetAllR1()">B4: X</button>
+            <div style="margin-top: 10px; font-size: 12px; color: #333;">
+                <strong>Help:</strong>
+                <ul>
+                    <li>Use uppercase letters for chord names.</li>
+                    <li>Separate chords with spaces (e.g., "C G7 Am F").</li>
+                    <li>Chords from R2A will be loaded here via B5.</li>
+                    <li>Click "OK" to send chords to the Chord List Panel.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- R2A: Text Input Panel -->
+        <div id="r2a" class="frame">
+            <h3>R2A: Text Input Panel</h3>
+            <textarea id="r2a-text-input" rows="5" placeholder="Enter chords here..." style="width: 100%;"></textarea>
+            <button onclick="loadToR1()">B5: Validate (Chords to R1)</button>
+            <button onclick="resetR2A()">B6: X</button>
+        </div>
+
+        <!-- R2B: Chord Analysis Panel -->
+        <div id="r2b" class="frame">
+            <h3>R2B: Chord Analysis Panel</h3>
+            <div style="height: 100px; background-color: #CCC; text-align: center; line-height: 100px;">
+                Virtual Piano (C4 - B5)
+            </div>
+            <p>Analysis Details:</p>
+            <ul>
+                <li>Notes in chord</li>
+                <li>Chord type and alternatives</li>
+            </ul>
+            <button onclick="alert('Play Chord button clicked')">B10: Play Chord</button>
+        </div>
+
+        <!-- R3: Chord List Panel -->
+        <div id="r3" class="frame">
+            <h3>R3: Chord List Panel</h3>
+            <p>Validated chords will appear here.</p>
+            <button onclick="alert('Show Triad button clicked')">B7: Triad</button>
+            <button onclick="alert('Show Tetrad button clicked')">B8: Tetrad</button>
+            <button onclick="alert('Show Inversions button clicked')">B9: Inversions</button>
+        </div>
+    </div>
+
+    <script>
+        // Function to load validated chords from R2A to R1
+        function loadToR1() {
+            const r2aInput = document.querySelector('#r2a-text-input').value.trim();
+            const r1TextArea = document.querySelector('#r1-text-input');
+            
+            if (r2aInput === '') {
+                alert('No valid chords found in R2A!');
+            } else {
+                r1TextArea.value = r2aInput; // Load R2A chords into R1
+                alert('Chords successfully loaded into R1 from R2A');
+            }
+        }
+
+        // Function to reset R1 text input
+        function resetR1() {
+            document.querySelector('#r1-text-input').value = '';
+            alert('R1 input cleared!');
+        }
+
+        // Function to reset all in R1
+        function resetAllR1() {
+            document.querySelector('#r1-text-input').value = '';
+            alert('R1 fully reset!');
+        }
+
+        // Function to reset R2A text input
+        function resetR2A() {
+            document.querySelector('#r2a-text-input').value = '';
+            alert('R2A input cleared!');
+        }
+    </script>
+</body>
+</html>

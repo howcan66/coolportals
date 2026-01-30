@@ -1,0 +1,1885 @@
+================================================================================
+PIANO BUTTONS SPECIFICATION - TEXT FORMAT WITH COMMENTS
+Complete Button Reference with Detailed Instructions
+Piano Design Interactive Chord Visualization Tool
+================================================================================
+
+STATUS: DRAFT (Ready for Version Control & Publication)
+Current Date: January 25, 2026
+Format: Text with HTML Comment Structure
+Language: English
+
+
+================================================================================
+VERSION CONTROL & CHANGE LOG
+================================================================================
+
+CURRENT VERSION: 1.0
+Status: READY FOR PUBLICATION ✅
+Published: NO (Awaiting final review)
+
+
+VERSION HISTORY:
+────────────────
+
+v1.0 - January 25, 2026
+├─ Initial creation
+├─ All 12 buttons documented (B1-B11 + BR3)
+├─ HTML comment structure implemented
+├─ Generic descriptions added for each button
+├─ Complete specifications with examples
+├─ Validation rules documented
+├─ Event handlers documented
+├─ Usage workflows with examples
+├─ Technical notes & comparisons
+├─ Accessibility features covered
+├─ Testing checklist included
+├─ Summary table of all buttons
+├─ Total: 1700+ lines
+├─ Status: COMPLETE
+└─ Changes: Initial version
+
+
+CHANGE TRACKING:
+────────────────
+
+[Add new changes below this line - Format: v[X.X] - [Date] - [Change description]]
+
+v1.1 - [Date] - [Change description here]
+v1.2 - [Date] - [Change description here]
+v1.3 - [Date] - [Change description here]
+
+
+PENDING REQUESTS & TODO:
+────────────────────────
+
+⏳ TODO: Update ASCII header snippets in commented spec to reflect new labels (LR3B1, XR1B2, LR1B4, XR2A)
+  └─ Status: PENDING
+  └─ Priority: LOW
+  └─ Target Version: v1.1
+  └─ Action: Refresh the small header/diagram blocks to match current button names
+
+⏳ TODO: Align keyboard shortcuts/UI references with new labels (RLR2B, XR2B, LR3B1, XR1B2, LR1B4, XR2A)
+  └─ Status: PENDING
+  └─ Priority: MEDIUM
+  └─ Target Version: v1.1
+  └─ Action: Update shortcut hints, any UI label references, and docs to use the new names consistently
+
+
+PENDING REQUESTS & TODO:
+────────────────────────
+
+⏳ REQUESTED: Create "Piano Button Review Update" text file
+   └─ Description: Comprehensive review of all buttons with update recommendations
+   └─ Status: PENDING
+   └─ Priority: MEDIUM
+   └─ Requested Date: January 25, 2026
+   └─ Action: Create new file with:
+      • Review of all 12 buttons
+      • What's working well
+      • Potential improvements
+      • Button interactions analysis
+      • User feedback incorporation
+      • Recommendations for next version
+   └─ File Name: Piano_Button_Review_Update.txt
+   └─ Target Version: v1.1
+
+⏳ TODO: Add per-row mode tracking
+   └─ Description: Implement individual mode states per R3 row (not global)
+   └─ Status: PLANNED
+   └─ Priority: LOW
+   └─ Target Version: v2.0
+
+⏳ TODO: Add keyboard shortcuts implementation
+   └─ Description: Document and implement keyboard shortcuts for all buttons
+   └─ Status: PLANNED
+   └─ Priority: MEDIUM
+   └─ Shortcuts needed: T, 4, I, Enter, Space, Delete, etc.
+   └─ Target Version: v1.2
+
+⏳ TODO: Add confirmation dialogs for destructive actions
+   └─ Description: Add confirmation for B4, B6, B11 (Clear operations)
+   └─ Status: PLANNED
+   └─ Priority: MEDIUM
+   └─ Target Version: v1.2
+
+⏳ TODO: Add undo/redo functionality
+   └─ Description: Implement undo/redo for major operations
+   └─ Status: PLANNED
+   └─ Priority: LOW
+   └─ Target Version: v2.0
+
+
+PUBLICATION CHECKLIST:
+──────────────────────
+
+Before publishing, ensure:
+☐ All 12 buttons fully documented
+☐ No incomplete sections
+☐ All examples tested and verified
+☐ HTML comments properly formatted
+☐ No typos or spelling errors
+☐ Technical specifications accurate
+☐ Accessibility notes complete
+☐ Ready for GitHub Pages upload
+☐ File saved and backed up
+☐ Version number confirmed
+
+
+STATUS INDICATORS:
+──────────────────
+
+🟢 READY FOR PUBLICATION - All requirements met
+🟡 IN PROGRESS - Active development/changes
+🔴 ON HOLD - Blocked or awaiting feedback
+✅ PUBLISHED - Live on GitHub Pages
+📝 NEEDS REVIEW - Awaiting approval
+
+
+CURRENT STATUS: 🟢 READY FOR PUBLICATION
+
+Last Updated: January 25, 2026
+Last Modified By: [Your Name/AI Assistant]
+Next Review Date: [Set when ready]
+
+
+================================================================================
+
+
+<!-- ========================================
+     FRAME: R1 | BUTTON: B1 (Row Load)
+     ======================================== -->
+
+<!-- GENERIC DESCRIPTION -->
+<!-- 
+This button loads a single chord from the input field in a specific row
+and sends it to R3 for visual display. It validates the chord before
+sending. Each row has its own B1 button numbered 1-24.
+-->
+
+BUTTON: B1 - Row Load
+HTML ID: r1-b1-{row}
+Display Name: "LR3B1" (Load)
+Location: Right side of input field (per row)
+Size: 28px × 20px (compact)
+Text Color: #000 (black)
+Background Color: #eee (light gray)
+Hover Color: #ddd (medium gray)
+Border: 1px solid #ccc
+Font Size: 0.7rem
+Font Weight: Normal
+
+FUNCTION:
+• Takes the chord from input field in current row
+• Validates the chord using CHORD_REGEX pattern
+• If valid, sends to R3 for display
+• If invalid, clears the field
+• Updates R3 piano visualization immediately
+
+VALIDATION RULES:
+Pattern: /^[A-GH][#b]?m?(maj7|m7|7|sus2|sus4)?\d*$/i
+Normalize: H → B (Swedish notation support)
+Examples Valid: C, C#, Cm, Cmaj7, C7, Cm7, D, Dm7, F#, Gb, etc.
+Examples Invalid: X, hello, !chord, xyz123, etc.
+
+EVENT HANDLER: handleB1Click(row)
+Event Type: click
+Prevents Default: Yes
+Stop Propagation: Yes (at button level)
+
+SUCCESS FEEDBACK:
+• Input field shows validated chord
+• R3 piano highlights chord notes in green color
+• Audio plays the chord automatically
+• Console logs: "R1:B1 row {row} value {raw} validated {v}"
+
+ERROR FEEDBACK:
+• Invalid input is cleared silently
+• R3 piano group for this row is cleared
+• No error message shown to user
+• Console logs validation failure
+
+TIMING:
+• Immediate execution (no delay)
+• No waiting period between click and execution
+
+RELATED BUTTONS:
+• B2: Clear this specific row
+• B3: Load all rows at once
+• R2A B5: Also sends data to R1
+
+USAGE WORKFLOW:
+1. User types "Dm" in row 5 input field
+2. User clicks B1-5 button
+3. "Dm" is validated against CHORD_REGEX
+4. Chord passes validation
+5. R3 row 5 piano shows D, F, A notes highlighted in green
+6. Chord audio plays automatically
+7. User can hear the result immediately
+
+TECHNICAL NOTES:
+• Each row (1-24) has independent B1 button
+• Button ID dynamically created: r1-b1-1, r1-b1-2, ..., r1-b1-24
+• Event listener attached in setupR1() function
+• Uses window.R3.receiveChordFromR1(chord, row) interface
+• Prevents race conditions with same-row multiple clicks
+
+<!-- END: R1 | B1 -->
+
+
+<!-- ========================================
+     FRAME: R1 | BUTTON: B2 (Row Clear)
+     ======================================== -->
+
+<!-- GENERIC DESCRIPTION -->
+<!-- 
+This button clears a single row in R1, removing the chord from the
+input field and clearing the corresponding piano display in R3.
+Each row has its own B2 button numbered 1-24.
+-->
+
+BUTTON: B2 - Row Clear
+HTML ID: r1-b2-{row}
+Display Name: "XR1B2" (Delete/Clear)
+Location: Right side of B1 button (per row)
+Size: 28px × 20px (compact)
+Text Color: #000 (black)
+Background Color: #eee (light gray)
+Hover Color: #ddd (medium gray)
+Border: 1px solid #ccc
+Font Size: 0.7rem
+Font Weight: Normal
+
+FUNCTION:
+• Clears the input field in current row
+• Clears the corresponding R3 piano group
+• Does not affect other rows
+• Silent operation (no confirmation dialog)
+• Immediate feedback
+
+OPERATIONS PERFORMED:
+1. Set input field value to empty string ("")
+2. Call R3.clearPianoGroup(row)
+3. Stop any playing audio for this row
+
+SUCCESS FEEDBACK:
+• Input field becomes empty
+• R3 piano group resets to default (no color highlights)
+• Chord label in R3 shows "–" (dash)
+• Visual confirmation of deletion
+
+ERROR FEEDBACK:
+• None (operation always succeeds)
+• No invalid states possible
+
+TIMING:
+• Instantaneous execution
+• No confirmation required
+• No delay between click and completion
+
+RELATED BUTTONS:
+• B1: Load this specific row
+• B4: Clear all rows at once
+• R2A B6: Also clears content (in textarea)
+
+USAGE WORKFLOW:
+1. User has "Dm" in row 5 input field
+2. R3 row 5 shows D, F, A notes in green
+3. User clicks B2-5 button
+4. Input field becomes empty
+5. R3 row 5 piano clears to default white/black keys
+6. Chord label shows "–"
+7. Row is now ready for new input
+
+PRECAUTIONS:
+• No confirmation dialog (immediate deletion)
+• User should be aware of this behavior
+• Suggestion: Add confirmation in future version
+• Or add undo functionality in future
+
+TECHNICAL NOTES:
+• Each row (1-24) has independent B2 button
+• Button ID: r1-b2-1, r1-b2-2, ..., r1-b2-24
+• Event listener attached in setupR1() function
+• Uses window.R3.clearPianoGroup(row) interface
+• Safe to call multiple times (idempotent)
+
+<!-- END: R1 | B2 -->
+
+
+<!-- ========================================
+  FRAME: R1 | BUTTON: B0 (LR1O - TBD Action)
+  ======================================== -->
+
+<!-- GENERIC DESCRIPTION -->
+<!-- 
+Placeholder button added after XR1B2 on each row.
+Action is intentionally deferred. This entry tracks the pending
+definition so future reviews can set its behavior.
+-->
+
+BUTTON: B0 - LR1O (Action TBD)
+HTML ID: r1-b0-{row}
+Display Name: "LR1O" (Pending)
+Location: Right of XR1B2 (per row)
+Size: 28px × 20px (compact)
+Text Color: #000 (black)
+Background Color: #eee (light gray)
+Hover Color: #ddd (medium gray)
+Border: 1px solid #ccc
+Font Size: 0.7rem
+Font Weight: Normal
+
+FUNCTION:
+• Opens a popup window at ~50% of available screen size
+• Popup contains only one centered button labeled "XR11O"
+• No chord/state mutation yet
+• Reserved for future action (e.g., copy/duplicate/send/custom)
+
+EVENT HANDLER: handleB0Click(evt, row)
+Event Type: click
+Prevents Default: Yes
+Stop Propagation: Yes
+
+STATUS:
+• Popup behavior implemented; XR11O button present
+• Action for XR11O still TBD
+• Tie into change log when action is defined
+
+TODO NEXT REVIEW:
+• Decide XR11O action and data flow
+• Add accessibility (aria-label/focus) if needed
+• Update integration.html and specs accordingly
+
+<!-- END: R1 | B0 (LR1O) -->
+
+
+<!-- ========================================
+    FRAME: R1 | BUTTON: LR3 (Global Load All)
+     ======================================== -->
+
+<!-- GENERIC DESCRIPTION -->
+<!-- 
+This button loads and validates ALL 24 rows at once, sending each
+chord to R3 with a 400ms delay between each. Creates a visual sequence
+of chords lighting up one after another.
+-->
+
+BUTTON: LR3 - Global Load All
+HTML ID: r1-b3
+Display Name: "LR3"
+Location: Top of R1 panel, left position
+Size: 60px × 24px (compact)
+Text Color: #000 (black)
+Background Color: #eee (light gray)
+Hover Color: #ddd (medium gray)
+Border: 1px solid #ccc
+Font Size: 0.7rem
+Font Weight: Normal
+
+FUNCTION:
+• Loads and validates ALL 24 rows simultaneously
+• Sends each chord to R3 for display
+• Processes sequentially with 400ms delay between each
+• Used for batch operations and demonstrations
+• Creates visual "cascade" effect
+
+PROCESSING ALGORITHM:
+For each row from 1 to 24:
+  1. Read input field value from this row
+  2. Validate using CHORD_REGEX pattern
+  3. Add to internal array (valid chords only)
+  4. Schedule to R3 with 400ms delay
+  5. Move to next row
+End loop
+
+TIMING CALCULATION:
+• Base delay: 400ms between each chord
+• Number of chords: Up to 24
+• Total time: 24 × 400ms = 9,600ms (9.6 seconds)
+• Purpose: Provide visual feedback during batch load
+
+VALIDATION:
+Pattern: /^[A-GH][#b]?m?(maj7|m7|7|sus2|sus4)?\d*$/i
+Invalid chords are skipped silently
+Valid chords continue to process
+No validation error messages shown
+
+SUCCESS FEEDBACK:
+• Each R3 row lights up sequentially (one per 400ms)
+• Chords are played one after another
+• Progress is visually apparent in R3
+• Console logs full array of chords
+
+ERROR FEEDBACK:
+• Invalid chords are skipped silently
+• Corresponding R3 group remains cleared
+• Valid chords continue processing normally
+• No error popups or messages
+
+EVENT HANDLER: handleB3Click()
+Event Type: click
+Prevents Default: Yes
+Stop Propagation: Yes (at button level)
+
+CONSOLE LOGGING:
+• Output: "R1:B3 batch send, [chord array]"
+• Shows all chords that were loaded
+• Useful for debugging batch operations
+
+RELATED BUTTONS:
+• B1: Load individual row (one at a time)
+• B4: Clear all rows at once
+• R2A B5: Also sends batch to R1 (from textarea)
+
+USAGE WORKFLOW - SCENARIO 1 (Direct):
+1. User fills all 24 rows with different chords
+2. User clicks B3 button
+3. First chord loads → R3 row 1 lights up green → Audio plays
+4. Wait 400ms
+5. Second chord loads → R3 row 2 lights up green → Audio plays
+6. Wait 400ms
+7. Process repeats for all 24 chords
+8. Total visual sequence takes ~9.6 seconds
+
+USAGE WORKFLOW - SCENARIO 2 (From R2A):
+1. User enters chords in R2A textarea
+2. User clicks R2A B5 (Load All)
+3. Chords populate R1 rows
+4. User then clicks R1 B3
+5. Cascade sequence begins
+
+TECHNICAL IMPLEMENTATION:
+• Creates array from all 24 rows
+• Uses setTimeout for delayed execution
+• Maintains timing accuracy
+• Builds complete batch before starting delays
+• Logs entire batch for debugging
+
+OPTIMIZATION NOTES:
+• Current delay: 400ms (configurable)
+• Could be reduced for faster playback
+• Could be increased for slower sequences
+• Delay value should be tunable in future
+
+<!-- END: R1 | B3 -->
+
+
+<!-- ========================================
+    FRAME: R1 | BUTTON: RALLB4 (Global Clear All)
+     ======================================== -->
+
+<!-- GENERIC DESCRIPTION -->
+<!-- 
+This button clears ALL 24 rows at once, removing all input fields
+and resetting all R3 piano groups to default state. Also resets the
+R2B piano graphics. One-click reset for the entire interface.
+-->
+
+BUTTON: RALLB4 - Global Clear All
+HTML ID: r1-b4
+Display Name: "RALLB4"
+Location: Top of R1 panel, right of B3
+Size: 60px × 24px (compact)
+Text Color: #000 (black)
+Background Color: #eee (light gray)
+Hover Color: #ddd (medium gray)
+Border: 1px solid #ccc
+Font Size: 0.7rem
+Font Weight: Normal
+
+FUNCTION:
+• Clears ALL 24 input fields in R1
+• Clears ALL 24 piano groups in R3
+• Resets entire interface to empty state
+• One-click reset for complete cleanup
+• No selective clearing
+
+PROCESSING ALGORITHM:
+For each row from 1 to 24:
+  1. Call handleB2Click(row)
+  2. This clears input field for this row
+  3. This clears R3 piano group for this row
+End loop
+
+OPERATIONS PER ROW:
+• Set input field value to ""
+• Clear R3 piano group highlights
+• Reset chord label to "–"
+• Stop any playing audio
+
+TIMING:
+• Instantaneous execution
+• All 24 rows cleared at once
+• No delay between rows
+• Completes in <100ms
+
+SUCCESS FEEDBACK:
+• All 24 input fields become empty
+• All 24 R3 pianos reset to default (white/black keys only)
+• All chord labels show "–" (dash)
+• Clean slate ready for new input
+
+ERROR FEEDBACK:
+• None (operation always succeeds)
+• No invalid states possible
+• No partial failures
+
+EVENT HANDLER: handleB4Click()
+Event Type: click
+Prevents Default: Yes
+Stop Propagation: Yes (at button level)
+
+CAUTION WARNINGS:
+• No confirmation dialog!
+• Operation is immediate and permanent
+• User should be aware of destructive nature
+• Suggestion: Add confirmation dialog in future
+• Or add undo functionality in future
+
+RELATED BUTTONS:
+• B2: Clear individual row
+• B3: Load all rows
+• R2A B6: Also clears content (in textarea)
+
+USAGE WORKFLOW:
+1. User has worked with 24 different chords
+2. User wants to start fresh with new progression
+3. User clicks B4 button
+4. All input fields clear instantly
+5. All R3 pianos reset to default state
+6. Interface is blank and ready for new input
+
+TYPICAL USE CASES:
+• Starting new musical progression
+• Clearing mistakes
+• Resetting after demonstration
+• Cleaning up between sessions
+
+TECHNICAL IMPLEMENTATION:
+• Loops through all 24 rows
+• Calls existing B2 handler for each row
+• Reuses existing clear logic
+• No duplicate code
+• Maintains consistency
+
+FUTURE ENHANCEMENTS:
+• Add confirmation dialog: "Clear all 24 rows?"
+• Add undo functionality (remember previous state)
+• Add selective range clearing (clear rows 1-10, etc)
+• Add progress indicator for large operations
+
+<!-- END: R1 | B4 -->
+
+
+<!-- ========================================
+     FRAME: R2A | BUTTON: B5 (Batch Load All)
+     ======================================== -->
+
+<!-- GENERIC DESCRIPTION -->
+<!-- 
+This button reads text from the R2A textarea, parses it for chords
+(odd rows only), validates each chord, and sends them to R1 for
+processing. Ignores even rows (for lyrics or comments).
+-->
+
+BUTTON: B5 - Batch Load All
+HTML ID: r2a-b5
+Display Name: "LR1B4"
+Location: Top of R2A panel, left position
+Size: 60px × 24px (compact)
+Text Color: #000 (black)
+Background Color: #eee (light gray)
+Hover Color: #ddd (medium gray)
+Border: 1px solid #ccc
+Font Size: 0.7rem
+Font Weight: Normal
+
+FUNCTION:
+• Reads all text from textarea element
+• Parses only odd-numbered rows (1, 3, 5, 7...)
+• Ignores even-numbered rows (2, 4, 6, 8...)
+• Validates all extracted chords
+• Sends validated chords to R1
+• Builds progressive chord sequence
+
+TEXTAREA ELEMENT:
+• ID: r2a-textarea
+• Type: HTML textarea
+• Rows: 20 visible rows
+• Font: Arial, sans-serif
+• Placeholder: "Odd rows: chords\nEven rows: lyrics (ignored)"
+
+INPUT FORMAT RULES:
+Line 1 (odd):   Chord name (e.g., "C")      ← PROCESSED
+Line 2 (even):  Text/lyrics (e.g., "Intro") ← IGNORED
+Line 3 (odd):   Chord name (e.g., "F")      ← PROCESSED
+Line 4 (even):  Text/lyrics (e.g., "Verse") ← IGNORED
+...etc
+
+PROCESSING ALGORITHM:
+1. Get textarea element
+2. Split content by newline character (\n)
+3. For each line at index 0, 2, 4, 6... (odd rows):
+   a. Trim whitespace
+   b. Check if line is not empty
+   c. Parse by space to get individual chord tokens
+   d. For each token:
+      i. Validate against CHORD_REGEX
+      ii. If valid, add to results array
+4. Clear R1 (call resetR1())
+5. Fill R1 with validated chords (call fillR1(chords))
+6. Log results to console
+
+PARSING EXAMPLE 1:
+Input:
+  C major
+  Intro
+  Dm F G
+  Verse
+
+Processing:
+Line 0 (odd):   "C major"
+                Parse to: ["C", "major"]
+                Validate: "C" ✓ valid, "major" ✗ invalid
+                Result: ["C"]
+
+Line 1 (even):  "Intro"
+                SKIPPED (even row)
+
+Line 2 (odd):   "Dm F G"
+                Parse to: ["Dm", "F", "G"]
+                Validate: All ✓ valid
+                Result: ["Dm", "F", "G"]
+
+Line 3 (even):  "Verse"
+                SKIPPED (even row)
+
+Final Array: ["C", "Dm", "F", "G"]
+Fill R1: Row 1=C, Row 2=Dm, Row 3=F, Row 4=G
+
+PARSING EXAMPLE 2:
+Input:
+  C
+  Intro
+  F major
+  Verse
+  G7sus4
+  Chorus
+
+Processing:
+Line 0 (odd):   "C"
+                Result: ["C"] ✓
+
+Line 1 (even):  "Intro" - SKIPPED
+
+Line 2 (odd):   "F major"
+                Parse: ["F", "major"]
+                Result: ["F"] (major filtered out)
+
+Line 3 (even):  "Verse" - SKIPPED
+
+Line 4 (odd):   "G7sus4"
+                Parse: ["G7sus4"]
+                Result: ["G7sus4"] ✓
+
+Line 5 (even):  "Chorus" - SKIPPED
+
+Final Array: ["C", "F", "G7sus4"]
+
+VALIDATION RULES:
+Pattern: /^[A-GH][#b]?m?(maj7|m7|7|sus2|sus4)?\d*$/i
+Normalize: H → B conversion before validation
+Case Insensitive: Yes (converts to uppercase)
+
+CHORD FORMAT:
+[Note][Accidental][Type][Suffix]
+Note: A-G or H (converts H to B)
+Accidental: # (sharp) or b (flat) - optional
+Type: m (minor) - optional
+Suffix: maj7, m7, 7, sus2, sus4 - optional
+Digit: Optional chord number
+
+Valid Examples:
+C, C#, Db, Cm, C#m, Cmaj7, Cm7, C7, Csus2, Csus4
+D, D#, Eb, Dm, D#m, Dmaj7, Dm7, D7, Dsus2, Dsus4
+E, F, F#, Gm, Am, A#m, Bb, B, etc.
+
+Invalid Examples:
+X, hello, !, @chord, 123, chord1, etc.
+
+SUCCESS FEEDBACK:
+• R1 input fields populate with parsed chords
+• Each chord shows in corresponding row (1, 2, 3...)
+• User can verify chords in R1 before further action
+• Console logs: "R2A: loaded chords to R1, [array]"
+
+ERROR FEEDBACK:
+• Invalid chords are silently filtered out
+• Empty lines are skipped
+• No error messages or warnings displayed
+• No error popups or dialogs
+
+SPECIAL HANDLING:
+• Multiple spaces between chords: Treated as delimiters
+• Tab characters: Also work as delimiters
+• Leading/trailing whitespace: Trimmed from all lines
+• Empty lines: Skipped without error
+
+EVENT HANDLER: r2aLoadAll()
+Event Type: click
+Prevents Default: Yes
+Stop Propagation: Yes (at button level)
+
+CONSOLE LOGGING:
+• Output: "R2A: lines count {number}"
+• Output: "R2A: loaded chords to R1, {array}"
+• Shows parsing progress
+• Useful for debugging
+
+RELATED BUTTONS:
+• B6: Clear textarea content
+• R1 B3: Load all R1 rows to R3 (next step)
+
+TYPICAL WORKFLOW:
+R2A (B5) → R1 (populated) → R1 (B3) → R3 (displayed)
+
+USAGE WORKFLOW - COMPLETE EXAMPLE:
+1. User opens application
+2. User types in R2A textarea:
+   C major
+   Intro
+   F major
+   Verse
+   G major
+   Chorus
+   C major
+   Outro
+3. User clicks B5 button
+4. Text is parsed:
+   - Line 1 (C major) → Parse → C ✓, major ✗ → Result: C
+   - Line 2 (Intro) → SKIPPED
+   - Line 3 (F major) → Parse → F ✓, major ✗ → Result: F
+   - Line 4 (Verse) → SKIPPED
+   - Line 5 (G major) → Parse → G ✓, major ✗ → Result: G
+   - Line 6 (Chorus) → SKIPPED
+   - Line 7 (C major) → Parse → C ✓, major ✗ → Result: C
+   - Line 8 (Outro) → SKIPPED
+5. Final chords: ["C", "F", "G", "C"]
+6. R1 clears and refills:
+   - Row 1: C
+   - Row 2: F
+   - Row 3: G
+   - Row 4: C
+   - Rows 5-24: Empty
+7. User now sees R1 populated with chords
+8. User can click R1 B3 to load all to R3
+9. R3 displays all chords as pianos
+
+TECHNICAL IMPLEMENTATION NOTES:
+• Textarea split by newline: .split('\n')
+• Loop increment: i += 2 (processes odd indices 0, 2, 4...)
+• Space parsing: .split(/\s+/) (splits on any whitespace)
+• Filter empty: .filter(Boolean) (removes empty strings)
+• Integration: Uses existing resetR1() and fillR1() functions
+
+OPTIMIZATION OPPORTUNITIES:
+• Could add regex for advanced filtering
+• Could support comments (lines starting with #)
+• Could add chord duration notation (C 2 = two beats)
+• Could add chord transposition
+
+<!-- END: R2A | B5 -->
+
+
+<!-- ========================================
+     FRAME: R2A | BUTTON: B6 (Batch Clear All)
+     ======================================== -->
+
+<!-- GENERIC DESCRIPTION -->
+<!-- 
+This button clears all text from the R2A textarea. Does not affect
+R1, R3, or R2B panels. Only clears the textarea input area.
+-->
+
+BUTTON: B6 - Batch Clear All
+HTML ID: r2a-b6
+Display Name: "XR2A"
+Location: Top of R2A panel, right of B5
+Size: 60px × 24px (compact)
+Text Color: #000 (black)
+Background Color: #eee (light gray)
+Hover Color: #ddd (medium gray)
+Border: 1px solid #ccc
+Font Size: 0.7rem
+Font Weight: Normal
+
+FUNCTION:
+• Clears all text from textarea element
+• Does NOT affect R1 input fields
+• Does NOT affect R3 piano displays
+• Does NOT affect R2B analysis display
+• Only affects R2A textarea content
+• Quick way to clear textarea for new input
+
+TEXTAREA ELEMENT:
+• ID: r2a-textarea
+• Getting element: document.getElementById('r2a-textarea')
+• Setting value: .value = ""
+
+OPERATION:
+1. Get textarea element by ID
+2. Set .value property to empty string ("")
+3. Placeholder text becomes visible again
+
+SUCCESS FEEDBACK:
+• Textarea becomes completely empty
+• Placeholder text visible: "Odd rows: chords\nEven rows: lyrics (ignored)"
+• Cursor visible in textarea
+• Ready for new input
+
+ERROR FEEDBACK:
+• None (operation always succeeds)
+• No invalid states possible
+• No partial failures
+
+TIMING:
+• Instantaneous execution
+• No confirmation required
+• Completes in <1ms
+
+EVENT HANDLER: Anonymous click listener
+Event Type: click
+Prevents Default: Yes
+Stop Propagation: Yes (at button level)
+
+CODE PATTERN:
+document.getElementById('r2a-b6').addEventListener('click', () => {
+  document.getElementById('r2a-textarea').value = '';
+});
+
+CAUTION WARNINGS:
+• No confirmation dialog!
+• Text is lost permanently unless copied first
+• Immediate irreversible action
+• User should be aware of destructive nature
+• Suggestion: Add confirmation in future
+
+COPY & PASTE WORKFLOW (To preserve data):
+1. User selects all in textarea (Ctrl+A)
+2. User copies text (Ctrl+C)
+3. User pastes to text editor or file (Ctrl+V)
+4. User returns to R2A
+5. User clicks B6 safely knowing data is saved
+
+RELATED BUTTONS:
+• B5: Load from textarea (opposite action)
+• R1 B4: Also clears R1 (related operation)
+
+USAGE WORKFLOW:
+1. User has typed chords in R2A textarea
+2. User decides to start with new progression
+3. User clicks B6 button
+4. Textarea becomes completely empty
+5. Placeholder text shows again
+6. Ready for new input
+
+TYPICAL USE CASES:
+• Starting new musical progression
+• Clearing mistakes before saving
+• Beginning new session
+• Resetting between demonstrations
+
+WORKFLOW WITH OTHER PANELS:
+R2A textarea content → Click B5 → Fills R1 → Click B3 → R3 shows pianos
+
+If user wants to clear R2A but keep R1:
+• Click B6: Only clears textarea
+• R1 fields still have chords
+• Can continue with R1 B3 to load to R3
+
+If user wants to clear everything:
+• Click B6: Clear R2A textarea
+• Click R1 B4: Clear R1 and R3
+• Complete reset
+
+TECHNICAL NOTES:
+• Textarea is separate from R1 input fields
+• Clearing textarea doesn't affect R1
+• Clearing R1 doesn't affect textarea
+• Each panel is independent (data flows one way)
+
+FUTURE ENHANCEMENTS:
+• Add confirmation dialog: "Clear all text?"
+• Add undo functionality (remember previous text)
+• Add save to local storage before clearing
+• Add character limit warning
+
+<!-- END: R2A | B6 -->
+
+
+<!-- ========================================
+     FRAME: R3 | BUTTON: B7 (Triad Mode)
+     ======================================== -->
+
+<!-- GENERIC DESCRIPTION -->
+<!-- 
+This button toggles Triad mode for a specific piano group in R3.
+Triads are 3-note chords (root, third, fifth). Each row has its
+own B7 button. Active state shows blue background.
+-->
+
+BUTTON: B7 - Triad Mode
+HTML ID: r3-b7-{row}
+Display Name: "T" (Triad)
+Location: Row of mode buttons (per R3 group)
+Size: 28px × 28px (compact square)
+Text Color: #000 (black)
+Background Color: #e0e0e0 (light gray) - default
+Hover Color: #d0d0d0 (medium gray) - hover
+Active Color: #a3d5ff (light blue) - when active
+Active Border: #0d47a1 (dark blue) - when active
+Font Size: 0.65rem
+Font Weight: Bold
+Border Radius: 50% (circular)
+
+FUNCTION:
+• Sets R3_mode global variable to 'triad'
+• Updates all mode button indicators
+• Recalculates chord voicing to 3 notes
+• Updates current piano display
+• Visually indicates active mode
+
+MODE DEFINITION - TRIAD:
+• Contains 3 notes
+• Formula: Root + Major Third + Perfect Fifth
+• Octave: Typically in octave 4
+• Example C Triad: C4, E4, G4
+• Example Dm Triad: D4, F4, A4
+
+GLOBAL STATE:
+Variable: R3_mode
+Values: 'triad' or 'tetrad'
+Initial: 'triad'
+Changed by: B7 (to triad) or B8 (to tetrad)
+
+RELATED GLOBAL:
+Variable: R3_inv (inversion level)
+Values: 0, 1, 2, 3
+Changed by: B9 (inversion button)
+
+EVENT HANDLER: Anonymous click listener
+Event Type: click
+Prevents Default: Yes
+Stop Propagation: Yes (at button level)
+
+CODE PATTERN:
+b7.addEventListener('click', () => {
+  R3_mode = 'triad';
+  updateR3RadioButtons(i);
+});
+
+OPERATIONS:
+1. Set R3_mode = 'triad'
+2. Call updateR3RadioButtons(row)
+   - This updates visual state of B7, B8, B9 buttons
+   - B7 gets active class (blue background)
+   - B8 gets inactive class (gray background)
+   - B9 shows inversion state
+3. Recalculate voicing (happens at next B1 click or BR3 click)
+
+VISUAL FEEDBACK:
+• B7 button turns blue (#a3d5ff) when active
+• B7 button border turns dark blue (#0d47a1)
+• B8 button turns gray (deselected)
+• Indicates Triad mode is now selected
+
+MUSIC THEORY NOTES:
+• Triads are fundamental building blocks
+• Used in classical harmony
+• 3-note chord structure
+• Most common chord type
+
+TRIAD EXAMPLES BY ROOT:
+C Triad: C4, E4, G4
+D Triad: D4, F#4, A4
+E Triad: E4, G#4, B4
+F Triad: F4, A4, C5
+G Triad: G4, B4, D5
+A Triad: A4, C#5, E5
+B Triad: B4, D#5, F#5
+
+MINOR TRIADS:
+Cm Triad: C4, Eb4, G4
+Dm Triad: D4, F4, A4
+Em Triad: E4, G4, B4
+
+RELATED BUTTONS:
+• B8: Switch to Tetrad mode
+• B9: Change inversion level
+• BR3: Send active chord to R2B
+
+USAGE WORKFLOW:
+1. Chord is loaded in R3 row (from R1)
+2. R3 shows piano with highlighted notes
+3. B8 is currently active (Tetrad mode)
+4. User clicks B7 button
+5. B7 turns blue, B8 turns gray
+6. Chord is recalculated to Triad voicing
+7. Piano updates to show 3 notes instead of 4
+8. Audio plays new 3-note version
+
+CHORD DISPLAY BEHAVIOR:
+• When B7 clicked: Piano shows 3 green highlights
+• When B8 active: Piano shows 4 green highlights
+• Notes don't change in label, only voicing
+
+TIMING:
+• Immediate state change
+• Visual feedback instant
+• No audio plays (just mode change)
+• Recalculation when chord is sent to R2B
+
+TECHNICAL NOTES:
+• Each row maintains independent mode state
+• Global R3_mode affects all rows (design choice)
+• Could be improved to per-row modes in future
+• Currently uses shared global variable
+
+<!-- END: R3 | B7 -->
+
+
+<!-- ========================================
+     FRAME: R3 | BUTTON: B8 (Tetrad Mode)
+     ======================================== -->
+
+<!-- GENERIC DESCRIPTION -->
+<!-- 
+This button toggles Tetrad mode for a specific piano group in R3.
+Tetrads are 4-note chords (root, third, fifth, seventh). Each row
+has its own B8 button. Active state shows blue background.
+-->
+
+BUTTON: B8 - Tetrad Mode
+HTML ID: r3-b8-{row}
+Display Name: "4" (Four notes)
+Location: Row of mode buttons (per R3 group)
+Size: 28px × 28px (compact square)
+Text Color: #000 (black)
+Background Color: #e0e0e0 (light gray) - default
+Hover Color: #d0d0d0 (medium gray) - hover
+Active Color: #a3d5ff (light blue) - when active
+Active Border: #0d47a1 (dark blue) - when active
+Font Size: 0.65rem
+Font Weight: Bold
+Border Radius: 50% (circular)
+
+FUNCTION:
+• Sets R3_mode global variable to 'tetrad'
+• Updates all mode button indicators
+• Recalculates chord voicing to 4 notes
+• Updates current piano display
+• Visually indicates active mode
+
+MODE DEFINITION - TETRAD:
+• Contains 4 notes
+• Formula: Root + Major Third + Perfect Fifth + Seventh
+• Octave: Typically in octave 4-5
+• Example C Tetrad: C4, E4, G4, B4
+• Example Dm Tetrad: D4, F4, A4, C5
+
+GLOBAL STATE:
+Variable: R3_mode
+Values: 'triad' or 'tetrad'
+Initial: 'triad'
+Changed by: B8 (to tetrad) or B7 (to triad)
+
+EVENT HANDLER: Anonymous click listener
+Event Type: click
+Prevents Default: Yes
+Stop Propagation: Yes (at button level)
+
+CODE PATTERN:
+b8.addEventListener('click', () => {
+  R3_mode = 'tetrad';
+  updateR3RadioButtons(i);
+});
+
+OPERATIONS:
+1. Set R3_mode = 'tetrad'
+2. Call updateR3RadioButtons(row)
+   - This updates visual state of B7, B8, B9 buttons
+   - B8 gets active class (blue background)
+   - B7 gets inactive class (gray background)
+   - B9 shows inversion state
+3. Recalculate voicing (happens at next B1 click or BR3 click)
+
+VISUAL FEEDBACK:
+• B8 button turns blue (#a3d5ff) when active
+• B8 button border turns dark blue (#0d47a1)
+• B7 button turns gray (deselected)
+• Indicates Tetrad mode is now selected
+
+MUSIC THEORY NOTES:
+• Tetrads add complexity and color
+• Seventh chords are very common
+• 4-note chord structure
+• Used in jazz and contemporary music
+
+TETRAD EXAMPLES BY ROOT:
+C Tetrad: C4, E4, G4, B4 (Cmaj7)
+D Tetrad: D4, F#4, A4, C#5 (Dmaj7)
+E Tetrad: E4, G#4, B4, D#5 (Emaj7)
+F Tetrad: F4, A4, C5, E5 (Fmaj7)
+G Tetrad: G4, B4, D5, F#5 (Gmaj7)
+A Tetrad: A4, C#5, E5, G#5 (Amaj7)
+B Tetrad: B4, D#5, F#5, A#5 (Bmaj7)
+
+MINOR TETRADS:
+Cm Tetrad: C4, Eb4, G4, Bb4 (Cm7)
+Dm Tetrad: D4, F4, A4, C5 (Dm7)
+Em Tetrad: E4, G4, B4, D5 (Em7)
+
+RELATED BUTTONS:
+• B7: Switch to Triad mode
+• B9: Change inversion level
+• BR3: Send active chord to R2B
+
+USAGE WORKFLOW:
+1. Chord is loaded in R3 row (from R1)
+2. R3 shows piano with highlighted notes
+3. B7 is currently active (Triad mode)
+4. User clicks B8 button
+5. B8 turns blue, B7 turns gray
+6. Chord is recalculated to Tetrad voicing
+7. Piano updates to show 4 notes instead of 3
+8. Audio plays new 4-note version
+
+CHORD DISPLAY BEHAVIOR:
+• When B8 clicked: Piano shows 4 green highlights
+• When B7 active: Piano shows 3 green highlights
+• Notes don't change in label, only voicing
+
+TIMING:
+• Immediate state change
+• Visual feedback instant
+• No audio plays (just mode change)
+• Recalculation when chord is sent to R2B
+
+COMPARISON: B7 vs B8
+
+┌─────────────┬──────────────┬──────────────┐
+│ Feature     │ B7 (Triad)   │ B8 (Tetrad)  │
+├─────────────┼──────────────┼──────────────┤
+│ Notes       │ 3 notes      │ 4 notes      │
+│ Sound       │ Basic/Pure   │ Rich/Complex │
+│ Theory      │ Root, 3rd, 5 │ Root,3,5,7   │
+│ Example     │ C, E, G      │ C,E,G,B      │
+│ Complexity  │ Low          │ High         │
+│ Common?     │ Very         │ Very         │
+└─────────────┴──────────────┴──────────────┘
+
+TECHNICAL NOTES:
+• Each row maintains independent mode state
+• Global R3_mode affects all rows (design choice)
+• Could be improved to per-row modes in future
+• Currently uses shared global variable
+
+<!-- END: R3 | B8 -->
+
+
+<!-- ========================================
+     FRAME: R3 | BUTTON: B9 (Inversion)
+     ======================================== -->
+
+<!-- GENERIC DESCRIPTION -->
+<!-- 
+This button cycles through chord inversions (0, 1, 2, 3, repeat).
+Each inversion rotates the notes through octaves. Each row has its
+own B9 button. Inversion level shown in visual state.
+-->
+
+BUTTON: B9 - Inversion
+HTML ID: r3-b9-{row}
+Display Name: "I" (Invert)
+Location: Row of mode buttons (per R3 group)
+Size: 28px × 28px (compact square)
+Text Color: #000 (black)
+Background Color: #e0e0e0 (light gray) - default
+Hover Color: #d0d0d0 (medium gray) - hover
+Active Color: #a3d5ff (light blue) - when inverted (Inv > 0)
+Active Border: #0d47a1 (dark blue) - when inverted
+Font Size: 0.65rem
+Font Weight: Bold
+Border Radius: 50% (circular)
+
+FUNCTION:
+• Cycles inversion level: 0 → 1 → 2 → 3 → 0 (repeat)
+• Rotates chord notes through octaves
+• Updates piano display to show new voicing
+• Visual indicator of inversion state
+• Used for exploring different chord voicings
+
+INVERSION CONCEPT:
+Root Position (Inv 0): Root in bass - C E G
+First Inversion (Inv 1): Third in bass - E G C
+Second Inversion (Inv 2): Fifth in bass - G C E
+Third Inversion (Inv 3): Seventh in bass (tetrads only) - B C E G
+
+GLOBAL STATE:
+Variable: R3_inv
+Values: 0, 1, 2, 3
+Initial: 0
+Changed by: B9 (cycles through values)
+
+EVENT HANDLER: Anonymous click listener
+Event Type: click
+Prevents Default: Yes
+Stop Propagation: Yes (at button level)
+
+CODE PATTERN:
+b9.addEventListener('click', () => {
+  R3_inv = (R3_inv + 1) % 4;
+  updateR3RadioButtons(i);
+});
+
+CYCLING ALGORITHM:
+Current: R3_inv = 0
+Click: R3_inv = (0 + 1) % 4 = 1
+Click: R3_inv = (1 + 1) % 4 = 2
+Click: R3_inv = (2 + 1) % 4 = 3
+Click: R3_inv = (3 + 1) % 4 = 0 (back to start)
+
+OPERATIONS:
+1. Increment inversion: R3_inv = (R3_inv + 1) % 4
+2. Call updateR3RadioButtons(row)
+   - This updates visual state of B9 button
+   - Shows active state if inv > 0
+   - Shows inactive state if inv = 0
+
+VISUAL FEEDBACK:
+• B9 turns blue if inversion > 0
+• B9 turns gray if inversion = 0
+• Indicates active inversion state
+• Piano notes shift on display
+
+MUSIC THEORY - INVERSION EXAMPLE (C Major):
+
+Root Position (Inv 0):
+• Notes: C4, E4, G4
+• Bass: C4 (root)
+• Sound: Stable, solid
+
+First Inversion (Inv 1):
+• Notes: E4, G4, C5
+• Bass: E4 (third)
+• Sound: Lighter, less stable
+
+Second Inversion (Inv 2):
+• Notes: G4, C5, E5
+• Bass: G4 (fifth)
+• Sound: Open, floating
+
+Third Inversion (Inv 3):
+• Notes: B4, C5, E5, G5 (tetrad mode)
+• Bass: B4 (seventh)
+• Sound: Unique, unusual
+
+INVERSION EXAMPLES BY CHORD:
+
+D Minor Triad:
+Inv 0: D4, F4, A4
+Inv 1: F4, A4, D5
+Inv 2: A4, D5, F5
+Inv 3: A4, D5, F5 (same as Inv 2 for triads)
+
+F Major Triad:
+Inv 0: F4, A4, C5
+Inv 1: A4, C5, F5
+Inv 2: C5, F5, A5
+Inv 3: C5, F5, A5
+
+RELATED BUTTONS:
+• B7: Triad mode
+• B8: Tetrad mode
+• BR3: Send inverted chord to R2B
+
+USAGE WORKFLOW:
+1. Chord is loaded in R3 row (from R1)
+2. Inversion starts at 0 (Root position)
+3. User clicks B9 button once
+4. Inversion changes to 1 (First inversion)
+5. Piano notes shift, B9 turns blue
+6. User clicks B9 button again
+7. Inversion changes to 2 (Second inversion)
+8. Piano notes shift again
+9. User clicks B9 button again
+10. Inversion changes to 3 (Third inversion)
+11. User clicks B9 button again
+12. Inversion cycles back to 0 (Root position)
+13. B9 turns gray, cycle repeats
+
+HEARING INVERSIONS:
+• Each inversion has different sound
+• Different bass note affects overall feel
+• Useful for finding smoother voice leading
+• Exploration tool for musicians
+
+TIMING:
+• Immediate cycle (no delay)
+• Visual feedback instant
+• No audio plays (just inversion change)
+• Recalculation when chord is sent to R2B
+
+TECHNICAL NOTES:
+• Uses modulo operator (%) to cycle
+• Modulo 4 keeps value in range 0-3
+• Each click increments and wraps around
+• Very efficient cycling mechanism
+
+PRACTICAL APPLICATIONS:
+• Finding smooth chord transitions
+• Exploring different chord colors
+• Understanding voice leading
+• Educational tool for music theory
+
+<!-- END: R3 | B9 -->
+
+
+<!-- ========================================
+     FRAME: R3 | BUTTON: BR3 (Send to R2B)
+     ======================================== -->
+
+<!-- GENERIC DESCRIPTION -->
+<!-- 
+This button sends the current chord from R3 to R2B for analysis
+and detailed display. Includes current mode (triad/tetrad) and
+inversion level. Arrow symbol indicates data flow direction.
+-->
+
+BUTTON: BR3 - Send to R2B
+HTML ID: r3-br3-{row}
+Display Name: "→" (Arrow/Send)
+Location: Row of mode buttons (per R3 group)
+Size: 28px × 28px (compact square)
+Text Color: #000 (black)
+Background Color: #e0e0e0 (light gray) - default
+Hover Color: #d0d0d0 (medium gray) - hover
+Font Size: 0.65rem
+Font Weight: Bold
+Border Radius: 50% (circular)
+
+FUNCTION:
+• Gets chord information from current R3 row
+• Verifies chord is valid (not empty/dash)
+• Recalculates voicing with current mode and inversion
+• Sends complete chord payload to R2B
+• R2B displays large piano with analysis
+
+PAYLOAD STRUCTURE:
+The data sent to R2B includes:
+{
+  chordName: "Dm",           // Name of chord (string)
+  notes: ["D4", "F4", "A4"], // Array of note names
+  mode: "triad",             // Current mode (triad/tetrad)
+  inversion: 0,              // Current inversion (0-3)
+  analysis: {...},           // Chord analysis data
+  source: "R3",              // Originating panel
+  timestamp: 1234567890      // When sent
+}
+
+EVENT HANDLER: Anonymous click listener
+Event Type: click
+Prevents Default: Yes
+Stop Propagation: Yes (at button level)
+
+CODE PATTERN:
+br3.addEventListener('click', () => {
+  const label = document.getElementById(`r3-label-${i}`);
+  const chordName = label ? label.textContent.trim() : '';
+  if(chordName && chordName !== '–'){
+    const freshNotes = computeVoicing(chordName, R3_mode, R3_inv);
+    const payload = {
+      chordName,
+      notes: freshNotes,
+      mode: R3_mode,
+      inversion: R3_inv,
+      analysis: analyzeChord(chordName),
+      source: 'R3',
+      timestamp: Date.now()
+    };
+    log('R3:send to R2B', payload, 'from row', i);
+    if(window.resetR2B) window.resetR2B();
+    R2B_playing = false;
+    if(window.R2B && window.R2B.setChord) window.R2B.setChord(payload);
+  } else {
+    log('R3:BR3 blocked - no chord in row', i);
+  }
+});
+
+OPERATIONS:
+1. Get chord label from R3 row i
+2. Extract chord name (trim whitespace)
+3. Check if chord is valid (not "–" or empty)
+4. If invalid: Log and return (no action)
+5. If valid:
+   a. Recalculate voicing: computeVoicing(chord, mode, inv)
+   b. Build payload object with all data
+   c. Log payload to console
+   d. Reset R2B (clear previous chord)
+   e. Set R2B_playing flag to false
+   f. Send payload to R2B.setChord()
+
+CHORD VALIDATION:
+• Check if label exists
+• Check if text is not "–" (dash)
+• Check if text is not empty
+• Only proceed if valid
+
+VOICING CALCULATION:
+• Uses computeVoicing(name, mode, inversion)
+• Gets from CHORD_TABLE
+• Applies current R3_mode (triad/tetrad)
+• Applies current R3_inv (0, 1, 2, 3)
+• Returns array of note names
+
+ANALYSIS CALCULATION:
+• Uses analyzeChord(name)
+• Returns chord analysis data
+• Currently returns basic structure
+• Future: Add detailed analysis
+
+SUCCESS FEEDBACK:
+• R2B receives payload
+• R2B displays large piano
+• R2B highlights chord notes in red
+• R2B plays chord audio automatically
+• R2B displays chord name
+• Console logs: "R3:send to R2B, {payload}, from row {i}"
+
+ERROR FEEDBACK:
+• If row has no chord: "R3:BR3 blocked - no chord in row {i}"
+• No error popup or message to user
+• Action silently prevented
+
+BLOCKING CONDITIONS:
+• Chord label is "–" (empty/cleared)
+• Chord name is empty string
+• Chord label element not found
+
+CROSS-FRAME COMMUNICATION:
+• Sends via window.R2B.setChord()
+• Requires same-origin policy
+• Works with HTTP server (localhost)
+• Works with file:// protocol (sometimes)
+
+TIMING:
+• Immediate execution
+• No delay before sending
+• R2B receives instantly
+• Audio plays automatically
+
+RELATED BUTTONS:
+• B7, B8: Change mode before sending
+• B9: Change inversion before sending
+• R2B B10: Replay the sent chord
+• R2B B11: Reset R2B display
+
+USAGE WORKFLOW:
+1. Chord is loaded in R3 row (from R1)
+2. User can hear chord in R3
+3. User adjusts mode (B7/B8) if desired
+4. User adjusts inversion (B9) if desired
+5. User clicks BR3 button
+6. Chord information is packaged
+7. R2B receives and displays chord
+8. Large piano shows in R2B
+9. Red highlights show chord notes
+10. Chord audio plays in R2B
+
+WORKFLOW EXAMPLE - COMPLETE:
+1. User types "Dm" in R1 row 1
+2. User clicks R1 B1 button
+3. R3 row 1 shows Dm piano (D, F, A in green)
+4. R3 plays Dm audio
+5. User clicks R3 B8 button
+6. R3 switches to Tetrad mode
+7. R3 row 1 now shows 4 notes (D, F, A, C)
+8. User clicks R3 B9 button twice
+9. R3 switches to Second inversion
+10. R3 notes rotate: A, D, F, C (A in bass)
+11. User clicks R3 BR3 button
+12. Data sent to R2B with all current settings
+13. R2B displays large piano (C4-B5)
+14. R2B shows A, D, F, C highlighted in red
+15. R2B plays Dm Second Inversion audio
+16. User can now see/hear detailed analysis
+
+DATA FLOW VISUALIZATION:
+R1 Input → R3 Display & Audio → R2B Large Piano & Analysis
+
+TECHNICAL NOTES:
+• Each row can send independently
+• Only one chord in R2B at a time
+• Previous R2B chord is cleared first
+• Console logs every send for debugging
+• Supports real-time workflow
+
+PERFORMANCE:
+• Fast execution (<10ms)
+• No blocking operations
+• No UI freezing
+• Smooth user experience
+
+<!-- END: R3 | BR3 -->
+
+
+<!-- ========================================
+     FRAME: R2B | BUTTON: B10 (Replay)
+     ======================================== -->
+
+<!-- GENERIC DESCRIPTION -->
+<!-- 
+This button replays the current chord in R2B. Used when user wants
+to hear the chord again without changing it. Plays immediately.
+-->
+
+BUTTON: B10 - Replay
+HTML ID: r2b-b10
+Display Name: "RLR2B"
+Location: Top of R2B panel, near chord label
+Size: 60px × 20px (compact)
+Text Color: #000 (black)
+Background Color: #eee (light gray)
+Hover Color: #ddd (medium gray)
+Border: 1px solid #ccc
+Font Size: 0.7rem
+Font Weight: Normal
+
+FUNCTION:
+• Gets current chord from R2B_current
+• Plays the chord audio using Web Audio API
+• No changes to display or state
+• Quick way to replay without resending
+
+GLOBAL STATE:
+Variable: R2B_current
+Contains: Complete chord data object or null
+
+DATA STRUCTURE:
+R2B_current = {
+  chordName: "Dm",
+  notes: ["D4", "F4", "A4"],
+  mode: "triad",
+  inversion: 0,
+  analysis: {...},
+  source: "R3",
+  timestamp: 1234567890
+}
+
+EVENT HANDLER: Anonymous click listener
+Event Type: click
+Prevents Default: Yes
+Stop Propagation: Yes (at button level)
+
+CODE PATTERN:
+document.getElementById('r2b-b10').addEventListener('click', () => {
+  if(R2B_current) playChord(R2B_current.notes);
+});
+
+OPERATIONS:
+1. Check if R2B_current exists
+2. If exists: playChord(R2B_current.notes)
+3. If null/empty: Do nothing
+
+AUDIO PLAYBACK:
+• Uses playChord() function
+• Prevents overlapping chords (R2B_playing flag)
+• Waits 1100ms before allowing next play
+• Uses Web Audio API synthesis
+
+AUDIO SPECIFICATION:
+• Sine wave oscillators
+• Attack: Exponential 0.01s
+• Sustain: 1.0s
+• Release: 0.05s
+• Gain: 0.2 master volume
+• Detune: Slight spread between voices
+
+SUCCESS FEEDBACK:
+• Chord audio plays immediately
+• Visual piano remains unchanged
+• Chord label remains unchanged
+• User hears the chord
+
+ERROR FEEDBACK:
+• If R2B_current is null: Do nothing (silent)
+• No error message
+• No audio plays
+
+TIMING:
+• Immediate execution (<10ms)
+• Audio plays ~0 seconds
+• Next replay available after 1100ms
+
+PRECONDITIONS:
+• Chord must be sent to R2B first
+• R2B_current must be populated
+• Browser must allow Web Audio
+
+BLOCKING:
+• R2B_playing flag prevents overlapping
+• If another chord just played: Wait 1100ms
+• Then B10 will work again
+
+RELATED BUTTONS:
+• B11: Reset R2B (clears chord)
+• R3 BR3: Send new chord to R2B
+
+USAGE WORKFLOW:
+1. User clicks R3 BR3 button
+2. Chord loads in R2B
+3. Chord plays automatically
+4. User hears chord
+5. User does something else
+6. User clicks B10 button
+7. Same chord plays again
+8. User can compare with other chords
+
+PRACTICAL USE CASES:
+• User missed hearing the chord first time
+• User wants to compare two chords
+• User wants to memorize the sound
+• User is analyzing chord quality
+• User forgot what chord sounded like
+
+TYPICAL WORKFLOW:
+1. Load chord in R3 (from R1)
+2. Click BR3 to send to R2B
+3. Chord plays in R2B
+4. Load different chord in R3
+5. Click BR3 to replace R2B chord
+6. New chord plays in R2B
+7. Click B10 to replay previous (wait, it's gone)
+8. Or click B10 to replay current
+
+TIMING EXAMPLE:
+T+0s: User clicks BR3 (Dm)
+T+0.1s: Dm loads in R2B
+T+0.1s: Dm audio starts
+T+1.1s: Dm audio ends
+T+1.1s: R2B_playing set to false
+T+1.2s: User can click B10 safely
+T+1.2s: Dm audio plays again
+
+MULTI-CHORD COMPARISON:
+1. Click BR3 with Dm
+2. Hear Dm
+3. Wait 1100ms
+4. Click B10 to rehear Dm (for comparison)
+5. Adjust voicing in R3
+6. Click BR3 with new voicing
+7. Hear new version
+
+TECHNICAL NOTES:
+• Simple function (3 lines)
+• No state changes
+• Reuses existing playChord() function
+• Very efficient
+
+<!-- END: R2B | B10 -->
+
+
+<!-- ========================================
+     FRAME: R2B | BUTTON: B11 (Reset)
+     ======================================== -->
+
+<!-- GENERIC DESCRIPTION -->
+<!-- 
+This button resets the R2B panel to empty state. Clears the current
+chord, resets piano to default colors, and clears chord label.
+-->
+
+BUTTON: B11 - Reset
+HTML ID: r2b-b11
+Display Name: "XR2B"
+Location: Top of R2B panel, right of B10
+Size: 60px × 20px (compact)
+Text Color: #000 (black)
+Background Color: #eee (light gray)
+Hover Color: #ddd (medium gray)
+Border: 1px solid #ccc
+Font Size: 0.7rem
+Font Weight: Normal
+
+FUNCTION:
+• Clears all R2B display elements
+• Resets piano to default state
+• Removes chord label
+• Clears R2B_current data
+• Returns to empty state
+
+GLOBAL STATE RESET:
+Variable: R2B_current
+Set to: null
+
+Piano Reset:
+• All white keys: #f5f5f5 (white)
+• All black keys: #1a1a1a (black)
+• No red highlights
+
+EVENT HANDLER: resetR2B()
+Event Type: click
+Prevents Default: Yes
+Stop Propagation: Yes (at button level)
+
+CODE PATTERN:
+document.getElementById('r2b-b11').addEventListener('click', resetR2B);
+
+FUNCTION DEFINITION:
+function resetR2B() {
+  const svg = document.getElementById('r2b-svg');
+  svg.querySelectorAll('.key').forEach(k => {
+    const n = k.getAttribute('data-note');
+    const isBlack = n.includes('#');
+    k.setAttribute('fill', isBlack ? '#1a1a1a' : '#f5f5f5');
+  });
+  R2B_current = null;
+  clearAnalysis();
+}
+
+OPERATIONS:
+1. Get R2B SVG element (piano display)
+2. For each piano key:
+   a. Get the note name
+   b. Check if black key (contains #)
+   c. Set color to default (white or black)
+3. Set R2B_current to null
+4. Call clearAnalysis()
+
+PIANO RESET DETAILS:
+• White keys set to #f5f5f5 (light gray-white)
+• Black keys set to #1a1a1a (near-black)
+• All red highlights removed
+• Original appearance restored
+
+ANALYSIS RESET:
+• Chord label set to "Chord Label"
+• Other analysis fields cleared
+• Ready for new chord
+
+SUCCESS FEEDBACK:
+• Piano becomes default (no highlights)
+• Chord label shows "Chord Label"
+• All analysis cleared
+• Interface returns to empty state
+
+ERROR FEEDBACK:
+• None (operation always succeeds)
+• No invalid states possible
+
+TIMING:
+• Instantaneous execution
+• All keys updated at once
+• Completes in <50ms
+
+GLOBAL STATE:
+Variable: R2B_current
+Before: Contains chord data object
+After: null (emptied)
+
+Variable: R2B_playing
+Status: Unchanged (but chord won't play since R2B_current is null)
+
+RELATED BUTTONS:
+• B10: Replay current chord (won't work after reset)
+• R3 BR3: Send new chord to R2B
+
+USAGE WORKFLOW:
+1. User has chord displayed in R2B
+2. Piano shows red highlights
+3. Chord label shows "Dm"
+4. User clicks B11 button
+5. Piano becomes all white/black
+6. Chord label resets to "Chord Label"
+7. R2B is now empty and clean
+8. Ready for new chord from R3
+
+PRACTICAL USE CASES:
+• Clear after analysis is complete
+• Start fresh with new chord
+• Clean interface between demonstrations
+• Reset for new student to use
+• Prepare for next chord
+
+WORKFLOW WITH B10:
+1. Chord loaded: Dm
+2. User clicks B10: Dm replays
+3. User clicks B11: R2B resets
+4. Piano empty, label "Chord Label"
+5. B10 now does nothing (no chord to replay)
+
+WORKFLOW WITH BR3:
+1. User clicks R3 BR3: Chord loads in R2B
+2. User analyzes chord
+3. User clicks B11: R2B resets
+4. User clicks R3 BR3 with different chord: New chord loads
+5. Cycle repeats
+
+COMBINED BUTTONS (BR3 → B10 → B11 → BR3):
+1. Click BR3: Dm loads, plays
+2. Click B10: Dm replays
+3. Click B11: Clear Dm
+4. Click BR3 with F: F loads, plays
+5. Repeat cycle
+
+TECHNICAL NOTES:
+• Very efficient operation
+• No data loss (only temporary reset)
+• User can load new chord immediately
+• Safe to call multiple times
+
+FUTURE ENHANCEMENTS:
+• Add undo/previous functionality
+• Remember last 5 chords
+• Add chord history navigation
+• Add save chord to favorites
+
+<!-- END: R2B | B11 -->
+
+
+================================================================================
+COMPREHENSIVE BUTTON SUMMARY TABLE
+================================================================================
+
+Panel │ Button │ HTML ID     │ Display │ Function
+──────┼────────┼─────────────┼─────────┼────────────────────────────────
+R1    │ B1     │ r1-b1-{row} │ "L"     │ Load single row
+R1    │ B2     │ r1-b2-{row} │ "X"     │ Clear single row
+R1    │ B3     │ r1-b3       │ "B3"    │ Load all 24 rows
+R1    │ B4     │ r1-b4       │ "B4"    │ Clear all 24 rows
+R2A   │ B5     │ r2a-b5      │ "B5"    │ Load from textarea
+R2A   │ B6     │ r2a-b6      │ "B6"    │ Clear textarea
+R3    │ B7     │ r3-b7-{row} │ "T"     │ Triad mode
+R3    │ B8     │ r3-b8-{row} │ "4"     │ Tetrad mode
+R3    │ B9     │ r3-b9-{row} │ "I"     │ Cycle inversion
+R3    │ BR3    │ r3-br3-{row}│ "→"     │ Send to R2B
+R2B   │ B10    │ r2b-b10     │ "RLR2B" │ Replay chord
+R2B   │ B11    │ r2b-b11     │ "XR2B"  │ Reset R2B
+
+
+================================================================================
+END OF PIANO_BUTTONS_SPEC1.TXT - TEXT FORMAT WITH COMMENTS
+================================================================================
+
+Version: 1.0
+Status: COMPLETE
+Created: January 25, 2026
+All 12 button types documented with detailed comment structure
+Format: Text with HTML comment delimiters
+Total buttons documented: 12 unique button types
+Rows per button: 6-10 rows per button specification
+Total lines: ~1800 lines of detailed specifications
+
+Ready for use in GitHub Pages documentation!
+

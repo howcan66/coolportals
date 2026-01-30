@@ -1,0 +1,1017 @@
+R2B Panel Build Instructions
+=============================
+
+OVERVIEW
+--------
+R2B is a Chord Analysis Panel that receives chord data from R3 panel via BR3 button ("LR2B").
+It displays a 2-octave piano (C4–B5) with marked chord notes, plays the chord, allows individual note playback,
+and provides chord analysis information.
+
+
+1. DATA RECEPTION FROM R3
+--------------------------
+
+R2B receives chord data via BR3 button in R3:
+- BR3 sends the LAST ACTIVE CHORD from R3 (single chord, never a list)
+- Data format: { chordName: "Cmaj7", notes: ["C4", "E4", "G4", "B4"], mode: "tetrad" }
+- R2B must expose a public API: R2B.setChord(chordData)
+
+Reception Handler:
+- receiveChordFromR3(chordData): 
+  * Store chord data to currentChord object
+  * Update chord name display
+  * Mark chord notes on 2-octave piano
+  * Play chord automatically upon reception
+  * Populate analysis section
+
+
+2. PIANO GRAPHIC STRUCTURE
+---------------------------
+
+2-Octave Piano (C4 to B5):
+- Total: 24 notes (14 white keys, 10 black keys)
+- Layout: Horizontal, all keys visible simultaneously
+- Each key labeled with note name (C4, C#4, D4, D#4, ... B5)
+
+Piano Structure:
+- Use SVG for crisp rendering at any size
+- White keys: #f5f5f5 fill, #ccc stroke
+- Black keys: #1a1a1a fill, #000 stroke
+- Key dimensions proportional to real piano
+- Note labels directly on keys (same style as R3)
+
+Chord Note Marking:
+- Active chord notes: #8fd694 fill (green, matching R3)
+- Non-chord notes: default key color
+- Clear previous markings when new chord received
+
+
+3. INTERACTIVE PLAYBACK
+------------------------
+
+Automatic Playback (on chord reception):
+- When R2B receives chord from R3 via BR3:
+  * Mark all chord notes in green
+  * Play all chord notes simultaneously (block chord)
+  * Duration: ~1-2 seconds sustained
+  * Attack: 10-30ms
+
+Individual Note Playback:
+- Each piano key is clickable/tappable
+- On click: play single note for ~500ms
+- Works for ALL keys (C4-B5), not just chord notes
+- Visual feedback: brief highlight on key press
+
+
+4. CONTROL BUTTONS
+-------------------
+
+B10 Button ("L" - Load/Play):
+- Label: "L" or icon
+- Position: Below piano, left side
+- Function: Replays the currently loaded chord
+- Action: 
+  * Re-highlight chord notes
+  * Play chord tones simultaneously
+  * No data transfer, just replay
+
+B11 Button ("X" - Reset):
+- Label: "X" or icon  
+- Position: Below piano, right of B10
+- Function: Clear/reset the current chord
+- Action:
+  * Clear chord name display (show "–")
+  * Remove all green markings from piano
+  * Clear analysis text
+  * Set currentChord to null
+
+Button Styling:
+- Small circular buttons
+- B10: #90ee90 background (light green, play/load action)
+- B11: #ff9999 background (light red, reset action)
+- Size: 32px × 32px (consistent with R3)
+- Gap between buttons: 8px
+- Style harmonized across all panels (R2A, R3, R2B)
+
+
+5. CHORD ANALYSIS SECTION
+--------------------------
+
+Display below piano and buttons:
+- Chord Name: Large, prominent display (e.g., "Cmaj7")
+- Chord Type: Triad/Tetrad classification
+- Notes List: All notes in the chord (C4, E4, G4, B4)
+- Intervals: Root, 3rd, 5th, 7th, extensions
+- Quality: Major, Minor, Dominant, Diminished, Augmented, Sus
+- Inversions: Root position, 1st inversion, 2nd inversion, 3rd inversion
+- Alternative Voicings: Suggest related chords
+
+Analysis Data Source:
+- Chord analysis is performed in R2A, R1, or E3 panels ONLY
+- R2B receives pre-analyzed data and displays it
+- R2B does NOT perform its own chord analysis
+- All analysis data must be included in received chord data
+
+Text Display Format:
+```
+Chord: Cmaj7
+Type: Major Tetrad
+Notes: C4, E4, G4, B4
+Intervals: R, M3, P5, M7
+Quality: Major
+Position: Root Position
+```
+
+
+6. HTML STRUCTURE
+-----------------
+
+Container: <section id="r2b-panel" class="r2b-analysis-panel">
+
+Structure:
+```html
+<section id="r2b-panel" class="r2b-analysis-panel">
+  
+  <!-- Chord Name Display -->
+  <div class="r2b-chord-name">
+    <h2 id="r2b-chord-title">–</h2>
+  </div>
+  
+  <!-- 2-Octave Piano SVG -->
+  <div class="r2b-piano-container">
+    <svg id="r2b-piano-svg" viewBox="0 0 1400 200">
+      <!-- 24 keys: C4 to B5 -->
+      <!-- Each key: <rect> with data-note attribute -->
+      <!-- Key labels: <text> elements -->
+    </svg>
+  </div>
+  
+  <!-- Control Buttons -->
+  <div class="r2b-button-group">
+    <button id="r2b-b10" class="r2b-btn-play" aria-label="Play Chord">L</button>
+    <button id="r2b-b11" class="r2b-btn-reset" aria-label="Reset Chord">X</button>
+  </div>
+  
+  <!-- Chord Analysis Section -->
+  <div class="r2b-analysis-section">
+    <div class="r2b-analysis-item">
+      <span class="r2b-label">Type:</span>
+      <span id="r2b-type">–</span>
+    </div>
+    <div class="r2b-analysis-item">
+      <span class="r2b-label">Notes:</span>
+      <span id="r2b-notes">–</span>
+    </div>
+    <div class="r2b-analysis-item">
+      <span class="r2b-label">Intervals:</span>
+      <span id="r2b-intervals">–</span>
+    </div>
+    <div class="r2b-analysis-item">
+      <span class="r2b-label">Quality:</span>
+      <span id="r2b-quality">–</span>
+    </div>
+    <div class="r2b-analysis-item">
+      <span class="r2b-label">Position:</span>
+      <span id="r2b-position">–</span>
+    </div>
+  </div>
+  
+</section>
+```
+
+
+7. CSS STYLING
+--------------
+
+Color Palette:
+- Background R2B: #f9f9f9 (light gray)
+- Piano white keys: #f5f5f5
+- Piano black keys: #1a1a1a
+- Marked chord notes: #8fd694 (green)
+- Active key press: #ffd700 (gold, brief flash)
+- Button B10 (play/load): #90ee90 (light green)
+- Button B11 (reset): #ff9999 (light red)
+- Text: #333 (dark gray)
+- Labels: #666 (medium gray)
+
+Panel Layout:
+- Width: 100% of container (or fixed width like 900px)
+- Padding: 20px
+- Background: #f9f9f9
+- Border: 1px solid #ddd
+- Border-radius: 8px
+
+Piano Container:
+- Width: 100%
+- Max-width: 1200px
+- Margin: 20px auto
+- Aspect-ratio: 7:1 (wide piano)
+
+Piano SVG Keys:
+- White key: width 50px, height 200px
+- Black key: width 30px, height 120px, positioned above white keys
+- Border-radius: 0 0 4px 4px (rounded bottom)
+- Cursor: pointer
+- Transition: fill 0.2s ease (for smooth color changes)
+
+Button Group:
+- Display: flex, justify-content: center, gap: 12px
+- Margin: 20px 0
+
+Individual Buttons:
+- Width: 32px, height: 32px (consistent with R3)
+- Border-radius: 50% (circular)
+- Font-size: 14px, font-weight: bold
+- Border: 2px solid #ccc
+- Cursor: pointer
+- Transition: transform 0.1s, box-shadow 0.2s
+- Hover: transform scale(1.05), box-shadow: 0 2px 8px rgba(0,0,0,0.2)
+
+Analysis Section:
+- Margin-top: 20px
+- Display: grid, grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))
+- Gap: 12px
+- Font-size: 14px
+
+Analysis Item:
+- Display: flex, gap: 8px
+- Label: font-weight: bold, color: #666
+- Value: color: #333
+
+
+8. JAVASCRIPT IMPLEMENTATION
+-----------------------------
+
+Core Functions:
+
+// Initialize R2B Panel
+function initR2B() {
+  renderPiano2Octaves();
+  attachKeyListeners();
+  attachButtonListeners();
+  exposePublicAPI();
+}
+
+// Render 2-Octave Piano (C4 to B5)
+function renderPiano2Octaves() {
+  const notes = generateNoteRange('C4', 'B5'); // 24 notes
+  const svg = document.getElementById('r2b-piano-svg');
+  notes.forEach((note, index) => {
+    const key = createPianoKey(note, index);
+    svg.appendChild(key);
+  });
+}
+
+// Create Piano Key (SVG rect + text)
+function createPianoKey(note, index) {
+  const isBlack = note.includes('#');
+  const x = calculateKeyXPosition(index, isBlack);
+  const y = isBlack ? 0 : 0;
+  const width = isBlack ? 30 : 50;
+  const height = isBlack ? 120 : 200;
+  
+  const keyRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  keyRect.setAttribute('x', x);
+  keyRect.setAttribute('y', y);
+  keyRect.setAttribute('width', width);
+  keyRect.setAttribute('height', height);
+  keyRect.setAttribute('fill', isBlack ? '#1a1a1a' : '#f5f5f5');
+  keyRect.setAttribute('stroke', isBlack ? '#000' : '#ccc');
+  keyRect.setAttribute('data-note', note);
+  keyRect.classList.add('piano-key');
+  
+  // Add note label
+  const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  label.setAttribute('x', x + width/2);
+  label.setAttribute('y', height - 10);
+  label.setAttribute('text-anchor', 'middle');
+  label.textContent = note;
+  
+  return [keyRect, label];
+}
+
+// Receive Chord from R3 (via BR3 button)
+function receiveChordFromR3(chordData) {
+  currentChord = chordData;
+  
+  // Update display
+  document.getElementById('r2b-chord-title').textContent = chordData.chordName;
+  
+  // Mark chord notes on piano
+  markChordNotes(chordData.notes);
+  
+  // Play chord automatically
+  playChord(chordData.notes);
+  
+  // Update analysis section
+  updateAnalysis(chordData);
+}
+
+// Mark Chord Notes on Piano
+function markChordNotes(notes) {
+  // Clear previous markings
+  document.querySelectorAll('.piano-key').forEach(key => {
+    const note = key.getAttribute('data-note');
+    const isBlack = note.includes('#');
+    key.setAttribute('fill', isBlack ? '#1a1a1a' : '#f5f5f5');
+  });
+  
+  // Mark active chord notes
+  notes.forEach(note => {
+    const key = document.querySelector(`[data-note="${note}"]`);
+    if (key) {
+      key.setAttribute('fill', '#8fd694'); // Green
+    }
+  });
+}
+
+// Play Chord (all notes simultaneously)
+function playChord(notes) {
+  const audioContext = getAudioContext();
+  const now = audioContext.currentTime;
+  
+  notes.forEach(note => {
+    const frequency = noteToFrequency(note);
+    playTone(frequency, now, 1.5); // 1.5 seconds duration
+  });
+}
+
+// Play Individual Note (on key click)
+function playNote(note) {
+  const audioContext = getAudioContext();
+  const frequency = noteToFrequency(note);
+  const now = audioContext.currentTime;
+  
+  playTone(frequency, now, 0.5); // 500ms duration
+  
+  // Visual feedback
+  const key = document.querySelector(`[data-note="${note}"]`);
+  const originalFill = key.getAttribute('fill');
+  key.setAttribute('fill', '#ffd700'); // Gold flash
+  setTimeout(() => {
+    key.setAttribute('fill', originalFill);
+  }, 200);
+}
+
+// Attach Key Click Listeners
+function attachKeyListeners() {
+  document.querySelectorAll('.piano-key').forEach(key => {
+    key.addEventListener('click', () => {
+      const note = key.getAttribute('data-note');
+      playNote(note);
+    });
+  });
+}
+
+// Button Handlers
+function attachButtonListeners() {
+  // B10: Play/Load Chord
+  document.getElementById('r2b-b10').addEventListener('click', () => {
+    if (currentChord && currentChord.notes) {
+      markChordNotes(currentChord.notes);
+      playChord(currentChord.notes);
+    }
+  });
+  
+  // B11: Reset Chord
+  document.getElementById('r2b-b11').addEventListener('click', () => {
+    resetChord();
+  });
+}
+
+// Reset Chord
+function resetChord() {
+  currentChord = null;
+  document.getElementById('r2b-chord-title').textContent = '–';
+  
+  // Clear piano markings
+  document.querySelectorAll('.piano-key').forEach(key => {
+    const note = key.getAttribute('data-note');
+    const isBlack = note.includes('#');
+    key.setAttribute('fill', isBlack ? '#1a1a1a' : '#f5f5f5');
+  });
+  
+  // Clear analysis
+  document.getElementById('r2b-type').textContent = '–';
+  document.getElementById('r2b-notes').textContent = '–';
+  document.getElementById('r2b-intervals').textContent = '–';
+  document.getElementById('r2b-quality').textContent = '–';
+  document.getElementById('r2b-position').textContent = '–';
+}
+
+// Update Analysis Section
+function updateAnalysis(chordData) {
+  const analysis = analyzeChord(chordData.chordName, chordData.notes);
+  
+  document.getElementById('r2b-type').textContent = analysis.type;
+  document.getElementById('r2b-notes').textContent = analysis.notes.join(', ');
+  document.getElementById('r2b-intervals').textContent = analysis.intervals.join(', ');
+  document.getElementById('r2b-quality').textContent = analysis.quality;
+  document.getElementById('r2b-position').textContent = analysis.position;
+}
+
+// Expose Public API for R3
+function exposePublicAPI() {
+  window.R2B = {
+    setChord: receiveChordFromR3,
+    reset: resetChord
+  };
+}
+
+// Initialize on DOM Load
+document.addEventListener('DOMContentLoaded', initR2B);
+
+
+9. AUDIO ENGINE
+---------------
+
+Use Web Audio API for sound generation:
+
+Audio Context:
+- Create single AudioContext instance (singleton)
+- Sample rate: 44100 Hz
+- Polyphony: Unlimited (web audio handles this)
+
+Tone Generation:
+function playTone(frequency, startTime, duration) {
+  const audioContext = getAudioContext();
+  
+  // Oscillator
+  const oscillator = audioContext.createOscillator();
+  oscillator.type = 'sine'; // or 'triangle' for piano-like sound
+  oscillator.frequency.value = frequency;
+  
+  // Gain (envelope)
+  const gainNode = audioContext.createGain();
+  gainNode.gain.setValueAtTime(0, startTime);
+  gainNode.gain.linearRampToValueAtTime(0.3, startTime + 0.02); // 20ms attack
+  gainNode.gain.setValueAtTime(0.3, startTime + duration - 0.1);
+  gainNode.gain.linearRampToValueAtTime(0, startTime + duration); // Release
+  
+  // Connect and play
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+  
+  oscillator.start(startTime);
+  oscillator.stop(startTime + duration);
+}
+
+Note to Frequency Conversion:
+function noteToFrequency(note) {
+  const noteMap = {
+    'C': 0, 'C#': 1, 'D': 2, 'D#': 3, 'E': 4, 'F': 5,
+    'F#': 6, 'G': 7, 'G#': 8, 'A': 9, 'A#': 10, 'B': 11
+  };
+  
+  const noteName = note.slice(0, -1);
+  const octave = parseInt(note.slice(-1));
+  
+  const semitonesFromC0 = noteMap[noteName] + (octave * 12);
+  const semitonesFromA4 = semitonesFromC0 - 57; // A4 = C0 + 57 semitones
+  
+  return 440 * Math.pow(2, semitonesFromA4 / 12);
+}
+
+
+10. INTEGRATION WITH R2A AND R3
+--------------------------------
+
+R2B receives chord data from TWO sources:
+- R2A Panel: via B5 and B6 buttons
+- R3 Panel: via B7, B8, B9, and BR3 buttons
+
+R2A → R2B Data Flow:
+1. User clicks B5 or B6 in R2A panel
+2. R2A calls: window.R2B.setChord(chordDataWithAnalysis)
+3. R2B receives fully analyzed chord data
+4. R2B displays chord, marks piano, plays audio, shows analysis
+
+R3 → R2B Data Flow:
+1. User clicks BR3 ("LR2B") button in R3 panel
+2. R3 calls: window.R2B.setChord(chordDataWithAnalysis)
+3. R2B receives chord data (analysis must come from R1/R2A/E3)
+4. R2B displays chord, marks piano, plays audio, shows analysis
+
+Complete Data Contract (from R2A or R3):
+{
+  chordName: "Cmaj7",                    // String: full chord name
+  notes: ["C4", "E4", "G4", "B4"],       // Array: note names with octave (C4-B5 range)
+  mode: "tetrad",                        // String: "triad" | "tetrad"
+  inversion: 0,                          // Number: 0-3 (0=root, 1=1st inv, 2=2nd inv, 3=3rd inv)
+  
+  // Analysis data (pre-computed by R2A/R1/E3):
+  analysis: {
+    type: "Major Tetrad",                // String: chord classification
+    intervals: ["R", "M3", "P5", "M7"],  // Array: interval names
+    quality: "Major",                    // String: Major|Minor|Dominant|Diminished|Augmented|Sus
+    position: "Root Position",           // String: inversion description
+    voicing: "Close",                    // String: Close|Open (optional)
+    extensions: ["7"],                   // Array: extensions present (optional)
+    alterations: []                      // Array: alterations like #5, b9 (optional)
+  },
+  
+  // Optional metadata:
+  source: "R3",                          // String: "R2A" | "R3" (for debugging)
+  timestamp: 1737734400000               // Number: Unix timestamp (optional)
+}
+
+Playback Timing (match R3 standard):
+- Automatic playback delay: 0ms (immediate upon reception)
+- Chord sustain duration: 1-2 seconds
+- Individual note duration: ~400ms (consistent with R3)
+- Note attack: 10-30ms envelope
+- No overlap between sequential chord receptions
+
+Error Handling:
+- If R2B receives invalid data: 
+  * Display error message: "Invalid chord data"
+  * Don't crash or clear existing display
+  * Log error to console for debugging
+  
+- If notes array is empty or undefined:
+  * Show "–" in chord name
+  * Don't play audio
+  * Clear piano markings
+  * Clear analysis section
+  
+- If chordName is missing but notes exist:
+  * Display notes as comma-separated list
+  * Play the notes
+  * Show "Unknown Chord" in analysis
+  
+- If analysis object is missing:
+  * Display chord name and notes
+  * Play the chord
+  * Show "Analysis unavailable" in analysis section
+  * Don't attempt to analyze locally
+
+- If notes are outside C4-B5 range:
+  * Transpose octaves to fit range for display
+  * Play original octaves for audio
+  * Show warning: "Notes transposed for display"
+
+- If duplicate chord received while one is playing:
+  * Stop current playback
+  * Clear previous markings
+  * Load and play new chord immediately
+
+State Management:
+- Only ONE chord active at a time
+- New chord reception replaces current chord
+- B10 replays last received chord (if any)
+- B11 clears current chord to null state
+- If chordName is missing: use notes to infer chord name
+
+
+10a. VISUAL FEEDBACK & UI CONSISTENCY
+-------------------------------------
+
+Consistency with R3 Panel:
+- Color scheme must match R3 for user familiarity
+- Piano key colors identical to R3 (#f5f5f5 white, #1a1a1a black)
+- Chord marking color identical to R3 (#8fd694 green)
+- Note labels same font and position as R3
+- Button styling harmonized (32px, circular, color-coded)
+
+Visual Feedback States:
+1. **Idle State** (no chord loaded):
+  - Chord name: "–"
+  - Piano: all keys default colors
+  - Analysis: all fields show "–"
+  - B10: disabled/grayed out
+  - B11: disabled/grayed out
+
+2. **Loading State** (chord received):
+  - Chord name: fades in over 100ms
+  - Piano: keys marked sequentially or all at once
+  - Analysis: populates immediately
+  - B10: enabled (light green)
+  - B11: enabled (light red)
+
+3. **Playing State** (audio active):
+  - Active notes: slight glow/shadow effect (optional)
+  - Progress indicator: subtle animation (optional)
+  - Other keys: still clickable for individual notes
+
+4. **Key Press State** (individual note):
+  - Key color: #ffd700 (gold) flash for 200ms
+  - Returns to previous color (green if chord note, default if not)
+  - Audio: 400ms note duration
+
+5. **Error State**:
+  - Chord name: shows error message in red text (#ff4444)
+  - Piano: unchanged (keeps previous state)
+  - Analysis: shows error details
+  - Buttons: remain enabled
+
+Animation Guidelines:
+- All transitions: 200ms ease-in-out
+- Color changes: smooth, not jarring
+- No animations longer than 500ms
+- Respect user's prefers-reduced-motion setting
+
+Responsive Behavior:
+- Piano scales proportionally on resize
+- Maintains aspect ratio 7:1
+- Buttons remain visible and accessible
+- Text remains readable (min font-size: 12px)
+- Touch targets minimum 32px (already specified)
+
+
+11. ACCESSIBILITY
+-----------------
+
+Keyboard Navigation:
+- All buttons: Tab-focusable
+- Piano keys: Tab-focusable with aria-label
+- Enter/Space to activate buttons and keys
+
+ARIA Labels:
+- Piano keys: aria-label="C4 piano key"
+- B10: aria-label="Play current chord"
+- B11: aria-label="Reset chord display"
+- Chord name: role="heading" aria-level="2"
+
+Screen Reader Support:
+- Announce chord name when received
+- Announce chord notes when played
+- Announce button actions on click
+
+
+11a. PERFORMANCE OPTIMIZATION
+-----------------------------
+
+Audio Performance:
+- Reuse single AudioContext instance (don't create multiple)
+- Clean up oscillators after playback to prevent memory leaks
+- Limit simultaneous oscillators to actual chord size (2-6 notes)
+- Use requestAnimationFrame for visual updates during playback
+
+SVG Performance:
+- Render piano SVG once on initialization
+- Update only fill attributes on chord changes (don't re-render)
+- Use CSS classes instead of inline styles where possible
+- Cache DOM queries (don't querySelector repeatedly)
+
+Memory Management:
+- Clear event listeners when resetting chord
+- Don't store audio buffers unnecessarily
+- Limit chord history to last received only
+- Use weak references for cross-panel communication
+
+Code Optimization:
+```javascript
+// Cache DOM elements on init
+const pianoKeys = new Map(); // note -> element
+const analysisElements = {
+  chordTitle: document.getElementById('r2b-chord-title'),
+  type: document.getElementById('r2b-type'),
+  notes: document.getElementById('r2b-notes'),
+  intervals: document.getElementById('r2b-intervals'),
+  quality: document.getElementById('r2b-quality'),
+  position: document.getElementById('r2b-position')
+};
+
+// Fast note marking
+function markChordNotes(notes) {
+  // Clear all markings
+  pianoKeys.forEach((element, note) => {
+    const isBlack = note.includes('#');
+    element.setAttribute('fill', isBlack ? '#1a1a1a' : '#f5f5f5');
+  });
+  
+  // Mark chord notes
+  notes.forEach(note => {
+    const element = pianoKeys.get(note);
+    if (element) element.setAttribute('fill', '#8fd694');
+  });
+}
+
+// Update analysis with direct element access
+function updateAnalysis(chordData) {
+  if (!chordData.analysis) {
+    setAnalysisUnavailable();
+    return;
+  }
+  
+  const { analysis } = chordData;
+  analysisElements.type.textContent = analysis.type || '–';
+  analysisElements.notes.textContent = chordData.notes.join(', ') || '–';
+  analysisElements.intervals.textContent = analysis.intervals?.join(', ') || '–';
+  analysisElements.quality.textContent = analysis.quality || '–';
+  analysisElements.position.textContent = analysis.position || '–';
+}
+
+function setAnalysisUnavailable() {
+  Object.values(analysisElements).forEach(el => {
+    if (el !== analysisElements.chordTitle) {
+      el.textContent = 'Analysis unavailable';
+    }
+  });
+}
+```
+
+Browser Compatibility:
+- Target: Modern browsers (Chrome 90+, Firefox 88+, Safari 14+, Edge 90+)
+- Web Audio API: Fully supported in target browsers
+- SVG: Fully supported
+- ES6 features: Map, Set, arrow functions, const/let (all supported)
+- Fallback not required for legacy browsers
+
+Load Time Optimization:
+- Total JS bundle: < 50KB (uncompressed)
+- SVG generation: < 100ms on init
+- First paint: < 200ms
+- Interactive: < 500ms after DOM ready
+
+
+12. TESTING CHECKLIST
+----------------------
+
+Before HTML Conversion:
+- [ ] 2-octave piano renders correctly (C4 to B5, 24 keys)
+- [ ] White keys: 14, Black keys: 10
+- [ ] All keys labeled with note names
+- [ ] Piano layout is horizontal and proportional
+- [ ] Chord name displays above piano
+- [ ] B10 and B11 buttons below piano
+- [ ] Analysis section below buttons
+
+Post-Implementation Testing:
+- [ ] Receive chord from R3 via BR3 button
+- [ ] Chord name displays correctly
+- [ ] Chord notes marked in green (#8fd694)
+- [ ] Chord plays automatically on reception
+- [ ] Click individual piano keys to play notes
+- [ ] B10 replays current chord
+- [ ] B11 resets chord (clears display)
+- [ ] Analysis section populates with chord data
+- [ ] Audio plays without distortion
+- [ ] All 24 keys are clickable and play correct pitch
+- [ ] Visual feedback on key press (gold flash)
+- [ ] Keyboard navigation works (Tab, Enter, Space)
+- [ ] ARIA labels present and accurate
+
+
+12a. DATA VALIDATION & SANITIZATION
+-----------------------------------
+
+Input Validation Rules:
+
+1. **chordName validation**:
+   - Type: string
+   - Max length: 20 characters
+   - Pattern: /^[A-G][#b]?(maj|min|m|dim|aug|sus|dom)?\d*$/
+   - Sanitize: trim whitespace, reject special characters
+
+2. **notes validation**:
+   - Type: array
+   - Min length: 2 (dyad minimum)
+   - Max length: 6 (extended chords)
+   - Each note pattern: /^[A-G][#b]?[0-9]$/
+   - Valid octave range: 0-8 (display limited to 4-5)
+   - No duplicates allowed
+
+3. **mode validation**:
+   - Type: string
+   - Allowed values: "triad" | "tetrad"
+   - Default: "triad" if missing
+
+4. **inversion validation**:
+   - Type: number
+   - Range: 0-3 (inclusive)
+   - Default: 0 if missing or invalid
+
+5. **analysis validation**:
+   - Type: object (optional)
+   - If present, must contain at least 'type' and 'quality'
+   - All string fields: max 50 characters
+   - Arrays: max 10 elements
+
+Validation Function Example:
+```javascript
+function validateChordData(data) {
+  const errors = [];
+  
+  // Validate chordName
+  if (!data.chordName || typeof data.chordName !== 'string') {
+    errors.push('Missing or invalid chordName');
+  } else if (data.chordName.length > 20) {
+    errors.push('chordName too long');
+  }
+  
+  // Validate notes
+  if (!Array.isArray(data.notes)) {
+    errors.push('notes must be an array');
+  } else if (data.notes.length < 2 || data.notes.length > 6) {
+    errors.push('notes array must contain 2-6 elements');
+  } else {
+    const notePattern = /^[A-G][#b]?[0-9]$/;
+    data.notes.forEach((note, i) => {
+      if (!notePattern.test(note)) {
+        errors.push(`Invalid note format at index ${i}: ${note}`);
+      }
+    });
+  }
+  
+  // Validate mode
+  if (data.mode && !['triad', 'tetrad'].includes(data.mode)) {
+    errors.push('mode must be "triad" or "tetrad"');
+  }
+  
+  // Validate inversion
+  if (data.inversion !== undefined) {
+    if (typeof data.inversion !== 'number' || data.inversion < 0 || data.inversion > 3) {
+      errors.push('inversion must be 0-3');
+    }
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    errors: errors
+  };
+}
+
+// Use in receiveChordFromR3:
+function receiveChordFromR3(chordData) {
+  const validation = validateChordData(chordData);
+  
+  if (!validation.isValid) {
+    console.error('Invalid chord data:', validation.errors);
+    displayError('Invalid chord data received');
+    return;
+  }
+  
+  // Proceed with valid data...
+  currentChord = chordData;
+  updateDisplay(chordData);
+}
+```
+
+Security Considerations:
+- Sanitize all string inputs to prevent XSS
+- Don't execute or eval any received data
+- Limit data size to prevent DoS
+- Validate data types strictly
+- Log suspicious data patterns
+
+
+12b. CROSS-PANEL COMMUNICATION PROTOCOL
+---------------------------------------
+
+Public API Specification:
+
+window.R2B object must expose:
+```javascript
+window.R2B = {
+  // Version identifier
+  version: "1.0.0",
+  
+  // Main entry point for receiving chords
+  setChord: function(chordData) {
+    // Validates and displays chord
+    // Returns: boolean (success/failure)
+  },
+  
+  // Reset display
+  reset: function() {
+    // Clears all display elements
+    // Returns: void
+  },
+  
+  // Get current chord state (for debugging)
+  getCurrentChord: function() {
+    // Returns: current chord object or null
+  },
+  
+  // Check if R2B is ready
+  isReady: function() {
+    // Returns: boolean
+  }
+};
+```
+
+Communication Flow:
+
+R2A → R2B:
+```javascript
+// In R2A panel (B5 or B6 click handler)
+function sendChordToR2B(chordData) {
+  if (typeof window.R2B !== 'undefined' && window.R2B.isReady()) {
+    const success = window.R2B.setChord(chordData);
+    if (!success) {
+      console.warn('R2B rejected chord data');
+    }
+  } else {
+    console.error('R2B panel not available');
+  }
+}
+```
+
+R3 → R2B:
+```javascript
+// In R3 panel (BR3 button click handler)
+function handleBR3Click() {
+  if (!currentChord) {
+    console.warn('No active chord to send');
+    return;
+  }
+  
+  // Add source metadata
+  const chordDataWithSource = {
+    ...currentChord,
+    source: 'R3',
+    timestamp: Date.now()
+  };
+  
+  if (window.R2B && window.R2B.isReady()) {
+    window.R2B.setChord(chordDataWithSource);
+  }
+}
+```
+
+Initialization Order:
+1. R1 panel initializes (chord source)
+2. R2A panel initializes (analysis + B5/B6)
+3. R3 panel initializes (display + B7/B8/B9/BR3)
+4. R2B panel initializes (analysis display)
+5. All panels signal ready state
+
+Ready State Check:
+```javascript
+// Wait for R2B to be ready
+function waitForR2B(callback, timeout = 5000) {
+  const startTime = Date.now();
+  
+  const checkReady = setInterval(() => {
+    if (window.R2B && window.R2B.isReady()) {
+      clearInterval(checkReady);
+      callback();
+    } else if (Date.now() - startTime > timeout) {
+      clearInterval(checkReady);
+      console.error('R2B panel failed to initialize');
+    }
+  }, 100);
+}
+```
+
+Event-Based Alternative (recommended):
+```javascript
+// R2B fires event when ready
+document.addEventListener('r2b-ready', function() {
+  console.log('R2B panel is ready to receive chords');
+});
+
+// In R2B initialization:
+function initR2B() {
+  // ... initialization code ...
+  
+  // Signal ready state
+  document.dispatchEvent(new CustomEvent('r2b-ready', {
+    detail: { version: '1.0.0' }
+  }));
+}
+```
+
+
+13. DEPENDENCIES
+----------------
+
+Required Libraries:
+- None (pure vanilla JavaScript)
+- Web Audio API (built into browsers)
+- SVG (built into browsers)
+
+Optional Enhancements:
+- Tone.js: For better piano sound (sampled audio)
+- D3.js: For complex SVG manipulations (optional)
+- Chart.js: For visualizing chord relationships (future)
+
+
+14. FILE STRUCTURE
+------------------
+
+Recommended Files:
+- r2b-panel.html: Main HTML structure
+- r2b-panel.css: All styles
+- r2b-panel.js: JavaScript logic
+- r2b-audio.js: Audio engine (Web Audio API)
+- r2b-analysis.js: Chord analysis algorithms
+
+
+15. FUTURE ENHANCEMENTS
+-----------------------
+
+Potential Features:
+- Alternative chord suggestions (e.g., Cmaj7 → Am7)
+- Chord progression builder
+- Export chord as MIDI
+- Custom voicing editor
+- Scale visualization on piano
+- Chord inversions visualizer
+- Harmonic function analysis (I, IV, V, etc.)
+
+
+=============================
+END OF R2B BUILD INSTRUCTIONS
+=============================

@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>R3 - Piano 24-Row Prototype</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            display: flex;
+        }
+
+        #r3-panel {
+            flex: 1;
+            background-color: #2b2b2b;
+            border: 1px solid #444;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .r3-pianogroup {
+            display: flex;
+            flex-direction: row;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 8px;
+            padding: 6px;
+            border: 1px solid #333;
+            border-radius: 3px;
+            background-color: #1f1f1f;
+        }
+
+        .r3-pianogroup.active {
+            border: 2px solid #4fc3f7;
+            background-color: #223344;
+        }
+
+        .r3-chord-label {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .r3-row-number {
+            padding: 3px 6px;
+            border: 1px solid #ff9800;
+            border-radius: 2px;
+            background-color: transparent;
+            color: #ff9800;
+            font-size: 11px;
+            font-weight: bold;
+            min-width: 25px;
+            text-align: center;
+        }
+
+        .r3-chord-name {
+            padding: 3px 8px;
+            border: 1px solid #4fc3f7;
+            border-radius: 2px;
+            background-color: transparent;
+            color: #4fc3f7;
+            font-size: 12px;
+            font-weight: bold;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .r3-piano-svg {
+            width: 140px;
+            height: 60px;
+            border: 1px solid #444;
+            background-color: #fff;
+            flex-shrink: 0;
+        }
+
+        .r3-controls {
+            display: flex;
+            gap: 3px;
+            flex-shrink: 0;
+        }
+
+        .r3-btn {
+            width: 22px;
+            height: 22px;
+            padding: 0;
+            border: 1px solid #333;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.05s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            font-weight: bold;
+        }
+
+        .r3-btn:hover {
+            opacity: 0.85;
+        }
+
+        .r3-btn:active {
+            transform: scale(0.96);
+        }
+
+        .r3-btn.active {
+            outline: 1px solid #ffffff;
+        }
+
+        .r3-btn-play {
+            background-color: #8fd694;
+            color: black;
+        }
+
+        .r3-btn-triad {
+            background-color: #4fc3f7;
+            color: black;
+        }
+
+        .r3-btn-tetrad {
+            background-color: #ffb74d;
+            color: black;
+        }
+
+        .r3-btn-invert {
+            background-color: #ba68c8;
+            color: white;
+        }
+
+        .r3-btn-send {
+            background-color: #4db6ac;
+            color: white;
+        }
+
+        .piano-key {
+            cursor: pointer;
+            transition: fill 0.1s;
+        }
+
+        .piano-key:hover {
+            filter: brightness(0.95);
+        }
+    </style>
+</head>
+<body>
+
+<section id="r3-panel">
+    <!-- 24 pianogroups will be generated here -->
+</section>
+
+<script>
+    // ===== R3 STATE (24 rows) =====
+    
+    const groupStates = Array(24).fill(null).map((_, i) => ({
+        rowIndex: i + 1,
+        chordName: null,
+        mode: 'triad',
+        inversion: 0,
+        notes: []
+    }));
+
+    let activeRowIndex = 1; // Currently active row for button controls
+
+    // ===== NOTE FREQUENCIES =====
+    
+    const NOTE_FREQUENCIES = {
+        'C4': 261.63, 'C#4': 277.18, 'D4': 293.66, 'D#4': 311.13, 'E4': 329.63, 'F4': 349.23,
+        'F#4': 369.99, 'G4': 391.99, 'G#4': 415.30, 'A4': 440.00, 'A#4': 466.16, 'B4': 493.88,
+        'C5': 523.25, 'C#5': 554.37, 'D5': 587.33, 'D#5': 622.25, 'E5': 659.25, 'F5': 698.46,
+        'F#5': 739.99, 'G5': 783.99, 'G#5': 830.61, 'A5': 880.00, 'A#5': 932.33, 'B5': 987.77
+    };
+
+    // ===== R3 INITIALIZATION =====
+    
+    function initR3() {
+        console.log('[R3] initR3() called - generating 24 rows');
+        generateRows();
+        attachAllButtonListeners();
+    }
+
+    console.log('[R3] Script running');
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initR3);
+    } else {
+        initR3();
+    }
+
+    // ===== ROW GENERATION =====
+    
+    function generateRows() {
+        const panel = document.getElementById('r3-panel');
+        panel.innerHTML = '';
+        
+        for (let i = 1; i <= 24; i++) {
+            const group = document.createElement('div');
+            group.className = 'r3-pianogroup';
+            group.id = `r3-pianogroup-${i}`;
+            group.setAttribute('data-row', i);
+            
+            // Chord label (row # + chord name)
+            const labelDiv = document.createElement('div');
+            labelDiv.className = 'r3-chord-label';
+            
+            const rowSpan = document.createElement('span');
+            rowSpan.className = 'r3-row-number';
+            rowSpan.textContent = `#${i}`;
+            labelDiv.appendChild(rowSpan);
+            
+            const chordSpan = document.createElement('span');
+            chordSpan.className = 'r3-chord-name';
+            chordSpan.id = `r3-label-${i}`;
+            chordSpan.textContent = '–';
+            labelDiv.appendChild(chordSpan);
+            
+            group.appendChild(labelDiv);
+            
+            // Piano SVG
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('class', 'r3-piano-svg');
+            svg.setAttribute('id', `r3-piano-${i}`);
+            svg.setAttribute('viewBox', '0 0 200 100');
+            svg.setAttribute('preserveAspectRatio', 'none');
+            group.appendChild(svg);
+            
+            // Controls (buttons)
+            const controlsDiv = document.createElement('div');
+            controlsDiv.className = 'r3-controls';
+            controlsDiv.id = `r3-controls-${i}`;
+            
+            const buttons = [
+                {class: 'r3-btn-play', text: 'B7', action: 'play'},
+                {class: 'r3-btn-triad', text: 'B8', action: 'triad'},
+                {class: 'r3-btn-tetrad', text: 'B9', action: 'tetrad'},
+                {class: 'r3-btn-invert', text: 'B10', action: 'invert'},
+                {class: 'r3-btn-send', text: 'B11', action: 'send'}
+            ];
+            
+            buttons.forEach(btn => {
+                const button = document.createElement('button');
+                button.className = `r3-btn ${btn.class}`;
+                button.textContent = btn.text;
+                button.setAttribute('data-action', btn.action);
+                button.setAttribute('data-row', i);
+                controlsDiv.appendChild(button);
+            });
+            
+            group.appendChild(controlsDiv);
+            panel.appendChild(group);
+            
+            // Render piano keys for this row
+            renderPianoKeys(i);
+        }
+    }
+
+    // ===== PIANO RENDERING (per row) =====
+    
+    function renderPianoKeys(rowIndex) {
+        const svg = document.getElementById(`r3-piano-${rowIndex}`);
+        if (!svg) return;
+        
+        const notes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+        const blackNotes = [0.5, 1.5, 3.5, 4.5, 5.5];
+        
+        let xPos = 0;
+        const whiteKeyWidth = 200 / 7;
+        const whiteKeyHeight = 100;
+        
+        // Draw white keys
+        notes.forEach((note, idx) => {
+            const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            rect.setAttribute('x', xPos);
+            rect.setAttribute('y', 0);
+            rect.setAttribute('width', whiteKeyWidth);
+            rect.setAttribute('height', whiteKeyHeight);
+            rect.setAttribute('fill', '#f5f5f5');
+            rect.setAttribute('stroke', '#999');
+            rect.setAttribute('class', 'piano-key');
+            rect.setAttribute('data-note', note + '4');
+            svg.appendChild(rect);
+
+            // Add note label
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', xPos + whiteKeyWidth / 2);
+            text.setAttribute('y', whiteKeyHeight - 6);
+            text.setAttribute('text-anchor', 'middle');
+            text.setAttribute('font-size', '14');
+            text.setAttribute('font-weight', 'bold');
+            text.setAttribute('fill', '#333');
+            text.setAttribute('pointer-events', 'none');
+            text.textContent = note;
+            svg.appendChild(text);
+
+            xPos += whiteKeyWidth;
+        });
+
+        // Draw black keys
+        xPos = 0;
+        blackNotes.forEach((position) => {
+            const x = (position * whiteKeyWidth) - (whiteKeyWidth * 0.275);
+            const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            rect.setAttribute('x', x);
+            rect.setAttribute('y', 0);
+            rect.setAttribute('width', whiteKeyWidth * 0.55);
+            rect.setAttribute('height', 60);
+            rect.setAttribute('fill', '#1a1a1a');
+            rect.setAttribute('stroke', '#000');
+            rect.setAttribute('class', 'piano-key');
+            
+            const whiteNote = notes[Math.floor(position)];
+            let blackNote;
+            if (whiteNote === 'E' || whiteNote === 'B') {
+                return;
+            } else {
+                blackNote = whiteNote + '#4';
+            }
+            rect.setAttribute('data-note', blackNote);
+            svg.appendChild(rect);
+
+            // Add black key label
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', x + (whiteKeyWidth * 0.275));
+            text.setAttribute('y', 35);
+            text.setAttribute('text-anchor', 'middle');
+            text.setAttribute('font-size', '10');
+            text.setAttribute('font-weight', 'bold');
+            text.setAttribute('fill', '#fff');
+            text.setAttribute('pointer-events', 'none');
+            text.textContent = whiteNote + '#';
+            svg.appendChild(text);
+        });
+
+        // Attach key listeners
+        document.querySelectorAll(`#r3-piano-${rowIndex} .piano-key`).forEach(key => {
+            key.addEventListener('click', () => {
+                playNote(key.getAttribute('data-note'));
+            });
+        });
+    }
+
+    // ===== PUBLIC API FOR R1 =====
+    
+    function receiveChordFromR1(chordName, rowIndex) {
+        if (!chordName || !rowIndex || rowIndex < 1 || rowIndex > 24) {
+            console.warn('R3.receiveChordFromR1: invalid params', chordName, rowIndex);
+            return;
+        }
+
+        const state = groupStates[rowIndex - 1];
+        state.chordName = chordName;
+        
+        // Auto-detect mode
+        if (/[679]|11|13/.test(chordName)) {
+            state.mode = 'tetrad';
+        } else {
+            state.mode = 'triad';
+        }
+        
+        state.inversion = 0;
+        state.notes = computeVoicing(chordName, state.mode, state.inversion);
+
+        updateChordDisplay(chordName, state.notes, rowIndex);
+        playChord(state.notes);
+        
+        // Auto-activate this row
+        activeRowIndex = rowIndex;
+        updateRowHighlight();
+    }
+
+    // ===== CHORD DISPLAY & MARKING =====
+    
+    function updateChordDisplay(chordName, notes, rowIndex) {
+        const label = document.getElementById(`r3-label-${rowIndex}`);
+        label.textContent = chordName;
+
+        const svg = document.getElementById(`r3-piano-${rowIndex}`);
+        if (!svg) return;
+        
+        // Clear previous markings
+        svg.querySelectorAll('.piano-key').forEach(key => {
+            const note = key.getAttribute('data-note');
+            const isBlack = note.includes('#');
+            key.setAttribute('fill', isBlack ? '#1a1a1a' : '#f5f5f5');
+        });
+
+        // Mark active chord notes
+        notes.forEach(note => {
+            const key = svg.querySelector(`[data-note="${note}"]`);
+            if (key) {
+                key.setAttribute('fill', '#8fd694');
+            }
+        });
+    }
+
+    // ===== VOICING COMPUTATION =====
+    
+    const CHORD_TABLE = {
+      'C':   {tri: ['C4','E4','G4'],   tet: ['C4','E4','G4','B4']},
+    'C/E': {tri: ['C4','E4','G4'],   tet: ['C4','E4','G4','B4']},
+      'C#':  {tri: ['C#4','E#4','G#4'], tet: ['C#4','E#4','G#4','B#4']},
+      'Db':  {tri: ['Db4','F4','Ab4'],  tet: ['Db4','F4','Ab4','C5']},
+      'D':   {tri: ['D4','F#4','A4'],   tet: ['D4','F#4','A4','C#5']},
+      'Dm':  {tri: ['D4','F4','A4'],    tet: ['D4','F4','A4','C5']},
+      'E':   {tri: ['E4','G#4','B4'],   tet: ['E4','G#4','B4','D#5']},
+      'Em':  {tri: ['E4','G4','B4'],    tet: ['E4','G4','B4','D5']},
+      'F':   {tri: ['F4','A4','C5'],    tet: ['F4','A4','C5','E5']},
+      'F6':  {tri: ['F4','A4','C5'],    tet: ['F4','A4','C5','D5']},
+      'G':   {tri: ['G4','B4','D5'],    tet: ['G4','B4','D5','F#5']},
+      'A':   {tri: ['A4','C#5','E5'],   tet: ['A4','C#5','E5','G#5']},
+      'Am':  {tri: ['A4','C5','E5'],    tet: ['A4','C5','E5','G5']},
+    'Am/G':{tri: ['A4','C5','E5'],    tet: ['A4','C5','E5','G5']},
+      'B':   {tri: ['B4','D#5','F#5'],  tet: ['B4','D#5','F#5','A#5']},
+      'Bb':  {tri: ['Bb4','D5','F5'],   tet: ['Bb4','D5','F5','A5']},
+      'Bm':  {tri: ['B4','D5','F#5'],   tet: ['B4','D5','F#5','A5']},
+      'C7':  {tri: ['C4','E4','G4'],    tet: ['C4','E4','G4','Bb4']},
+      'Cm7': {tri: ['C4','Eb4','G4'],   tet: ['C4','Eb4','G4','Bb4']},
+      'Cmaj7':{tri: ['C4','E4','G4'],   tet: ['C4','E4','G4','B4']},
+      'Dm7': {tri: ['D4','F4','A4'],    tet: ['D4','F4','A4','C5']},
+      'Dm7b5':{tri: ['D4','F4','Ab4'],  tet: ['D4','F4','Ab4','C5']},
+      'Em7': {tri: ['E4','G4','B4'],    tet: ['E4','G4','B4','D5']},
+      'F7':  {tri: ['F4','A4','C5'],    tet: ['F4','A4','C5','Eb5']},
+      'Fmaj7':{tri: ['F4','A4','C5'],   tet: ['F4','A4','C5','E5']},
+      'G7':  {tri: ['G4','B4','D5'],    tet: ['G4','B4','D5','F5']},
+      'Gmaj7':{tri: ['G4','B4','D5'],   tet: ['G4','B4','D5','F#5']},
+      'A7':  {tri: ['A4','C#5','E5'],   tet: ['A4','C#5','E5','G5']},
+      'Amaj7':{tri: ['A4','C#5','E5'],  tet: ['A4','C#5','E5','G#5']},
+      'B7':  {tri: ['B4','D#5','F#5'],  tet: ['B4','D#5','F#5','A5']},
+      'Bb7': {tri: ['Bb4','D5','F5'],   tet: ['Bb4','D5','F5','Ab5']},
+      'Bbmaj7':{tri: ['Bb4','D5','F5'], tet: ['Bb4','D5','F5','A5']},
+      'Bm7': {tri: ['B4','D5','F#5'],   tet: ['B4','D5','F#5','A5']},
+      'Caug':{tri: ['C4','E4','G#4'],   tet: ['C4','E4','G#4','B4']},
+      'Cdim':{tri: ['C4','Eb4','Gb4'],  tet: ['C4','Eb4','Gb4','Bbb4']},
+      'Cdim7':{tri: ['C4','Eb4','Gb4'], tet: ['C4','Eb4','Gb4','A4']},
+      'Csus2':{tri: ['C4','D4','G4'],   tet: ['C4','D4','G4','B4']},
+      'Csus4':{tri: ['C4','F4','G4'],   tet: ['C4','F4','G4','B4']},
+      'C9':  {tri: ['C4','E4','G4'],    tet: ['C4','E4','G4','D5']},
+      'Cmaj9':{tri: ['C4','E4','G4'],   tet: ['C4','E4','G4','D5']},
+      'Cm9': {tri: ['C4','Eb4','G4'],   tet: ['C4','Eb4','G4','D5']},
+      'Cadd9':{tri: ['C4','E4','G4'],   tet: ['C4','E4','G4','D5']},
+      'C11': {tri: ['C4','E4','G4'],    tet: ['C4','E4','G4','F5']},
+      'Cmaj11':{tri: ['C4','E4','G4'],  tet: ['C4','E4','G4','F5']},
+      'C13': {tri: ['C4','E4','G4'],    tet: ['C4','E4','G4','A5']},
+      'Cmaj13':{tri: ['C4','E4','G4'],  tet: ['C4','E4','G4','A5']},
+      'F#m': {tri: ['F#4','A4','C#5'],  tet: ['F#4','A4','C#5','E5']},
+      'G#m': {tri: ['G#4','B4','D#5'],  tet: ['G#4','B4','D#5','F#5']},
+      'Ab':  {tri: ['Ab4','C5','Eb5'],  tet: ['Ab4','C5','Eb5','G5']},
+      'Abm': {tri: ['Ab4','Cb5','Eb5'], tet: ['Ab4','Cb5','Eb5','Gb5']},
+      'Gb':  {tri: ['Gb4','Bb4','Db5'], tet: ['Gb4','Bb4','Db5','F5']},
+      'Gbm': {tri: ['Gb4','A4','Db5'],  tet: ['Gb4','A4','Db5','E5']}
+    };
+
+    function computeVoicing(chordName, mode, inversion) {
+        if (!chordName) return [];
+        const norm = chordName.replace(/^H/i, 'B');
+
+        const parts = norm.split('/');
+        const base = parts[0];
+        const bass = parts[1] ? parts[1].toUpperCase() : null;
+
+        const entry = CHORD_TABLE[base];
+        if (!entry) return [];
+
+        let notes = mode === 'tetrad' ? entry.tet : entry.tri;
+
+        notes = notes.map(n => {
+            n = n.replace('Eb', 'D#').replace('Ab', 'G#').replace('Bb', 'A#');
+            n = n.replace('Db', 'C#').replace('Gb', 'F#');
+            n = n.replace('Cb', 'B').replace('Fb', 'E');
+            n = n.replace('##', '').replace('bb', '');
+            n = n.replace('E#', 'F').replace('B#', 'C');
+            n = n.replace(/[45]$/, '4');
+            return n;
+        });
+
+        if (bass) {
+            let bassNote = bass.replace(/^H/, 'B');
+            bassNote = bassNote.replace('EB','D#').replace('AB','G#').replace('BB','A#');
+            bassNote = bassNote.replace('DB','C#').replace('GB','F#');
+            bassNote = bassNote.replace('CB','B').replace('FB','E');
+            bassNote = bassNote.replace('E#', 'F').replace('B#', 'C');
+            bassNote = bassNote + '4';
+            notes = notes.filter(n => n.replace(/[45]$/, '') !== bassNote.replace(/[45]$/, ''));
+            notes.unshift(bassNote);
+        }
+
+        if (!notes.length) return notes;
+        const inv = Math.abs(inversion) % notes.length;
+        return notes.slice(inv).concat(notes.slice(0, inv));
+    }
+
+    // ===== AUDIO =====
+    
+    let AUDIO_CTX = null, AUDIO_MASTER = null;
+
+    function getAudio() {
+        if (!AUDIO_CTX) {
+            const Ctx = window.AudioContext || window.webkitAudioContext;
+            AUDIO_CTX = new Ctx();
+            AUDIO_MASTER = AUDIO_CTX.createGain();
+            AUDIO_MASTER.gain.value = 0.2;
+            AUDIO_MASTER.connect(AUDIO_CTX.destination);
+        }
+        return { ctx: AUDIO_CTX, master: AUDIO_MASTER };
+    }
+
+    function noteToFreq(note) {
+        if (!note) return 440;
+        const m = note.match(/^([A-GH])([#b]?)(\d)$/i);
+        if (!m) return 440;
+        let [, ltr, acc, oct] = m; oct = parseInt(oct, 10);
+        const name = ltr.toUpperCase() === 'H' ? 'B' : ltr.toUpperCase();
+        const key = (name + (acc || '')).toUpperCase();
+        const semis = { C:0,'C#':1,DB:1,D:2,'D#':3,EB:3,E:4,F:5,'F#':6,GB:6,G:7,'G#':8,AB:8,A:9,'A#':10,BB:10,B:11 };
+        const semi = semis[key];
+        if (semi === undefined) return 440;
+        const midi = (oct + 1) * 12 + semi;
+        return 440 * Math.pow(2, (midi - 69) / 12);
+    }
+
+    function triggerTone(freq, dur = 0.8, when = 0, detune = 0) {
+        const { ctx, master } = getAudio();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        osc.detune.value = detune;
+        gain.gain.setValueAtTime(0.0001, ctx.currentTime + when);
+        gain.gain.exponentialRampToValueAtTime(1.0, ctx.currentTime + when + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + when + dur);
+        osc.connect(gain).connect(master);
+        osc.start(ctx.currentTime + when);
+        osc.stop(ctx.currentTime + when + dur + 0.05);
+    }
+
+    function playChord(notes) {
+        if (!Array.isArray(notes) || !notes.length) return;
+        console.log(`[R3] Playing chord: ${notes.join(', ')}`);
+        notes.forEach((n, idx) => {
+            const f = noteToFreq(n);
+            const detune = (idx - (notes.length - 1) / 2) * 4;
+            triggerTone(f, 1.0, 0, detune);
+        });
+    }
+
+    function playNote(note) {
+        console.log(`[R3] Playing note: ${note}`);
+        const f = noteToFreq(note);
+        triggerTone(f, 0.5, 0, 0);
+    }
+
+    // ===== BUTTON HANDLERS =====
+    
+    function attachAllButtonListeners() {
+        for (let i = 1; i <= 24; i++) {
+            const controls = document.getElementById(`r3-controls-${i}`);
+            if (!controls) continue;
+            
+            controls.addEventListener('click', (event) => {
+                const btn = event.target.closest('.r3-btn');
+                if (!btn) return;
+                
+                activeRowIndex = i;
+                updateRowHighlight();
+                
+                const action = btn.getAttribute('data-action');
+                handleGroupAction(i, action);
+            });
+        }
+    }
+
+    function updateRowHighlight() {
+        document.querySelectorAll('.r3-pianogroup').forEach(group => {
+            group.classList.remove('active');
+        });
+        const active = document.getElementById(`r3-pianogroup-${activeRowIndex}`);
+        if (active) active.classList.add('active');
+    }
+
+    function handleGroupAction(rowIndex, action) {
+        const state = groupStates[rowIndex - 1];
+        
+        switch (action) {
+            case 'play':
+                if (state.notes && state.notes.length > 0) {
+                    playChord(state.notes);
+                }
+                break;
+            case 'triad':
+                state.mode = 'triad';
+                if (state.chordName) {
+                    state.notes = computeVoicing(state.chordName, state.mode, state.inversion);
+                    updateChordDisplay(state.chordName, state.notes, rowIndex);
+                    sendToR2B(rowIndex);
+                }
+                break;
+            case 'tetrad':
+                state.mode = 'tetrad';
+                if (state.chordName) {
+                    state.notes = computeVoicing(state.chordName, state.mode, state.inversion);
+                    updateChordDisplay(state.chordName, state.notes, rowIndex);
+                    sendToR2B(rowIndex);
+                }
+                break;
+            case 'invert':
+                state.inversion = (state.inversion + 1) % 4;
+                if (state.chordName) {
+                    state.notes = computeVoicing(state.chordName, state.mode, state.inversion);
+                    updateChordDisplay(state.chordName, state.notes, rowIndex);
+                    sendToR2B(rowIndex);
+                }
+                break;
+            case 'send':
+                sendToR2B(rowIndex);
+                break;
+        }
+    }
+
+    function sendToR2B(rowIndex) {
+        const state = groupStates[rowIndex - 1];
+        if (!state.chordName) {
+            console.log(`[R3] Row ${rowIndex}: No chord to send to R2B`);
+            return;
+        }
+
+        let displayName = state.chordName;
+        if (state.inversion > 0) {
+            const invNames = ['', '1st inv', '2nd inv', '3rd inv'];
+            displayName = `${state.chordName} (${invNames[state.inversion]})`;
+        }
+
+        const payload = {
+            rowIndex: rowIndex,
+            chordName: displayName,
+            notes: state.notes,
+            mode: state.mode,
+            inversion: state.inversion,
+            source: 'R3',
+            timestamp: Date.now()
+        };
+        
+        window.parent.postMessage({
+            type: 'R3_SEND_TO_R2B',
+            payload: payload
+        }, '*');
+        console.log(`[R3] Row ${rowIndex} sent to R2B:`, displayName);
+    }
+
+    // ===== POSTMESSAGE LISTENER =====
+    
+    window.addEventListener('message', (event) => {
+        if (event.data.type === 'R1_LOAD_CHORD') {
+            const { chord, rowIndex } = event.data;
+            console.log(`[R3] Received from R1:`, { chord, rowIndex });
+            receiveChordFromR1(chord, rowIndex);
+        }
+    });
+
+</script>
+
+</body>
+</html>

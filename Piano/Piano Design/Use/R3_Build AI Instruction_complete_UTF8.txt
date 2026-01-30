@@ -1,0 +1,249 @@
+R3 Panel Functionalities
+------------------------
+
+1. R3 presenterar ackordgrafik i form av pianografik.
+   - Varje pianografik visar en oktav med vita och svarta tangenter.
+   - Tangenternas notnamn ska alltid visas direkt på tangenterna.
+   - Noter får aldrig döljas eller ersättas av annan grafik.
+
+2. Pianografiken består av 10 fasta pianogrupper:
+   - Dessa benämns R3.Pianogroup.1 till R3.Pianogroup.10.
+   - Samtliga 10 pianogrupper ska placeras horisontellt på samma rad.
+   - Ingen radbrytning får förekomma.
+   - Pianogrupperna ska ligga kant-i-kant utan mellanrum.
+   - R3-panelens bredd utgör 85% av sidans bredd (R1 upptar 15%).
+   - De 10 pianogrupperna ska tillsammans fylla hela denna bredd.
+   - Varje pianogrupp ska automatiskt anpassa sin bredd så att alla 10 får plats.
+   - Pianogruppens höjd ska skalas proportionellt till dess bredd för att bibehålla korrekta pianoproportioner.
+   - Ingen del av R3.Pianogroup får visa sidans bakgrund:
+       * Ingen padding
+       * Ingen margin
+       * Ingen vit yta mellan grupperna
+
+3. Tonmarkering i R3 är exkluderad:
+   - Triad-markering: exkluderas
+   - Tetrad-markering: exkluderas
+   - Inversions-markering: exkluderas
+   - Endast ackordnoter får markeras när ett ackord visas; inga extra overlays
+
+4. Knappar för R3:
+   - B7: Triad (ljudläge; minimal rund knapp utan text; påverkar endast ljud)
+   - B8: Tetrad (ljudläge; minimal rund knapp utan text; påverkar endast ljud)
+   - B9: Inversion (ljudläge; minimal rund knapp utan text; påverkar endast ljud)
+   - BR3: Load into R2B ("LR2B") (tyst; skickar senaste aktiva ackordet)
+
+5. BR3-funktion:
+   - BR3 ska skicka det SENAST AKTIVA ackordet i R3 (från R1/B1/B3) till R2B.
+   - BR3 skickar alltid ett (1) ackord, aldrig en lista.
+
+6. Placering av knappar:
+   - Knapparna B7, B8, B9 och BR3 ska placeras i en horisontell rad direkt under pianografiken.
+   - Knapparna ska vara centrerade horisontellt i R3-panelen.
+   - Knapparna ska vara små och runda, utan text på eller under knapparna (endast ikon/färgindikator om behövs).
+   - Avståndet mellan knapparna ska vara jämnt.
+   - Knapparnas rad ska ligga direkt under R3.Pianogroup-raden utan mellanliggande element.
+
+7. R3-panelens bakgrundsfärg:
+   - R3-panelens bakgrundsfärg är vit.
+
+R3 Input From R1
+----------------
+
+1. R3 får alltid sitt aktiva ackord från R1.
+   - R1 ansvarar för att välja eller aktivera ett ackord.
+   - Det ackord som är aktivt i R1 ska omedelbart göras tillgängligt för R3.
+
+2. R3 ska ta emot ackordet som en strukturerad datasträng:
+   - Format: Ackordnamn (t.ex. "Cmaj7", "Dm", "F#dim")
+   - Endast ett ackord åt gången är aktivt.
+
+3. När R3 tar emot ett nytt ackord från R1:
+   - Ackordnamn visas ovanför pianografiken (överlappar ej tangenter).
+   - Tangenter för ackordets toner markeras; inga triad/tetrad/inversions-overlays.
+   - Ingen annan källa får ändra R3:s aktiva ackord.
+
+4. R3 ska alltid betrakta det senaste ackordet från R1 som det aktuella.
+   - Tidigare ackord ska ignoreras.
+   - Ingen historik sparas i R3.
+
+5. R3 får inte själv generera eller ändra ackord.
+   - R3 är en ren presentationspanel.
+   - Endast R1 får bestämma vilket ackord som är aktivt.
+
+R1-specifikation och triggers
+-----------------------------
+- Validering, rad/global-knappar (B1–B4) och hjälptexter hanteras i R1.
+- Se "R1_Build AI Instruction_3.txt" för detaljer.
+
+9. Ljudlägen och uppspelning
+----------------------------
+B7/B8/B9 styr ljudet i R3 (endast audio; visuella overlays exkluderas):
+- B7 – Triad: spelar treklang utifrån ackordets kvalitet.
+- B8 – Tetrad: spelar fyrklang = triad + primär extension (normalt 7; eller explicit 9/11/13; vid add9/add11/add13 används add-tonen).
+- B9 – Inversion: cyklar inversioner, påverkar röstningsordning (lägsta ton) endast för ljud:
+  * Triad: 0–2 (root, 1:a, 2:a)
+  * Tetrad: 0–3 (root, 1:a, 2:a, 3:e)
+
+Voicing-regler (tonuppsättning för uppspelning):
+- maj: Triad R, 3, 5; Tetrad R, 3, 5, 7
+- min: Triad R, b3, 5; Tetrad R, b3, 5, b7
+- dom: Triad R, 3, 5; Tetrad R, 3, b7 + primär extension (9/11/13); 5 kan utgå vid behov
+- sus: Triad R, 4, 5 (ersätter 3→4); Tetrad R, 4, 5, b7 (för dominant sus)
+- dim: Triad R, b3, b5; °7 Tetrad R, b3, b5, bb7
+- aug: Triad R, 3, #5; Tetrad R, 3, #5, 7 (om angivet)
+- Alterationer: ersätt 5→#5/b5; använd #9/b9/#11/b13 som primär extension i tetradläge.
+- Additions: add9/add11/add13 = använd add-ton som primär extension i tetradläge.
+
+Inversionsordning (exempel):
+- Triad inv0: R–3–5; inv1: 3–5–R; inv2: 5–R–3
+- Tetrad inv0: R–3–5–7; inv1: 3–5–7–R; inv2: 5–7–R–3; inv3: 7–R–3–5
+
+Utlösare → ljud:
+- B1 (rad-load): spelar raden i valt läge/inversion (ett ackord per tryck; overflow n>10 ignoreras).
+- B3 (load all): spelar alla laddade ackord sekventiellt i grupper 1–10; ~400 ms per ackord, ej överlapp.
+- B2/B4 (clear/reset): tysta.
+- BR3 (skicka till R2B): tyst; skickar endast senaste aktiva ackordet (aldrig lista).
+
+Uppspelningsmotor standard:
+- Polyfoni ≥ 4; blockackord som standard (samtidiga note-on).
+- Envelope: attack 10–30 ms; sustain ~1–2 s; ingen pedal som standard.
+- Stämning: A4 = 440 Hz; liksvävande temperament.
+
+Edge cases:
+- Ogiltiga ackord (enl R1.XC): tyst; rad rensas; R3 uppdateras inte.
+- Overflow (B1 mot n>10): ignoreras; inget ljud.
+- Fler än 4 toner: i tetradläge prioriteras primär extension; 5:e kan utgå för klar röstning.
+- Enharmoniska: visning enligt inmatning; ljud spelar likvärdig tonklass (C# ≡ Db).
+
+10. HTML Structure & Semantic Markup
+
+   Container: <section id="r3-panel" class="r3-piano-panel"> för hela panelen.
+   - Background: white (#ffffff)
+   - Width: 85% of viewport
+
+   Pianogroup Container: <div id="r3-pianogroups" class="r3-pianogroups-container">
+   - Display: flex, no gap (kant-i-kant)
+   - Flex-wrap: nowrap
+
+   Individual Pianogroup Structure (×10):
+   Individual Pianogroup contains chord label above piano SVG graphic
+   - Chord label displays chord name or "–" if empty
+   - Piano SVG shows one octave: C–B (12 notes, 7 white + 5 black keys)
+   - Each key labeled with note name
+   - Active chord notes marked in green (#8fd694)
+
+   Button Container: <div class="r3-button-group"> direkt under pianogroups
+   - B7, B8, B9: Small circular buttons (32px), data-mode attribute
+   - BR3: Rounded square button with "LR2B" text
+   - All buttons have aria-label for accessibility
+
+   Footer: <div class="r3-footer"> för tidsstämpel
+   - Format: yy.mm.dd • HH.mm (ex. "26.01.24 • 14.37")
+
+11. CSS Styling Guidelines
+
+   Color Palette:
+   - Background R3: #ffffff (white)
+   - Piano white keys: #f5f5f5 (light gray)
+   - Piano black keys: #1a1a1a (dark gray/black)
+   - Marked tone (active chord): #8fd694 (green, per R1 consistency)
+   - Button mode-inactive: #d0d0d0 (light gray)
+   - Button mode-active: #a3d5ff (light blue)
+   - Button BR3: #c9b3ff (light purple)
+
+   R3 Panel Layout:
+   - Width: 85% of viewport
+   - Display: flex, flex-direction: column
+   - Background: #ffffff
+   - Border: 1px solid #ddd
+
+   Pianogroups Container:
+   - Display: flex, gap: 0 (no space between groups, kant-i-kant)
+   - Flex-wrap: nowrap
+   - Width: 100%
+
+   Individual Pianogroup:
+   - Flex: 1 0 10% (each takes 10% width)
+   - Display: flex, flex-direction: column
+   - Aspect-ratio: 20:1 (maintains piano proportions)
+
+   Piano SVG:
+   - Width: 100%, Height: auto
+   - viewBox: 0 0 200 100
+
+   Button Group Layout:
+   - Display: flex, justify-content: center, gap: 8px
+   - Margin-top: 8px
+
+   Button Styling (B7/B8/B9):
+   - Shape: circular (border-radius: 50%)
+   - Size: 32px × 32px
+   - Default: #d0d0d0
+   - Active: #a3d5ff with box-shadow
+
+   Button Styling (BR3):
+   - Shape: rounded square (border-radius: 4px)
+   - Padding: 6px 12px
+   - Background: #c9b3ff
+   - Font-size: 12px, font-weight: bold
+
+12. JavaScript Implementation (Option B: Code Examples)
+
+   Piano Rendering Function:
+   - renderPianoSVG(pianoGroupIndex): Creates SVG with 7 white + 5 black keys
+   - Each key has id, data-note attribute, note name label
+   - White keys: #f5f5f5 with #ccc border
+   - Black keys: #1a1a1a with #000 border
+
+   Update Chord Display Function:
+   - updateChordDisplay(pianoGroupIndex, chordName, notes)
+   - Sets chord label text
+   - Marks active chord notes with #8fd694 fill
+   - Clears previous markings
+
+   Sound Mode Handlers:
+   - setSoundMode(mode): Updates button UI, replays chord with new mode
+   - handleB7Click: Set to 'triad' mode
+   - handleB8Click: Set to 'tetrad' mode
+   - handleB9Click: Set to 'inversion' mode, cycle inversions 0-3
+
+   BR3 Send Handler:
+   - handleBR3Click: Sends currentChord.name to R2B (single chord)
+   - Uses R2B.setChord(chordName) API
+
+   Data Reception from R1:
+   - receiveChordFromR1(chordName, voicing)
+   - voicing object contains { triad: [notes], tetrad: [notes], inversions: [...] }
+   - Updates pianogroup display with chord and notes
+   - Plays sound based on currentSoundMode
+
+   Initialization:
+   - DOMContentLoaded: Render all 10 pianogroups, set default sound mode
+   - Create piano SVGs dynamically or use template
+
+13. Implementation Checklist
+
+   Before HTML Conversion:
+   - [ ] Verify 10 pianogroups with IDs r3-pianogroup-1 to r3-pianogroup-10
+   - [ ] Confirm piano graphic shows C–B (12 notes, 7 white + 5 black)
+   - [ ] Verify note names on all keys
+   - [ ] Confirm horizontal layout, no line breaks, kant-i-kant
+   - [ ] Test R3 width = 85% viewport
+   - [ ] Add ARIA labels to all buttons
+   - [ ] Verify button colors: #d0d0d0 inactive, #a3d5ff active, #c9b3ff BR3
+   - [ ] Confirm footer timestamp format
+
+   Post-Implementation Testing:
+   - [ ] Receive chord from R1 (B1/B3 trigger)
+   - [ ] Chord name displayed correctly
+   - [ ] Correct notes marked in green on piano
+   - [ ] B7 (Triad) plays 3-note voicing
+   - [ ] B8 (Tetrad) plays 4-note voicing with extension
+   - [ ] B9 (Inversion) cycles 0–3 for tetrads
+   - [ ] BR3 sends single chord to R2B (not list)
+   - [ ] Sound playback ~400ms timing
+   - [ ] Pianogroups resize proportionally
+   - [ ] Keyboard support (Tab, focus outlines)
+   - [ ] All chord qualities (maj/m/dim/aug/sus)
+   - [ ] Voicing rules applied per sound mode
+   - [ ] Cross-panel flow R2A→R1→R3 complete
