@@ -229,10 +229,6 @@
                 font-size: 0.75rem;
             }
             
-            .frame-header .data-flow {
-                display: none;  /* Hide workflow text on mobile */
-            }
-            
             #frame-timestamp {
                 display: none;  /* Hide timestamp on mobile */
             }
@@ -253,7 +249,8 @@
 
 <div class="frame-header">
     <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
-        <h1 style="margin: 0;">
+        <h1 style="margin: 0; cursor: help;" title="R2A (input) → R1 (validation) → R3 (display) → R2B (analysis)
+R1 (single row input) → R3 (display)">
             🎹 Piano Chords & Lyrics Analyse & View
             <span id="frame-version" style="font-size:0.72rem; color:#b3e5fc; margin-left:8px; display:inline-block;"></span>
             <span id="frame-timestamp" style="font-size:0.75rem; color:#888; margin-left:8px; display:inline-block;"></span>
@@ -266,9 +263,6 @@
             <button class="frame-nav-btn" data-nav="4" title="Tablet">📱</button>
             <button class="frame-nav-btn" data-nav="5" title="Phone">📵</button>
         </div>
-    </div>
-    <div class="data-flow" aria-label="Data flow">
-        <span>R1 (single row input) -> R3 (display) or R2A (input) → R1 (validation) → R3 (display) → R2B (analysis)</span>
     </div>
 </div>
 
