@@ -118,19 +118,22 @@
     <h2>R2A - Batch Input Panel (Top Left)</h2>
     <table>
         <tr>
-            <th class="button-col">Button</th>
+            <th class="button-col">Button #</th>
+            <th class="button-col">Label</th>
             <th>Function</th>
             <th>Description</th>
         </tr>
         <tr>
-            <td class="button-col">B5 LR1</td>
+            <td class="button-col"><strong>B5</strong></td>
+            <td class="button-col">B5LR1</td>
             <td>Load to R1</td>
-            <td>Parse all chords from textarea and send valid chords to R1 validation panel</td>
+            <td>Parse all chords from textarea and send valid chords to R1 validation panel. Validates chord syntax before transfer.</td>
         </tr>
         <tr>
-            <td class="button-col">B6 XR2A</td>
-            <td>Clear R2A</td>
-            <td>Clear title, textarea, and localStorage for R2A panel</td>
+            <td class="button-col"><strong>B6</strong></td>
+            <td class="button-col">B6XR2A</td>
+            <td>Reset All</td>
+            <td>Clear all data in R2A panel: song title, textarea content, and localStorage. Resets panel to empty state with no data retained.</td>
         </tr>
         <tr>
             <td class="button-col">«</td>
@@ -144,18 +147,22 @@
         </tr>
         <tr>
             <td class="button-col">»</td>
+            <td>–</td>
             <td>Next</td>
             <td>Navigate to next sample (wraps to first)</td>
         </tr>
         <tr>
-            <td class="button-col">Log</td>
-            <td>Download</td>
-            <td>Download parse log as text file with R2A|R1|R3 entries</td>
+            <td class="button-col"><strong>B7</strong></td>
+            <td class="button-col">ER</td>
+            <td>Error Log</td>
+            <td>Error log showing missing or invalid chords detected during R2A→R1→R3 parsing. Download as text file for review.</td>
         </tr>
         <tr>
-            <td class="button-col">XLog</td>
-            <td>Clear Log</td>
-            <td>Clear all parse log entries (with confirmation)</td>
+            <td class="button-col"><strong>B8</strong></td>
+            <td class="button-col">--</td>
+            <td>Reset Log</td>
+            <td>Clear all error log entries and reset log to empty state. Requires confirmation before clearing data.</td>
+        </tr>
         </tr>
     </table>
 </div>
@@ -164,27 +171,35 @@
     <h2>R1 - Validation Panel (Top Right)</h2>
     <table>
         <tr>
-            <th class="button-col">Button</th>
+            <th class="button-col">Button #</th>
+            <th class="button-col">Label</th>
             <th>Function</th>
             <th>Description</th>
         </tr>
         <tr>
+            <td class="button-col"><strong>B3</strong></td>
             <td class="button-col">LR3</td>
             <td>Load All</td>
-            <td>Send all 24 validated chords to R3 piano display</td>
+            <td>Load all 24 validated chords from R1 to R3 piano display</td>
         </tr>
         <tr>
+            <td class="button-col"><strong>B4</strong></td>
             <td class="button-col">XR1</td>
             <td>Clear All</td>
-            <td>Clear all 24 input rows in R1</td>
+            <td>Reset and clear all 24 input rows in R1 validation panel. Removes all chord data but keeps row structure intact.</td>
+        </tr>
+        <tr>
+            <td colspan="4"><em>Per-row buttons (repeat for each of 24 rows):</em></td>
         </tr>
         <tr>
             <td class="button-col">L</td>
+            <td>–</td>
             <td>Load Row</td>
-            <td>Send this specific row's chord to corresponding R3 piano</td>
+            <td>Send this row's chord to corresponding R3 piano display</td>
         </tr>
         <tr>
             <td class="button-col">X</td>
+            <td>–</td>
             <td>Clear Row</td>
             <td>Clear this specific input row</td>
         </tr>
@@ -197,7 +212,33 @@
 </div>
 
 <div class="section">
-    <h2>R3 - Piano Display Panel (Bottom Left)</h2>
+    <h2>R2B - Analysis Panel (Bottom Right)</h2>
+    <table>
+        <tr>
+            <th class="button-col">Element</th>
+            <th>Function</th>
+            <th>Description</th>
+        </tr>
+        <tr>
+            <td class="button-col"><strong>–</strong></td>
+            <td>R3 Chord</td>
+            <td>Displays currently selected chord from R3 piano display. Updates in real-time when chord is selected or played.</td>
+        </tr>
+        <tr>
+            <td class="button-col"><strong>B12</strong></td>
+            <td>Play R3 Chord</td>
+            <td>Play the currently displayed chord on piano with selected duration.</td>
+        </tr>
+        <tr>
+            <td class="button-col"><strong>B13</strong></td>
+            <td>Reset R2B Chord</td>
+            <td>Reset chord display and clear current analysis. Returns R2B to empty state.</td>
+        </tr>
+    </table>
+</div>
+
+<div class="section">
+    <h2>R3 - Piano Display Panel (Bottom Center)</h2>
     <table>
         <tr>
             <th class="button-col">Button</th>
