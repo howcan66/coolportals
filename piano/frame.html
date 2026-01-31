@@ -296,6 +296,10 @@ R1 (single row input) → R3 (display)">
                 <span class="btn-desktop">📵</span>
                 <span class="btn-mobile">▪</span>
             </button>
+            <button class="frame-nav-btn" data-nav="6" title="Help">
+                <span class="btn-desktop">❓</span>
+                <span class="btn-mobile">?</span>
+            </button>
         </div>
     </div>
 </div>
@@ -618,6 +622,10 @@ R1 (single row input) → R3 (display)">
                         r3Frame.src = 'R3.html?v=2.0.0&layout=mobile';
                     }
                 }, 100);
+            } else if (navNum === '6') {
+                // Help - open help window
+                window.open('help.html', 'helpWindow', 
+                    'width=400,height=800,scrollbars=yes,resizable=yes,left=100,top=50');
             }
         });
     });

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piano Chord App - Help</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+            margin: 0;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #0d47a1;
+            border-bottom: 2px solid #0d47a1;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #1976d2;
+            margin-top: 30px;
+            margin-bottom: 10px;
+            border-left: 4px solid #4fc3f7;
+            padding-left: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        th {
+            background-color: #0d47a1;
+            color: white;
+            padding: 10px;
+            text-align: left;
+            font-weight: bold;
+        }
+        td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        tr:hover {
+            background-color: #f0f0f0;
+        }
+        .icon-col {
+            width: 50px;
+            text-align: center;
+            font-size: 18px;
+        }
+        .button-col {
+            width: 80px;
+            font-weight: bold;
+            color: #0d47a1;
+        }
+        .section {
+            background-color: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+<h1>🎹 Piano Chord Application - Help Guide</h1>
+
+<div class="section">
+    <h2>Header Navigation Buttons</h2>
+    <table>
+        <tr>
+            <th class="icon-col">Icon</th>
+            <th class="button-col">Function</th>
+            <th>Description</th>
+        </tr>
+        <tr>
+            <td class="icon-col">🎵</td>
+            <td class="button-col">UG</td>
+            <td>Opens Ultimate Guitar chord reference in new tab</td>
+        </tr>
+        <tr>
+            <td class="icon-col">🎼</td>
+            <td class="button-col">Sample</td>
+            <td>Opens Sample Data manager in new window for CRUD operations</td>
+        </tr>
+        <tr>
+            <td class="icon-col">①</td>
+            <td class="button-col">Linear</td>
+            <td>Switch R3 to Linear Layout (1 row × 24 columns)</td>
+        </tr>
+        <tr>
+            <td class="icon-col">🖥️</td>
+            <td class="button-col">Desktop</td>
+            <td>Switch R3 to Desktop Layout (4 column grid)</td>
+        </tr>
+        <tr>
+            <td class="icon-col">📱</td>
+            <td class="button-col">Tablet</td>
+            <td>Switch R3 to Tablet Layout (3 column grid)</td>
+        </tr>
+        <tr>
+            <td class="icon-col">📵</td>
+            <td class="button-col">Mobile</td>
+            <td>Switch R3 to Mobile Layout (2 column grid)</td>
+        </tr>
+        <tr>
+            <td class="icon-col">❓</td>
+            <td class="button-col">Help</td>
+            <td>Opens this help window</td>
+        </tr>
+    </table>
+</div>
+
+<div class="section">
+    <h2>R2A - Batch Input Panel (Top Left)</h2>
+    <table>
+        <tr>
+            <th class="button-col">Button</th>
+            <th>Function</th>
+            <th>Description</th>
+        </tr>
+        <tr>
+            <td class="button-col">B5 LR1</td>
+            <td>Load to R1</td>
+            <td>Parse all chords from textarea and send valid chords to R1 validation panel</td>
+        </tr>
+        <tr>
+            <td class="button-col">B6 XR2A</td>
+            <td>Clear R2A</td>
+            <td>Clear title, textarea, and localStorage for R2A panel</td>
+        </tr>
+        <tr>
+            <td class="button-col">«</td>
+            <td>Previous</td>
+            <td>Navigate to previous sample (wraps to last)</td>
+        </tr>
+        <tr>
+            <td class="button-col">1/4</td>
+            <td>Counter</td>
+            <td>Shows current sample index / total count</td>
+        </tr>
+        <tr>
+            <td class="button-col">»</td>
+            <td>Next</td>
+            <td>Navigate to next sample (wraps to first)</td>
+        </tr>
+        <tr>
+            <td class="button-col">Log</td>
+            <td>Download</td>
+            <td>Download parse log as text file with R2A|R1|R3 entries</td>
+        </tr>
+        <tr>
+            <td class="button-col">XLog</td>
+            <td>Clear Log</td>
+            <td>Clear all parse log entries (with confirmation)</td>
+        </tr>
+    </table>
+</div>
+
+<div class="section">
+    <h2>R1 - Validation Panel (Top Right)</h2>
+    <table>
+        <tr>
+            <th class="button-col">Button</th>
+            <th>Function</th>
+            <th>Description</th>
+        </tr>
+        <tr>
+            <td class="button-col">LR3</td>
+            <td>Load All</td>
+            <td>Send all 24 validated chords to R3 piano display</td>
+        </tr>
+        <tr>
+            <td class="button-col">XR1</td>
+            <td>Clear All</td>
+            <td>Clear all 24 input rows in R1</td>
+        </tr>
+        <tr>
+            <td class="button-col">L</td>
+            <td>Load Row</td>
+            <td>Send this specific row's chord to corresponding R3 piano</td>
+        </tr>
+        <tr>
+            <td class="button-col">X</td>
+            <td>Clear Row</td>
+            <td>Clear this specific input row</td>
+        </tr>
+        <tr>
+            <td class="button-col">B25</td>
+            <td>Focus & Play</td>
+            <td>Scroll to this row in R3 and play the chord</td>
+        </tr>
+    </table>
+</div>
+
+<div class="section">
+    <h2>R3 - Piano Display Panel (Bottom Left)</h2>
+    <table>
+        <tr>
+            <th class="button-col">Button</th>
+            <th>Function</th>
+            <th>Description</th>
+        </tr>
+        <tr>
+            <td class="button-col">#N</td>
+            <td>Row Number</td>
+            <td>Displays row number (1-24) - not clickable</td>
+        </tr>
+        <tr>
+            <td class="button-col">–</td>
+            <td>Chord Name</td>
+            <td>Shows current chord symbol (e.g., Cmaj7, Am, G7)</td>
+        </tr>
+        <tr>
+            <td class="button-col">B7</td>
+            <td>Play Chord</td>
+            <td>Play chord with piano key highlighting and Web Audio synthesis</td>
+        </tr>
+        <tr>
+            <td class="button-col">B8</td>
+            <td>Triad Mode</td>
+            <td>Set voicing to 3-note mode (root, 3rd, 5th)</td>
+        </tr>
+        <tr>
+            <td class="button-col">B9</td>
+            <td>Tetrad Mode</td>
+            <td>Set voicing to 4-note mode (root, 3rd, 5th, 7th)</td>
+        </tr>
+        <tr>
+            <td class="button-col">B10</td>
+            <td>Invert</td>
+            <td>Cycle through inversions: 0 (root) → 1 (1st) → 2 (2nd) → 3 (3rd)</td>
+        </tr>
+        <tr>
+            <td class="button-col">B11</td>
+            <td>Send R2B</td>
+            <td>Send chord to R2B analysis panel for detailed view</td>
+        </tr>
+    </table>
+</div>
+
+<div class="section">
+    <h2>R2B - Analysis Panel (Bottom Right)</h2>
+    <table>
+        <tr>
+            <th class="button-col">Control</th>
+            <th>Range</th>
+            <th>Description</th>
+        </tr>
+        <tr>
+            <td class="button-col">Duration</td>
+            <td>0.5s - 3.0s</td>
+            <td>Adjust note playback duration for all pianos</td>
+        </tr>
+        <tr>
+            <td class="button-col">Volume</td>
+            <td>0 - 100%</td>
+            <td>Adjust audio playback volume for all pianos</td>
+        </tr>
+        <tr>
+            <td class="button-col">Display</td>
+            <td>-</td>
+            <td>Shows chord analysis: notes, intervals, voicing info</td>
+        </tr>
+    </table>
+</div>
+
+<div class="section">
+    <h2>Supported Chord Types</h2>
+    <p><strong>Root Notes:</strong> A, B, C, D, E, F, G (with # or b accidentals, including Bb)</p>
+    <p><strong>Qualities:</strong> maj, m, dim, aug, sus2, sus4</p>
+    <p><strong>Extensions:</strong> 2, 4, 5, 6, 7, 9, 11, 13</p>
+    <p><strong>Alterations:</strong> #5, b5, #9, b9, #11, b13</p>
+    <p><strong>Added Notes:</strong> add9, add11, add13</p>
+    <p><strong>Slash Chords:</strong> C/E, G/B, Am/C</p>
+</div>
+
+<div class="section">
+    <h2>Abbreviations & Terms</h2>
+    <table>
+        <tr>
+            <th class="button-col">Term</th>
+            <th>Meaning</th>
+        </tr>
+        <tr>
+            <td class="button-col">R1</td>
+            <td>Validation Panel - 24 chord input rows</td>
+        </tr>
+        <tr>
+            <td class="button-col">R2A</td>
+            <td>Batch Input Panel - multi-line text chord entry</td>
+        </tr>
+        <tr>
+            <td class="button-col">R2B</td>
+            <td>Analysis Panel - chord analysis and controls</td>
+        </tr>
+        <tr>
+            <td class="button-col">R3</td>
+            <td>Piano Display Panel - 24 interactive piano keyboards</td>
+        </tr>
+        <tr>
+            <td class="button-col">UG</td>
+            <td>Ultimate Guitar - online chord reference site</td>
+        </tr>
+        <tr>
+            <td class="button-col">SMP</td>
+            <td>Sample Manager - CRUD operations for chord samples</td>
+        </tr>
+        <tr>
+            <td class="button-col">Triad</td>
+            <td>3-note chord (root, 3rd, 5th)</td>
+        </tr>
+        <tr>
+            <td class="button-col">Tetrad</td>
+            <td>4-note chord (root, 3rd, 5th, 7th)</td>
+        </tr>
+        <tr>
+            <td class="button-col">Inversion</td>
+            <td>Rearranging chord notes (0=root position, 1=1st inv, etc.)</td>
+        </tr>
+    </table>
+</div>
+
+<div class="section">
+    <p style="text-align: center; color: #666; margin-top: 30px;">
+        <strong>Version 2.0.0</strong> | Piano Chord Application<br>
+        Close this window to return to the application
+    </p>
+</div>
+
+</body>
+</html>
