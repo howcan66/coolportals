@@ -473,17 +473,23 @@ R1 (single row input) → R3 (display)">
         
         if (event.data.type === 'R2A_LOAD_CHORDS') {
             // Device-aware routing: R2A B5
-            // Tablet (≤1024px): R2A→R3 (skip R1 since hidden)
-            // Desktop (>1024px): R2A→R1→R3 (validation step)
+            // Tablet (≤1024px): Convert to R1_LOAD_ALL format, route to R3
+            // Desktop (>1024px): Route to R1 as-is
             
             const isTablet = window.innerWidth <= 1024;
             
             if (isTablet) {
-                // Route directly to R3 on tablet
+                // Convert R2A_LOAD_CHORDS to R1_LOAD_ALL format and send to R3
+                const convertedMessage = {
+                    type: 'R1_LOAD_ALL',
+                    chords: event.data.chords
+                    // titleLine discarded on tablet (no R1 to display it)
+                };
+                
                 const r3Frame = document.getElementById('r3-frame');
                 if (r3Frame && r3Frame.contentWindow) {
-                    r3Frame.contentWindow.postMessage(event.data, '*');
-                    console.log('[Frame Router] R2A→R3 (tablet): chords loaded directly');
+                    r3Frame.contentWindow.postMessage(convertedMessage, '*');
+                    console.log('[Frame Router] R2A→R3 (tablet): converted R2A_LOAD_CHORDS to R1_LOAD_ALL, sent', event.data.chords.length, 'chords');
                 }
             } else {
                 // Route to R1 on desktop (user can manipulate)
