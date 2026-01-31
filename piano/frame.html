@@ -178,7 +178,8 @@
             <span id="frame-timestamp" style="font-size:0.75rem; color:#888; margin-left:8px; display:inline-block;"></span>
         </h1>
         <div class="frame-nav-buttons" id="frame-nav-buttons">
-            <button class="frame-nav-btn active" data-nav="1">1</button>
+            <button class="frame-nav-btn active" data-nav="0">0</button>
+            <button class="frame-nav-btn" data-nav="1">1</button>
             <button class="frame-nav-btn" data-nav="2">2</button>
             <button class="frame-nav-btn" data-nav="3">3</button>
             <button class="frame-nav-btn" data-nav="4">4</button>
@@ -370,7 +371,10 @@
             const navNum = btn.getAttribute('data-nav');
             console.log('[Frame] Navigation to:', navNum);
             
-            if (navNum === '1') {
+            if (navNum === '0') {
+                // Main Piano app (frame.html)
+                console.log('[Frame] Main app - already here');
+            } else if (navNum === '1') {
                 // Sample data
                 window.open('Sample.html', 'sample', 'width=700,height=600');
             } else if (navNum === '2') {
