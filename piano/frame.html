@@ -218,6 +218,35 @@
             background-color: #4fc3f7;
             color: #0d47a1;
         }
+
+        /* === QUICK MOBILE/TABLET FIX === */
+        @media (max-width: 768px) {
+            .frame-header {
+                padding: 4px;
+            }
+            
+            .frame-header h1 {
+                font-size: 0.75rem;
+            }
+            
+            .frame-header .data-flow {
+                display: none;  /* Hide workflow text on mobile */
+            }
+            
+            #frame-timestamp {
+                display: none;  /* Hide timestamp on mobile */
+            }
+            
+            .frame-nav-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 16px;
+            }
+            
+            .frame-nav-buttons {
+                gap: 3px;  /* Tighter button spacing */
+            }
+        }
     </style>
 </head>
 <body>
