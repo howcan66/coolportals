@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piano Chords & Lyrics - Tablet</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #fff;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .frame-header {
+            background-color: #0d47a1;
+            padding: 4px;
+            border-radius: 3px;
+            margin-bottom: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .frame-header h1 {
+            font-size: 0.75rem;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .frame-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: var(--row1-height, 0.3fr) 8px var(--row2-height, 0.7fr);
+            grid-template-areas:
+                "r2a"
+                "divider"
+                "r3";
+            gap: 6px;
+            flex: 1;
+            min-height: 0;
+            position: relative;
+        }
+
+        .resize-divider {
+            grid-area: divider;
+            background: transparent;
+            cursor: ns-resize;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
+
+        .resize-divider::before {
+            content: '';
+            width: 100%;
+            height: 4px;
+            background: #0d47a1;
+            border-radius: 2px;
+            transition: background 0.2s, height 0.2s;
+        }
+
+        .resize-divider:hover::before {
+            background: #4dd0e1;
+            height: 6px;
+        }
+
+        .resize-divider.dragging::before {
+            background: #4dd0e1;
+            height: 6px;
+        }
+
+        .frame-r2a { grid-area: r2a; }
+        .frame-r3 { grid-area: r3; }
+        
+        .frame-r3 iframe {
+            overflow-y: auto;
+        }
+
+        .frame-wrapper {
+            display: flex;
+            flex-direction: column;
+            background-color: #2a2a2a;
+            border-radius: 2px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+            overflow: hidden;
+        }
+
+        iframe {
+            flex: 1;
+            border: none;
+            background-color: #fff;
+            min-height: 0;
+        }
+
+        .frame-nav-buttons {
+            display: flex;
+            gap: 2px;
+            justify-content: flex-end;
+            align-items: center;
+            margin-top: 4px;
+        }
+
+        .frame-nav-btn {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            border: 1px solid #4fc3f7;
+            border-radius: 3px;
+            background-color: transparent;
+            color: #4fc3f7;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.2s;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .frame-nav-btn i {
+            font-size: 0.9rem;
+        }
+
+        .frame-nav-btn:hover {
+            background-color: #4fc3f7;
+            color: #0d47a1;
+        }
+
+        .frame-nav-btn.active {
+            background-color: #4fc3f7;
+            color: #0d47a1;
+        }
+
+        /* Tablet handheld controls */
+        .frame-r2a-controls {
+            display: flex;
+            gap: 4px;
+            flex-wrap: nowrap;
+            padding: 4px 8px;
+            background-color: #1a4d7f;
+            border-radius: 2px;
+            margin-bottom: 4px;
+        }
+
+        .frame-r2a-btn {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 6px;
+            border: 1px solid #4fc3f7;
+            border-radius: 3px;
+            background-color: transparent;
+            color: #4fc3f7;
+            font-size: 0.85rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .frame-r2a-btn:hover {
+            background-color: #4fc3f7;
+            color: #0d47a1;
+        }
+
+        .frame-r2a-btn i {
+            font-size: 0.9rem;
+        }
+
+        .frame-r2a-sample-nav {
+            display: flex;
+            gap: 3px;
+            align-items: center;
+            padding: 6px 8px;
+            border: 1px solid #666;
+            border-radius: 3px;
+            background-color: transparent;
+            color: #ccc;
+        }
+
+        .frame-r2a-sample-nav button {
+            width: 24px;
+            height: 24px;
+            padding: 0;
+            border: 1px solid #666;
+            background-color: #2b2b2b;
+            color: #ccc;
+            cursor: pointer;
+            border-radius: 2px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .frame-r2a-sample-nav button:hover {
+            background-color: #4fc3f7;
+            color: #0d47a1;
+        }
+
+        .frame-r2a-sample-display {
+            min-width: 25px;
+            text-align: center;
+            color: #888;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="frame-header">
+    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        <h1 style="margin: 0; cursor: help; font-size: 1rem; display: flex; align-items: center; gap: 2px; flex: 1;" title="Tablet: R2A (input) → R3 (display)">
+            <span style="font-size: 0.9rem;">🎹</span>
+            <button id="frame-r2a-prev-sample" style="width: 20px; height: 20px; padding: 0; border: none; background: transparent; color: inherit; cursor: pointer; font-size: 0.9rem;">«</button>
+            <span class="frame-r2a-sample-display" id="frame-r2a-sample-display">1/?</span>
+            <button id="frame-r2a-next-sample" style="width: 20px; height: 20px; padding: 0; border: none; background: transparent; color: inherit; cursor: pointer; font-size: 0.9rem;">»</button>
+        </h1>
+        <div class="frame-nav-buttons" id="frame-nav-buttons">
+            <button class="frame-nav-btn" data-nav="1" title="Sample Data">
+                <i class="fa-solid fa-music"></i>
+            </button>
+            <button class="frame-nav-btn" data-nav="6" title="Help">
+                <i class="fa-solid fa-circle-question"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Tablet R2A controls -->
+    <div class="frame-r2a-controls">
+        <button class="frame-r2a-btn" id="frame-r2a-b5" title="Load All to R3">
+            <i class="fa-solid fa-upload"></i>
+        </button>
+        <button class="frame-r2a-btn" id="frame-r2a-b6" title="Clear R2A">
+            <i class="fa-solid fa-trash"></i>
+        </button>
+        <button class="frame-r2a-btn" id="frame-r2a-er" title="Error Log" style="border-color: #ffb74d; color: #ffb74d;">
+            <i class="fa-solid fa-circle-exclamation"></i>
+        </button>
+        <button class="frame-r2a-btn" id="frame-r2a-clearlog" title="Reset Log" style="border-color: #f4a6a6; color: #f4a6a6;">
+            <i class="fa-solid fa-circle-xmark"></i>
+        </button>
+    </div>
+</div>
+
+<div class="frame-container">
+    <div class="frame-wrapper frame-r2a">
+        <iframe id="r2a-frame" name="r2a-frame" src="R2A.html?v=2.1.0-dev"></iframe>
+    </div>
+
+    <div class="resize-divider" id="resize-divider"></div>
+
+    <div class="frame-wrapper frame-r3">
+        <iframe id="r3-frame" name="r3-frame" src="R3.html?v=2.1.0-dev"></iframe>
+    </div>
+</div>
+
+<script src="frame-shared.js"></script>
+<script>
+    const APP_VERSION = 'v2.1.0-dev-tablet';
+
+    function isHandheld() {
+        return window.innerWidth <= 1024;
+    }
+
+    function routeR2AButtonClick(buttonType) {
+        if (!isHandheld()) return;
+        
+        const r2aFrame = document.getElementById('r2a-frame');
+        if (!r2aFrame || !r2aFrame.contentWindow) return;
+
+        console.log('[Frame Tablet Router] Routing R2A button:', buttonType);
+        
+        r2aFrame.contentWindow.postMessage({
+            type: 'R2A_BUTTON_CLICK',
+            button: buttonType
+        }, '*');
+    }
+
+    // Attach click handlers
+    document.getElementById('frame-r2a-b5')?.addEventListener('click', () => routeR2AButtonClick('b5'));
+    document.getElementById('frame-r2a-b6')?.addEventListener('click', () => routeR2AButtonClick('b6'));
+    document.getElementById('frame-r2a-er')?.addEventListener('click', () => routeR2AButtonClick('er'));
+    document.getElementById('frame-r2a-clearlog')?.addEventListener('click', () => routeR2AButtonClick('clearlog'));
+    document.getElementById('frame-r2a-prev-sample')?.addEventListener('click', () => routeR2AButtonClick('prev-sample'));
+    document.getElementById('frame-r2a-next-sample')?.addEventListener('click', () => routeR2AButtonClick('next-sample'));
+
+    // Navigation buttons
+    const navButtons = document.querySelectorAll('.frame-nav-btn');
+    
+    navButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const navNum = btn.getAttribute('data-nav');
+            console.log('[Frame Tablet] Navigation to:', navNum);
+            
+            if (navNum === '1') {
+                window.open('Sample.html', 'sample', 'width=1400,height=720');
+            } else if (navNum === '6') {
+                window.open('help.html', 'helpWindow', 
+                    'width=400,height=800,scrollbars=yes,resizable=yes,left=100,top=50');
+            }
+        });
+    });
+
+    console.log('Frame Tablet loaded. R2A and R3 panels visible.');
+    console.log('Device: Tablet/iPad (≤1024px width)');
+</script>
+
+</body>
+</html>
