@@ -252,19 +252,20 @@
                 gap: 3px;  /* Tighter button spacing */
             }
 
-            /* Hide R2B and h-divider on tablet/mobile */
+            /* Hide R1, R2B and h-divider on tablet */
+            .frame-r1,
             .frame-r2b,
             .h-resize-divider {
                 display: none;
             }
 
-            /* Adjust grid for tablet/mobile (R1 | R2A on top, R1 | R3 on bottom) */
+            /* Adjust grid for tablet (R2A full width top, R3 full width bottom) */
             .frame-container {
-                grid-template-columns: 0.125fr 1fr;
+                grid-template-columns: 1fr;
                 grid-template-areas:
-                    "r1 r2a"
-                    "r1 divider"
-                    "r1 r3";
+                    "r2a"
+                    "divider"
+                    "r3";
             }
         }
     </style>
@@ -471,11 +472,26 @@ R1 (single row input) → R3 (display)">
         console.log('[Frame Router] Received message:', event.data.type);
         
         if (event.data.type === 'R2A_LOAD_CHORDS') {
-            // Route R2A→R1
-            const r1Frame = document.getElementById('r1-frame');
-            if (r1Frame && r1Frame.contentWindow) {
-                r1Frame.contentWindow.postMessage(event.data, '*');
-                console.log('[Frame Router] R2A→R1: chords loaded');
+            // Device-aware routing: R2A B5
+            // Tablet (≤1024px): R2A→R3 (skip R1 since hidden)
+            // Desktop (>1024px): R2A→R1→R3 (validation step)
+            
+            const isTablet = window.innerWidth <= 1024;
+            
+            if (isTablet) {
+                // Route directly to R3 on tablet
+                const r3Frame = document.getElementById('r3-frame');
+                if (r3Frame && r3Frame.contentWindow) {
+                    r3Frame.contentWindow.postMessage(event.data, '*');
+                    console.log('[Frame Router] R2A→R3 (tablet): chords loaded directly');
+                }
+            } else {
+                // Route to R1 on desktop (user can manipulate)
+                const r1Frame = document.getElementById('r1-frame');
+                if (r1Frame && r1Frame.contentWindow) {
+                    r1Frame.contentWindow.postMessage(event.data, '*');
+                    console.log('[Frame Router] R2A→R1 (desktop): chords loaded');
+                }
             }
         }
         else if (event.data.type === 'R1_LOAD_CHORD') {
