@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>R3 Linear - 1 Chord Per Row</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            display: flex;
+        }
+
+        #r3-panel {
+            flex: 1;
+            background-color: #2b2b2b;
+            border: 1px solid #444;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow-y: auto;
+            gap: 8px;
+        }
+
+        .r3-pianogroup {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 8px;
+            background: #1a1a1a;
+            border-radius: 4px;
+            border-left: 3px solid #444;
+            margin-bottom: 8px;
+        }
+
+        .r3-pianogroup.active {
+            border-left-color: #4fc3f7;
+        }
+
+        .r3-piano-svg {
+            width: 100%;
+            height: 80px;
+            border: 1px solid #444;
+            background-color: #fff;
+        }
+
+        .r3-controls {
+            display: flex;
+            gap: 3px;
+            justify-content: flex-start;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .r3-btn {
+            width: 28px;
+            height: 24px;
+            padding: 0;
+            border: 1px solid #333;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.05s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+        }
+
+        .r3-btn:hover {
+            opacity: 0.85;
+        }
+
+        .r3-btn:active {
+            transform: scale(0.96);
+        }
+
+        .r3-btn.active {
+            outline: 2px solid #ffffff;
+            outline-offset: 1px;
+        }
+
+        .r3-btn-play {
+            background-color: #8fd694;
+        }
+
+        .r3-btn-triad {
+            background-color: #4fc3f7;
+        }
+
+        .r3-btn-tetrad {
+            background-color: #ffb74d;
+        }
+
+        .r3-btn-chord {
+            background-color: #4fc3f7 !important;
+            cursor: default !important;
+            opacity: 1 !important;
+            color: #01579b;
+            font-weight: bold;
+            min-width: 50px;
+        }
+
+        .r3-btn-rownum {
+            background-color: #ff9800 !important;
+            cursor: default !important;
+            opacity: 1 !important;
+            min-width: 40px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: black;
+        }
+
+        .piano-key {
+            cursor: pointer;
+            transition: fill 0.1s;
+        }
+
+        .piano-key:hover {
+            filter: brightness(0.95);
+        }
+    </style>
+</head>
+<body>
+
+<section id="r3-panel">
+    <!-- 24 rows will be generated here by JavaScript -->
+</section>
+
+<script>
+    // ===== R3 STATE - 24 ROWS (LINEAR LAYOUT) =====
+    
+    const groupStates = Array(24).fill(null).map((_, i) => ({
+        rowIndex: i + 1,
+        chordName: null,
+        mode: 'triad',
+        inversion: 0,
+        notes: [],
+        isEmpty: true
+    }));
+
+    // ===== NOTE FREQUENCIES =====
+    
+    const NOTE_FREQUENCIES = {
+        'C4': 261.63, 'C#4': 277.18, 'D4': 293.66, 'D#4': 311.13, 'E4': 329.63, 'F4': 349.23,
+        'F#4': 369.99, 'G4': 391.99, 'G#4': 415.30, 'A4': 440.00, 'A#4': 466.16, 'B4': 493.88,
+        'C5': 523.25, 'C#5': 554.37, 'D5': 587.33, 'D#5': 622.25, 'E5': 659.25, 'F5': 698.46,
+        'F#5': 739.99, 'G5': 783.99, 'G#5': 830.61, 'A5': 880.00, 'A#5': 932.33, 'B5': 987.77
+    };
+
+    // ===== R3 INITIALIZATION =====
+    
+    function initR3() {
+        console.log('[R3 Linear] Initializing 24 rows (vertical layout)');
+        const panel = document.getElementById('r3-panel');
+        
+        if (!panel) {
+            console.error('[R3] Panel element not found!');
+            return;
+        }
+        
+        for (let i = 0; i < 24; i++) {
+            const rowIndex = i + 1;
+            
+            const group = document.createElement('div');
+            group.className = 'r3-pianogroup';
+            group.id = `r3-pianogroup-${rowIndex}`;
+            
+            // Piano SVG
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('viewBox', '0 0 200 100');
+            svg.setAttribute('preserveAspectRatio', 'none');
+            svg.setAttribute('class', 'r3-piano-svg');
+            svg.id = `r3-piano-${rowIndex}`;
+            
+            renderPianoKeysForGroup(svg, rowIndex);
+            group.appendChild(svg);
+            
+            // Controls
+            const controls = document.createElement('div');
+            controls.className = 'r3-controls';
+            controls.id = `r3-controls-${rowIndex}`;
+            controls.innerHTML = `
+                <button class="r3-btn r3-btn-rownum" disabled title="Row">#${rowIndex}</button>
+                <button class="r3-btn r3-btn-chord" disabled title="Chord" id="r3-chord-${rowIndex}">–</button>
+                <button class="r3-btn r3-btn-play" onclick="handleButton(${rowIndex}, 'play')" title="Play">B7</button>
+                <button class="r3-btn r3-btn-triad" onclick="handleButton(${rowIndex}, 'triad')" title="Triad">B8</button>
+                <button class="r3-btn r3-btn-tetrad" onclick="handleButton(${rowIndex}, 'tetrad')" title="Tetrad">B9</button>
+            `;
+            group.appendChild(controls);
+            panel.appendChild(group);
+        }
+        
+        console.log('[R3 Linear] 24 rows initialized successfully');
+        exposePublicAPI();
+    }
+
+    // ===== PIANO RENDERING =====
+    
+    function renderPianoKeysForGroup(svg, rowIndex) {
+        const whiteNotes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+        let xPos = 0;
+        const whiteKeyWidth = 200 / 14; // 2 octaves = 14 white keys
+        
+        for (let octave = 4; octave <= 5; octave++) {
+            whiteNotes.forEach((note, idx) => {
+                // White key
+                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                rect.setAttribute('x', xPos);
+                rect.setAttribute('y', 0);
+                rect.setAttribute('width', whiteKeyWidth);
+                rect.setAttribute('height', 100);
+                rect.setAttribute('fill', '#f5f5f5');
+                rect.setAttribute('stroke', '#000');
+                rect.setAttribute('class', 'piano-key');
+                
+                let whiteName = note + octave;
+                rect.setAttribute('data-note', whiteName);
+                svg.appendChild(rect);
+                
+                // White key label
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', xPos + whiteKeyWidth / 2);
+                text.setAttribute('y', 90);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('font-size', '10');
+                text.setAttribute('fill', '#000');
+                text.setAttribute('pointer-events', 'none');
+                text.textContent = note;
+                svg.appendChild(text);
+                
+                // Black keys (except E-F and B-C gaps)
+                if (idx < 6 && note !== 'E' && note !== 'B') {
+                    const x = xPos + (whiteKeyWidth * 0.75) - (whiteKeyWidth * 0.3);
+                    const blackRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    blackRect.setAttribute('x', x);
+                    blackRect.setAttribute('y', 0);
+                    blackRect.setAttribute('width', whiteKeyWidth * 0.6);
+                    blackRect.setAttribute('height', 90);
+                    blackRect.setAttribute('fill', '#1a1a1a');
+                    blackRect.setAttribute('stroke', '#000');
+                    blackRect.setAttribute('class', 'piano-key');
+                    
+                    let blackNote = note + '#' + octave;
+                    blackRect.setAttribute('data-note', blackNote);
+                    svg.appendChild(blackRect);
+                }
+                
+                xPos += whiteKeyWidth;
+            });
+        }
+        
+        // Attach listeners
+        document.querySelectorAll(`#r3-piano-${rowIndex} .piano-key`).forEach(key => {
+            key.addEventListener('click', () => {
+                playNote(key.getAttribute('data-note'));
+            });
+        });
+    }
+
+    // ===== AUDIO =====
+    
+    let AUDIO_CTX = null, AUDIO_MASTER = null;
+
+    function getAudio() {
+        if (!AUDIO_CTX) {
+            const Ctx = window.AudioContext || window.webkitAudioContext;
+            AUDIO_CTX = new Ctx();
+            AUDIO_MASTER = AUDIO_CTX.createGain();
+            AUDIO_MASTER.gain.value = 0.2;
+            AUDIO_MASTER.connect(AUDIO_CTX.destination);
+        }
+        return { ctx: AUDIO_CTX, master: AUDIO_MASTER };
+    }
+
+    function noteToFreq(note) {
+        if (!note) return 440;
+        const m = note.match(/^([A-GH])([#b]?)(\d)$/i);
+        if (!m) return 440;
+        
+        const [, noteName, mod, octaveStr] = m;
+        const octave = parseInt(octaveStr);
+        
+        const semitones = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11, H: 11 };
+        let semitone = semitones[noteName.toUpperCase()] || 0;
+        if (mod === '#') semitone++;
+        if (mod === 'b') semitone--;
+        
+        const n = (octave + 1) * 12 + semitone;
+        return 440 * Math.pow(2, (n - 69) / 12);
+    }
+
+    function triggerTone(freq, duration = 0.2, delayMs = 0, detuneAmount = 0) {
+        try {
+            const { ctx, master } = getAudio();
+            const now = ctx.currentTime + delayMs / 1000;
+            
+            const osc = ctx.createOscillator();
+            osc.frequency.value = freq;
+            if (detuneAmount) osc.detune.value = detuneAmount;
+            
+            const gainNode = ctx.createGain();
+            gainNode.gain.setValueAtTime(0.3, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, now + duration);
+            
+            osc.connect(gainNode);
+            gainNode.connect(master);
+            
+            osc.start(now);
+            osc.stop(now + duration);
+        } catch (e) {
+            console.warn('Audio error:', e.message);
+        }
+    }
+
+    function playChord(notes) {
+        notes.forEach((n, idx) => {
+            const f = noteToFreq(n);
+            const detune = (idx - (notes.length - 1) / 2) * 4;
+            triggerTone(f, 1.0, 0, detune);
+        });
+    }
+
+    function playNote(note) {
+        console.log(`[R3 Linear] Playing note: ${note}`);
+        const f = noteToFreq(note);
+        triggerTone(f, 0.5, 0, 0);
+    }
+
+    // ===== BUTTON HANDLERS =====
+    
+    function handleButton(rowIndex, action) {
+        console.log(`[R3 Linear] Button ${action} for row ${rowIndex}`);
+    }
+
+    // ===== PUBLIC API =====
+    
+    function exposePublicAPI() {
+        window.R3 = {
+            groupStates: groupStates
+        };
+    }
+
+    // ===== INITIALIZATION =====
+    
+    document.addEventListener('DOMContentLoaded', initR3);
+
+    console.log('R3 Linear View (1 chord per row, 24 rows) loaded');
+</script>
+
+</body>
+</html>

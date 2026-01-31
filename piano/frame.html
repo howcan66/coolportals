@@ -371,10 +371,21 @@
             console.log('[Frame] Navigation to:', navNum);
             
             if (navNum === '1') {
-                // Open Sample.html
+                // Sample data
                 window.open('Sample.html', 'sample', 'width=700,height=600');
+            } else if (navNum === '2') {
+                // R3 Linear (1 chord per row, 24 rows)
+                window.open('R3_Linear.html', 'r3linear', 'width=900,height=800');
+            } else if (navNum === '3') {
+                // R3 Desktop (4 columns)
+                window.open('R3.html?v=1.0.2', 'r3desktop', 'width=1400,height=800');
+            } else if (navNum === '4') {
+                // R3 Tablet (3 columns)
+                window.open('R3.html?v=1.0.2', 'r3tablet', 'width=800,height=800');
+            } else if (navNum === '5') {
+                // R3 Mobile (2 columns)
+                window.open('R3.html?v=1.0.2', 'r3mobile', 'width=500,height=800');
             }
-            // Future: Add more routes for buttons 2-5
         });
     });
 
