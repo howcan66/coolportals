@@ -134,16 +134,57 @@
             background-color: #fff;
             min-height: 0;
         }
+
+        .frame-nav-buttons {
+            display: flex;
+            gap: 6px;
+            justify-content: flex-end;
+            align-items: center;
+            margin-top: 4px;
+        }
+
+        .frame-nav-btn {
+            width: 28px;
+            height: 24px;
+            padding: 0;
+            border: 1px solid #4fc3f7;
+            border-radius: 3px;
+            background-color: transparent;
+            color: #4fc3f7;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .frame-nav-btn:hover {
+            background-color: #4fc3f7;
+            color: #0d47a1;
+        }
+
+        .frame-nav-btn.active {
+            background-color: #4fc3f7;
+            color: #0d47a1;
+        }
     </style>
 </head>
 <body>
 
 <div class="frame-header">
-    <h1>
-        R1 🎹 Piano Chords & Lyrics Analyse & View
-        <span id="frame-version" style="font-size:0.72rem; color:#b3e5fc; margin-left:8px; display:inline-block;"></span>
-        <span id="frame-timestamp" style="font-size:0.75rem; color:#888; margin-left:8px; display:inline-block;"></span>
-    </h1>
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+        <h1 style="margin: 0;">
+            🎹 Piano Chords & Lyrics Analyse & View
+            <span id="frame-version" style="font-size:0.72rem; color:#b3e5fc; margin-left:8px; display:inline-block;"></span>
+            <span id="frame-timestamp" style="font-size:0.75rem; color:#888; margin-left:8px; display:inline-block;"></span>
+        </h1>
+        <div class="frame-nav-buttons" id="frame-nav-buttons">
+            <button class="frame-nav-btn active" data-nav="1">1</button>
+            <button class="frame-nav-btn" data-nav="2">2</button>
+            <button class="frame-nav-btn" data-nav="3">3</button>
+            <button class="frame-nav-btn" data-nav="4">4</button>
+            <button class="frame-nav-btn" data-nav="5">5</button>
+        </div>
+    </div>
     <div class="data-flow" aria-label="Data flow">
         <span>R1 (single row input) -> R3 (display) or R2A (input) → R1 (validation) → R3 (display) → R2B (analysis)</span>
     </div>
@@ -319,6 +360,18 @@
     
     const versionEl = document.getElementById('frame-version');
     if (versionEl) versionEl.textContent = APP_VERSION;
+
+    // ===== NAVIGATION BUTTONS =====
+    const navButtons = document.querySelectorAll('.frame-nav-btn');
+    navButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            navButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const navNum = btn.getAttribute('data-nav');
+            console.log('[Frame] Navigation to:', navNum);
+            // Future: Route to different sections/projects
+        });
+    });
 
     updateFrameTimestamp();
     setInterval(updateFrameTimestamp, 60000);
