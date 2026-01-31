@@ -438,9 +438,10 @@
         // Update chord button text
         chordBtn.textContent = state.isEmpty ? '–' : state.chordName;
 
-        // Update piano highlighting (default green)
+        // Update piano highlighting (mode-aware)
         if (!state.isEmpty) {
-            highlightChordKeys(svg, state.notes, '#8fd694');
+            const modeColor = state.mode === 'tetrad' ? '#4fc3f7' : '#8fd694';
+            highlightChordKeys(svg, state.notes, modeColor);
         }
     }
 
