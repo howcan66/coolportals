@@ -139,7 +139,11 @@
 <body>
 
 <div class="frame-header">
-    <h1>R1 🎹 Piano Chords & Lyrics Analyse & View <span id="frame-timestamp" style="font-size:0.75rem; color:#888; margin-left:8px; display:inline-block;"></span></h1>
+    <h1>
+        R1 🎹 Piano Chords & Lyrics Analyse & View
+        <span id="frame-version" style="font-size:0.72rem; color:#b3e5fc; margin-left:8px; display:inline-block;"></span>
+        <span id="frame-timestamp" style="font-size:0.75rem; color:#888; margin-left:8px; display:inline-block;"></span>
+    </h1>
     <div class="data-flow" aria-label="Data flow">
         <span>R1 (single row input) -> R3 (display) or R2A (input) → R1 (validation) → R3 (display) → R2B (analysis)</span>
     </div>
@@ -147,25 +151,26 @@
 
 <div class="frame-container">
     <div class="frame-wrapper frame-r2a">
-        <iframe id="r2a-frame" name="r2a-frame" src="R2A.html?v=1.0.1"></iframe>
+        <iframe id="r2a-frame" name="r2a-frame" src="R2A.html?v=1.0.2"></iframe>
     </div>
 
     <div class="frame-wrapper frame-r1">
-        <iframe id="r1-frame" name="r1-frame" src="R1.html?v=1.0.1"></iframe>
+        <iframe id="r1-frame" name="r1-frame" src="R1.html?v=1.0.2"></iframe>
     </div>
 
     <div class="resize-divider" id="resize-divider"></div>
 
     <div class="frame-wrapper frame-r3">
-        <iframe id="r3-frame" name="r3-frame" src="R3.html?v=1.0.1"></iframe>
+        <iframe id="r3-frame" name="r3-frame" src="R3.html?v=1.0.2"></iframe>
     </div>
 
     <div class="frame-wrapper frame-r2b">
-        <iframe id="r2b-frame" name="r2b-frame" src="R2B.html?v=1.0.1"></iframe>
+        <iframe id="r2b-frame" name="r2b-frame" src="R2B.html?v=1.0.2"></iframe>
     </div>
 </div>
 
 <script>
+    const APP_VERSION = 'v1.0.2';
     // ===== RESIZE DIVIDER =====
     const divider = document.getElementById('resize-divider');
     const container = document.querySelector('.frame-container');
@@ -308,9 +313,13 @@
         const dd = String(d.getDate()).padStart(2,'0');
         const hh = String(d.getHours()).padStart(2,'0');
         const mi = String(d.getMinutes()).padStart(2,'0');
-        document.getElementById('frame-timestamp').textContent = `${yy}.${mm}.${dd} • ${hh}.${mi}`;
+        const tsEl = document.getElementById('frame-timestamp');
+        if (tsEl) tsEl.textContent = `${yy}.${mm}.${dd} • ${hh}.${mi}`;
     }
     
+    const versionEl = document.getElementById('frame-version');
+    if (versionEl) versionEl.textContent = APP_VERSION;
+
     updateFrameTimestamp();
     setInterval(updateFrameTimestamp, 60000);
 
