@@ -183,12 +183,20 @@
             color: #4fc3f7;
             cursor: pointer;
             font-weight: bold;
-            font-size: 18px;
+            font-size: 11px;
             transition: all 0.2s;
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+
+        /* Desktop: Show text labels */
+        .btn-desktop {
+            display: inline;
+        }
+        .btn-mobile {
+            display: none;
         }
 
         .frame-nav-btn:hover::after {
@@ -233,6 +241,14 @@
                 display: none;  /* Hide timestamp on mobile */
             }
             
+            /* Mobile/Tablet: Show Unicode symbols */
+            .btn-desktop {
+                display: none;
+            }
+            .btn-mobile {
+                display: inline;
+            }
+            
             .frame-nav-btn {
                 width: 32px;
                 height: 32px;
@@ -256,12 +272,30 @@ R1 (single row input) → R3 (display)">
             <span id="frame-timestamp" style="font-size:0.75rem; color:#888; margin-left:8px; display:inline-block;"></span>
         </h1>
         <div class="frame-nav-buttons" id="frame-nav-buttons">
-            <button class="frame-nav-btn active" data-nav="0" title="Note">🎵</button>
-            <button class="frame-nav-btn" data-nav="1" title="Sheet">🎼</button>
-            <button class="frame-nav-btn" data-nav="2" title="Linear">①</button>
-            <button class="frame-nav-btn" data-nav="3" title="Desktop">🖥️</button>
-            <button class="frame-nav-btn" data-nav="4" title="Tablet">📱</button>
-            <button class="frame-nav-btn" data-nav="5" title="Phone">📵</button>
+            <button class="frame-nav-btn active" data-nav="0" title="Ultimate Guitar">
+                <span class="btn-desktop">UG</span>
+                <span class="btn-mobile">♪</span>
+            </button>
+            <button class="frame-nav-btn" data-nav="1" title="Sample Data">
+                <span class="btn-desktop">SMP</span>
+                <span class="btn-mobile">♫</span>
+            </button>
+            <button class="frame-nav-btn" data-nav="2" title="Linear Layout">
+                <span class="btn-desktop">LIN</span>
+                <span class="btn-mobile">1</span>
+            </button>
+            <button class="frame-nav-btn" data-nav="3" title="Desktop Layout">
+                <span class="btn-desktop">DSK</span>
+                <span class="btn-mobile">▦</span>
+            </button>
+            <button class="frame-nav-btn" data-nav="4" title="Tablet Layout">
+                <span class="btn-desktop">TAB</span>
+                <span class="btn-mobile">▢</span>
+            </button>
+            <button class="frame-nav-btn" data-nav="5" title="Mobile Layout">
+                <span class="btn-desktop">MOB</span>
+                <span class="btn-mobile">▪</span>
+            </button>
         </div>
     </div>
 </div>
