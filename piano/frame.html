@@ -274,28 +274,28 @@
 
 <div class="frame-container">
     <div class="frame-wrapper frame-r2a">
-        <iframe id="r2a-frame" name="r2a-frame" src="R2A.html?v=1.0.2"></iframe>
+        <iframe id="r2a-frame" name="r2a-frame" src="R2A.html?v=2.0.0"></iframe>
     </div>
 
     <div class="h-resize-divider" id="h-resize-divider"></div>
 
     <div class="frame-wrapper frame-r2b">
-        <iframe id="r2b-frame" name="r2b-frame" src="R2B.html?v=1.0.2"></iframe>
+        <iframe id="r2b-frame" name="r2b-frame" src="R2B.html?v=2.0.0"></iframe>
     </div>
 
     <div class="frame-wrapper frame-r1">
-        <iframe id="r1-frame" name="r1-frame" src="R1.html?v=1.0.2"></iframe>
+        <iframe id="r1-frame" name="r1-frame" src="R1.html?v=2.0.0"></iframe>
     </div>
 
     <div class="resize-divider" id="resize-divider"></div>
 
     <div class="frame-wrapper frame-r3">
-        <iframe id="r3-frame" name="r3-frame" src="R3.html?v=1.0.2"></iframe>
+        <iframe id="r3-frame" name="r3-frame" src="R3.html?v=2.0.0"></iframe>
     </div>
 </div>
 
 <script>
-    const APP_VERSION = 'v1.0.2';
+    const APP_VERSION = 'v2.0.0';
     // ===== RESIZE DIVIDER =====
     const divider = document.getElementById('resize-divider');
     const container = document.querySelector('.frame-container');
@@ -536,7 +536,7 @@
             r3Frame.src = 'about:blank';
             // Small delay to ensure clear, then reload
             setTimeout(() => {
-                r3Frame.src = 'R3.html?v=1.0.2';
+                r3Frame.src = 'R3.html?v=2.0.0';
             }, 50);
         }
     }
@@ -560,7 +560,7 @@
                 setTimeout(() => {
                     const r3Frame = document.getElementById('r3-frame');
                     if (r3Frame) {
-                        r3Frame.src = 'R3.html?v=1.0.2&layout=linear';
+                        r3Frame.src = 'R3.html?v=2.0.0&layout=linear';
                     }
                 }, 100);
             } else if (navNum === '3') {
@@ -569,7 +569,7 @@
                 setTimeout(() => {
                     const r3Frame = document.getElementById('r3-frame');
                     if (r3Frame) {
-                        r3Frame.src = 'R3.html?v=1.0.2&layout=desktop';
+                        r3Frame.src = 'R3.html?v=2.0.0&layout=desktop';
                     }
                 }, 100);
             } else if (navNum === '4') {
@@ -578,7 +578,7 @@
                 setTimeout(() => {
                     const r3Frame = document.getElementById('r3-frame');
                     if (r3Frame) {
-                        r3Frame.src = 'R3.html?v=1.0.2&layout=tablet';
+                        r3Frame.src = 'R3.html?v=2.0.0&layout=tablet';
                     }
                 }, 100);
             } else if (navNum === '5') {
@@ -587,7 +587,7 @@
                 setTimeout(() => {
                     const r3Frame = document.getElementById('r3-frame');
                     if (r3Frame) {
-                        r3Frame.src = 'R3.html?v=1.0.2&layout=mobile';
+                        r3Frame.src = 'R3.html?v=2.0.0&layout=mobile';
                     }
                 }, 100);
             }
