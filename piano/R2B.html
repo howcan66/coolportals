@@ -213,28 +213,6 @@
         });
         
         console.log('[R2B] Current duration on load:', chordDuration);
-        
-        // Volume control listener
-        if (volumeSlider) {
-            volumeSlider.addEventListener('input', (e) => {
-                chordVolume = parseFloat(e.target.value) / 100;
-                console.log(`[R2B] ⭐ Chord volume CHANGED to ${chordVolume.toFixed(2)} (${e.target.value}%)`);
-                
-                // Update display
-                if (volumeDisplay) {
-                    volumeDisplay.textContent = e.target.value + '%';
-                    volumeDisplay.style.backgroundColor = '#ffeb3b';
-                    volumeDisplay.style.color = '#000';
-                    volumeDisplay.style.padding = '2px 6px';
-                    volumeDisplay.style.borderRadius = '3px';
-                    
-                    setTimeout(() => {
-                        volumeDisplay.style.backgroundColor = 'transparent';
-                        volumeDisplay.style.color = 'white';
-                    }, 500);
-                }
-            });
-        }
     });
     
     // ===== NOTE FREQUENCIES =====
