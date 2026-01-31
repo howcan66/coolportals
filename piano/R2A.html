@@ -153,6 +153,13 @@
             border-color: #f4a6a6;
             color: black;
         }
+
+        /* Hide R2A buttons on handheld (≤1024px) - buttons in frame header instead */
+        @media (max-width: 1024px) {
+            .r2a-global-buttons {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
@@ -670,6 +677,21 @@ Are you gonna drop the bomb or not?`;
     // ===== TIMESTAMP =====
     // ===== MESSAGE LISTENER (from Sample.html or frame) =====
     window.addEventListener('message', (event) => {
+        // Handle R2A button clicks from frame header (handheld devices)
+        if (event.data && event.data.type === 'R2A_BUTTON_CLICK') {
+            const button = event.data.button;
+            console.log('[R2A] Button click from frame header:', button);
+            
+            // Route to appropriate button handler
+            if (button === 'b5') handleB5Click();
+            else if (button === 'b6') handleB6Click();
+            else if (button === 'er') document.getElementById('r2a-b7')?.click();
+            else if (button === 'clearlog') document.getElementById('r2a-b8-clearlog')?.click();
+            else if (button === 'prev-sample') navigateSample(-1);
+            else if (button === 'next-sample') navigateSample(1);
+            return;
+        }
+
         if (event.data && event.data.type === 'LOAD_CHORD_DATA') {
             console.log('[R2A] Message received');
             const titleInput = document.getElementById('r2a-title');

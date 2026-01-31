@@ -252,12 +252,20 @@
                 gap: 3px;  /* Tighter button spacing */
             }
 
-            /* Hide R1, R2B and h-divider on tablet */
+            /* Hide R1, R2B and h-divider on handheld */
             .frame-r1,
             .frame-r2b,
             .h-resize-divider {
                 display: none;
             }
+
+            /* Show R2A control buttons on handheld */
+            .frame-r2a-controls {
+                display: flex !important;
+            }
+
+            /* Hide original R2A buttons in the R2A iframe on handheld */
+            /* (R2A.html will handle this via CSS media query) */
 
             /* Adjust grid for tablet (R2A full width top, R3 full width bottom) */
             .frame-container {
@@ -267,7 +275,83 @@
                     "divider"
                     "r3";
             }
-        }
+            /* Handheld R2A control buttons (hidden on desktop) */
+            .frame-r2a-controls {
+                display: none;
+            }
+
+            .frame-r2a-controls {
+                display: flex;
+                gap: 4px;
+                flex-wrap: wrap;
+                padding: 4px 8px;
+                background-color: #1a4d7f;
+                border-radius: 2px;
+                margin-bottom: 4px;
+            }
+
+            .frame-r2a-btn {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                padding: 6px 10px;
+                border: 1px solid #4fc3f7;
+                border-radius: 3px;
+                background-color: transparent;
+                color: #4fc3f7;
+                font-size: 0.85rem;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.2s;
+                white-space: nowrap;
+            }
+
+            .frame-r2a-btn:hover {
+                background-color: #4fc3f7;
+                color: #0d47a1;
+            }
+
+            .frame-r2a-btn i {
+                font-size: 1rem;
+            }
+
+            .frame-r2a-sample-nav {
+                display: flex;
+                gap: 3px;
+                align-items: center;
+                padding: 6px 8px;
+                border: 1px solid #666;
+                border-radius: 3px;
+                background-color: transparent;
+                color: #ccc;
+            }
+
+            .frame-r2a-sample-nav button {
+                width: 24px;
+                height: 24px;
+                padding: 0;
+                border: 1px solid #666;
+                background-color: #2b2b2b;
+                color: #ccc;
+                cursor: pointer;
+                border-radius: 2px;
+                font-size: 0.9rem;
+                font-weight: bold;
+                transition: all 0.2s;
+            }
+
+            .frame-r2a-sample-nav button:hover {
+                background-color: #4fc3f7;
+                color: #0d47a1;
+            }
+
+            .frame-r2a-sample-display {
+                min-width: 45px;
+                text-align: center;
+                color: #888;
+                font-size: 0.85rem;
+                font-weight: bold;
+            }        }
     </style>
 </head>
 <body>
@@ -304,6 +388,27 @@ R1 (single row input) → R3 (display)">
             </button>
         </div>
     </div>
+
+    <!-- Handheld R2A controls (visible on ≤1024px) -->
+    <div class="frame-r2a-controls">
+        <button class="frame-r2a-btn" id="frame-r2a-b5" title="Load All to R3">
+            <i class="fa-solid fa-upload"></i> B5
+        </button>
+        <button class="frame-r2a-btn" id="frame-r2a-b6" title="Clear R2A">
+            <i class="fa-solid fa-trash"></i> B6
+        </button>
+        <button class="frame-r2a-btn" id="frame-r2a-er" title="Error Log" style="border-color: #ffb74d; color: #ffb74d;">
+            <i class="fa-solid fa-circle-exclamation"></i> ER
+        </button>
+        <button class="frame-r2a-btn" id="frame-r2a-clearlog" title="Reset Log" style="border-color: #f4a6a6; color: #f4a6a6;">
+            <i class="fa-solid fa-circle-xmark"></i> --
+        </button>
+        <div class="frame-r2a-sample-nav">
+            <button id="frame-r2a-prev-sample">«</button>
+            <span class="frame-r2a-sample-display" id="frame-r2a-sample-display">1/4</span>
+            <button id="frame-r2a-next-sample">»</button>
+        </div>
+    </div>
 </div>
 
 <div class="frame-container">
@@ -330,6 +435,37 @@ R1 (single row input) → R3 (display)">
 
 <script>
     const APP_VERSION = 'v2.1.0-dev';
+
+    // ===== HANDHELD R2A BUTTON ROUTING =====
+    // Route R2A button clicks from frame header to R2A iframe on handheld devices
+
+    function isHandheld() {
+        return window.innerWidth <= 1024;
+    }
+
+    function routeR2AButtonClick(buttonType) {
+        if (!isHandheld()) return;
+        
+        const r2aFrame = document.getElementById('r2a-frame');
+        if (!r2aFrame || !r2aFrame.contentWindow) return;
+
+        console.log('[Frame Router] Routing R2A button:', buttonType);
+        
+        // Send message to R2A to trigger the appropriate button
+        r2aFrame.contentWindow.postMessage({
+            type: 'R2A_BUTTON_CLICK',
+            button: buttonType
+        }, '*');
+    }
+
+    // Attach click handlers to handheld buttons
+    document.getElementById('frame-r2a-b5')?.addEventListener('click', () => routeR2AButtonClick('b5'));
+    document.getElementById('frame-r2a-b6')?.addEventListener('click', () => routeR2AButtonClick('b6'));
+    document.getElementById('frame-r2a-er')?.addEventListener('click', () => routeR2AButtonClick('er'));
+    document.getElementById('frame-r2a-clearlog')?.addEventListener('click', () => routeR2AButtonClick('clearlog'));
+    document.getElementById('frame-r2a-prev-sample')?.addEventListener('click', () => routeR2AButtonClick('prev-sample'));
+    document.getElementById('frame-r2a-next-sample')?.addEventListener('click', () => routeR2AButtonClick('next-sample'));
+
     // ===== RESIZE DIVIDER =====
     const divider = document.getElementById('resize-divider');
     const container = document.querySelector('.frame-container');
