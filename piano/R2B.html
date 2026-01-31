@@ -156,11 +156,6 @@
                 <input type="radio" name="chord-duration" value="3.0" style="cursor: pointer;"> 3.0s
             </label>
         </div>
-        
-        <div id="r2b-volume-control" style="display: inline-block; padding: 10px 14px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); margin-left: 15px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
-            <label style="font-weight: bold; margin-right: 10px; color: white; font-size: 15px;">🔉 <span id="volume-display">80%</span></label>
-            <input type="range" name="chord-volume" id="chord-volume-slider" min="0" max="100" value="80" style="cursor: pointer; vertical-align: middle; margin-left: 8px; width: 120px;">
-        </div>
     </div>
 
     <div class="r2b-content">
@@ -178,18 +173,15 @@
     let currentChord = null;
     let isChordPlaying = false;
     let chordDuration = 2.0;  // Default duration
-    let chordVolume = 0.8;    // Default volume (0-1 scale)
+    let chordVolume = 0.8;    // Default volume (0-1 scale) - hardcoded, users control via OS volume
     
     // Set up duration control listeners
     document.addEventListener('DOMContentLoaded', () => {
         const durationRadios = document.querySelectorAll('input[name="chord-duration"]');
         const durationDisplay = document.getElementById('duration-display');
-        const volumeSlider = document.getElementById('chord-volume-slider');
-        const volumeDisplay = document.getElementById('volume-display');
         
         console.log('[R2B] Found duration radios:', durationRadios.length);
         console.log('[R2B] Default duration:', chordDuration, 's');
-        console.log('[R2B] Default volume:', chordVolume * 100, '%');
         
         durationRadios.forEach(radio => {
             radio.addEventListener('change', (e) => {
