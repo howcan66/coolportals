@@ -369,7 +369,12 @@
             btn.classList.add('active');
             const navNum = btn.getAttribute('data-nav');
             console.log('[Frame] Navigation to:', navNum);
-            // Future: Route to different sections/projects
+            
+            if (navNum === '1') {
+                // Open Sample.html
+                window.open('Sample.html', 'sample', 'width=700,height=600');
+            }
+            // Future: Add more routes for buttons 2-5
         });
     });
 

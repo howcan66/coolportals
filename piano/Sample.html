@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piano Sample Data</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(20, 20, 40, 0.95);
+            border: 2px solid #4fc3f7;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            color: #4fc3f7;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.5rem;
+        }
+
+        .sample-data {
+            background: #0a0a1a;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+            line-height: 1.8;
+            font-size: 13px;
+            color: #b0e0e6;
+            white-space: pre-wrap;
+            word-break: break-word;
+            overflow-x: auto;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: 2px solid #4fc3f7;
+            background-color: transparent;
+            color: #4fc3f7;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background-color: #4fc3f7;
+            color: #0a0a1a;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .info {
+            color: #888;
+            font-size: 12px;
+            text-align: center;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎹 Piano Sample Data</h1>
+        
+        <div class="sample-data">D              A                 Bm    Bm/A Gmaj7   G6
+Sample verse line one with placeholder chords above
+
+D                 A              G  D/F# Em7 D
+Sample verse line two with chords
+
+Em7              A7              Dm7  G   Cmaj7
+Sample chorus with more harmonic movement
+
+D              A                 Bm    Bm/A
+Sample verse ending line
+
+D                 A              G  D/F# Em7 D
+Final resolution back to D major
+        </div>
+
+        <div class="button-group">
+            <button onclick="loadSample()">Load to R2A</button>
+            <button onclick="copyToClipboard()">Copy Data</button>
+        </div>
+
+        <div class="info">
+            This sample contains 6 chord/lyric lines ready to import into the Piano app.
+        </div>
+    </div>
+
+    <script>
+        const sampleData = `D              A                 Bm    Bm/A Gmaj7   G6
+Sample verse line one with placeholder chords above
+D                 A              G  D/F# Em7 D
+Sample verse line two with chords
+Em7              A7              Dm7  G   Cmaj7
+Sample chorus with more harmonic movement
+D              A                 Bm    Bm/A
+Sample verse ending line
+D                 A              G  D/F# Em7 D
+Final resolution back to D major`;
+
+        function loadSample() {
+            // Post data to parent frame (Piano app)
+            if (window.parent !== window) {
+                window.parent.postMessage({
+                    type: 'SAMPLE_DATA_LOAD',
+                    data: sampleData
+                }, '*');
+                alert('Sample data sent to Piano app!');
+            } else {
+                alert('This must be opened within the Piano app frame.');
+            }
+        }
+
+        function copyToClipboard() {
+            navigator.clipboard.writeText(sampleData).then(() => {
+                alert('Sample data copied to clipboard!');
+            }).catch(() => {
+                alert('Copy failed. Try manual selection.');
+            });
+        }
+
+        console.log('Sample.html loaded. Use "Load to R2A" button or copy data manually.');
+    </script>
+</body>
+</html>
