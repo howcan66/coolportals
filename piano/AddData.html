@@ -50,9 +50,8 @@
             font-size: 14px;
         }
 
-        textarea {
+        textarea, input {
             width: 100%;
-            height: 180px;
             padding: 10px;
             background: #0a0a1a;
             border: 1px solid #333;
@@ -60,11 +59,15 @@
             color: #e0e0e0;
             font-family: 'Courier New', monospace;
             font-size: 13px;
-            resize: vertical;
             line-height: 1.5;
         }
 
-        textarea:focus {
+        textarea {
+            height: 140px;
+            resize: vertical;
+        }
+
+        input:focus, textarea:focus {
             outline: none;
             border-color: #4fc3f7;
             box-shadow: 0 0 8px rgba(79, 195, 247, 0.3);
@@ -115,6 +118,31 @@
             background-color: #666;
             color: #fff;
         }
+
+        #preview-section {
+            display: none;
+            background: #0a0a1a;
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 12px;
+            margin-top: 16px;
+        }
+
+        #preview-section h3 {
+            color: #ffb74d;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        #preview-text {
+            color: #b0e0e6;
+            font-size: 12px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 120px;
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body>
@@ -123,26 +151,42 @@
         
         <form id="addDataForm">
             <div class="form-group">
-                <label for="chordData">Enter chord lines (one per line):</label>
+                <label for="chordData">Enter chord lines:</label>
                 <textarea id="chordData" placeholder="Example:&#10;C              G                 Am    Am/G Fmaj7    F6&#10;Sample verse line one with chords above&#10;C                 G              F  C/E Dm7 C&#10;Sample verse line two with chords" required></textarea>
                 <div class="info-text">
-                    ℹ️ Format: Alternate chord lines and lyric lines. This data will be added to the sample collection.
+                    ℹ️ Format: Alternate chord lines and lyric lines.
                 </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password (default: "piano"):</label>
+                <input type="password" id="password" placeholder="Leave empty for default">
+                <div class="info-text">
+                    ℹ️ Required to edit/delete data later. Default password is "piano".
+                </div>
+            </div>
+
+            <div id="preview-section">
+                <h3>📋 Preview (click Add to confirm):</h3>
+                <div id="preview-text"></div>
             </div>
 
             <div class="button-group">
                 <button type="button" class="cancel-btn" onclick="window.close()">Cancel</button>
-                <button type="submit">Add to Sample</button>
+                <button type="button" id="preview-btn" onclick="showPreview()">Preview</button>
+                <button type="submit" id="submit-btn" style="display:none;">Confirm & Save</button>
             </div>
         </form>
     </div>
 
     <script>
         const form = document.getElementById('addDataForm');
+        const previewSection = document.getElementById('preview-section');
+        const previewText = document.getElementById('preview-text');
+        const previewBtn = document.getElementById('preview-btn');
+        const submitBtn = document.getElementById('submit-btn');
         
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            
+        function showPreview() {
             const chordData = document.getElementById('chordData').value.trim();
             
             if (!chordData) {
@@ -150,14 +194,37 @@
                 return;
             }
 
-            // Save to localStorage
-            let savedData = localStorage.getItem('piano_sample_data') || '';
-            savedData += (savedData ? '\n\n' : '') + chordData;
-            localStorage.setItem('piano_sample_data', savedData);
+            previewText.textContent = chordData;
+            previewSection.style.display = 'block';
+            previewBtn.style.display = 'none';
+            submitBtn.style.display = 'inline-block';
+        }
 
-            console.log('[Add Data] Saved to localStorage');
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
             
-            // Notify parent/other windows
+            const chordData = document.getElementById('chordData').value.trim();
+            const password = document.getElementById('password').value || 'piano';
+
+            if (!chordData) {
+                alert('Please enter some chord data');
+                return;
+            }
+
+            // Save to localStorage with timestamp and password hash
+            const entry = {
+                data: chordData,
+                timestamp: new Date().toISOString(),
+                passwordHash: btoa(password) // Simple encoding (not secure, just to prevent casual viewing)
+            };
+
+            let savedEntries = JSON.parse(localStorage.getItem('piano_sample_entries') || '[]');
+            savedEntries.push(entry);
+            localStorage.setItem('piano_sample_entries', JSON.stringify(savedEntries));
+
+            console.log('[AddData] Saved entry with password protection');
+            
+            // Notify parent
             if (window.opener) {
                 window.opener.postMessage({
                     type: 'CHORD_DATA_ADDED',
@@ -165,7 +232,7 @@
                 }, '*');
             }
 
-            alert('Data added successfully!\n\nView it in Sample.html (Button 1)');
+            alert('✅ Data saved successfully!\n\nView and manage it in Sample.html (Button 1)');
             window.close();
         });
 

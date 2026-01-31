@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Piano Sample Data</title>
+    <title>Sample Chord Data</title>
     <style>
         * {
             margin: 0;
@@ -20,52 +20,34 @@
         }
 
         .container {
-            max-width: 600px;
+            max-width: 1000px;
             margin: 0 auto;
-            background: rgba(20, 20, 40, 0.95);
-            border: 2px solid #4fc3f7;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
         }
 
         h1 {
             color: #4fc3f7;
             margin-bottom: 20px;
-            text-align: center;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
         }
 
-        .sample-data {
-            background: #0a0a1a;
-            border: 1px solid #333;
-            border-radius: 4px;
-            padding: 15px;
-            margin-bottom: 20px;
-            line-height: 1.8;
-            font-size: 13px;
-            color: #b0e0e6;
-            white-space: pre-wrap;
-            word-break: break-word;
-            overflow-x: auto;
-        }
-
-        .button-group {
+        .controls {
             display: flex;
-            gap: 10px;
-            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
         }
 
         button {
-            padding: 10px 20px;
+            padding: 10px 16px;
             border: 2px solid #4fc3f7;
             background-color: transparent;
             color: #4fc3f7;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
             transition: all 0.2s;
+            font-family: Arial, sans-serif;
         }
 
         button:hover {
@@ -77,104 +59,400 @@
             transform: scale(0.95);
         }
 
-        .info {
+        .add-btn {
+            background-color: #4fc3f7;
+            color: #0a0a1a;
+        }
+
+        .add-btn:hover {
+            background-color: #6dd5ff;
+            color: #0a0a1a;
+        }
+
+        .content-section {
+            margin-bottom: 30px;
+        }
+
+        .section-header {
+            color: #b0e0e6;
+            font-size: 13px;
+            font-weight: bold;
+            margin-top: 24px;
+            margin-bottom: 12px;
+            padding: 8px;
+            background: rgba(79, 195, 247, 0.1);
+            border-left: 3px solid #4fc3f7;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 12px;
+            background: #0a0a1a;
+            border: 1px solid #333;
+            border-radius: 4px;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+            resize: vertical;
+            margin-bottom: 8px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #4fc3f7;
+            box-shadow: 0 0 8px rgba(79, 195, 247, 0.3);
+        }
+
+        .saved-entries {
+            margin-top: 12px;
+        }
+
+        .entry {
+            background: #0a0a1a;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .entry:hover {
+            border-color: #4fc3f7;
+        }
+
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .entry-timestamp {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .entry-content {
+            color: #b0e0e6;
+            font-size: 12px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-break: break-word;
+            margin-bottom: 8px;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .entry-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .delete-btn {
+            background-color: #ff6b6b;
+            border-color: #ff6b6b;
+            color: #fff;
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .delete-btn:hover {
+            background-color: #ff5252;
+            border-color: #ff5252;
+        }
+
+        .info-text {
             color: #888;
             font-size: 12px;
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+
+        .no-entries {
+            color: #666;
+            font-size: 13px;
+            padding: 12px;
             text-align: center;
-            margin-top: 15px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #1a1a2e;
+            border: 2px solid #ff6b6b;
+            border-radius: 8px;
+            padding: 24px;
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+        }
+
+        .modal-content h2 {
+            color: #ff6b6b;
+            margin-bottom: 16px;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 10px;
+            background: #0a0a1a;
+            border: 1px solid #333;
+            border-radius: 4px;
+            color: #e0e0e0;
+            font-family: monospace;
+            margin-bottom: 16px;
+            font-size: 13px;
+        }
+
+        .modal-content input:focus {
+            outline: none;
+            border-color: #ff6b6b;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .modal-buttons button {
+            padding: 8px 16px;
+            font-size: 12px;
+        }
+
+        .cancel-btn {
+            border-color: #666;
+            color: #666;
+        }
+
+        .cancel-btn:hover {
+            background-color: #666;
+            color: #fff;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎹 Piano Sample Data</h1>
-        
-        <div class="sample-data" id="sample-display">D              A                 Bm    Bm/A Gmaj7   G6
-Sample verse line one with placeholder chords above
+        <h1>📋 Chord Data Collection</h1>
 
-D                 A              G  D/F# Em7 D
-Sample verse line two with chords
-
-Em7              A7              Dm7  G   Cmaj7
-Sample chorus with more harmonic movement
-
-D              A                 Bm    Bm/A
-Sample verse ending line
-
-D                 A              G  D/F# Em7 D
-Final resolution back to D major
+        <div class="controls">
+            <button class="add-btn" onclick="openAddDialog()">+ Add New Data</button>
+            <button onclick="copyAllData()">📋 Copy All</button>
+            <button onclick="loadIntoR2A()" style="border-color: #8fd694; color: #8fd694;">📤 Load to R2A</button>
         </div>
 
-        <div class="button-group">
-            <button onclick="loadSample()">Load to R2A</button>
-            <button onclick="copyToClipboard()">Copy Data</button>
-            <button onclick="openAddData()" style="border-color: #ffb74d; color: #ffb74d;">+ Add Data</button>
+        <!-- Default Data Section -->
+        <div class="content-section">
+            <div class="section-header">📌 Default Sample Data</div>
+            <textarea id="sample-display" readonly></textarea>
+            <div class="info-text">
+                ℹ️ Built-in sample collection (read-only)
+            </div>
         </div>
 
-        <div class="info" id="data-info">
-            This sample contains 6 chord/lyric lines ready to import into the Piano app.
+        <!-- Saved Entries Section -->
+        <div class="content-section">
+            <div class="section-header">💾 Your Saved Entries</div>
+            <div id="saved-entries" class="saved-entries"></div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <h2>⚠️ Confirm Delete</h2>
+            <p style="color: #b0e0e6; margin-bottom: 16px;">Enter password to delete this entry:</p>
+            <input type="password" id="deletePassword" placeholder="Password" />
+            <div class="modal-buttons">
+                <button class="cancel-btn" onclick="closeDeleteModal()">Cancel</button>
+                <button class="delete-btn" onclick="confirmDelete()">Delete</button>
+            </div>
         </div>
     </div>
 
     <script>
-        let sampleData = `D              A                 Bm    Bm/A Gmaj7   G6
-Sample verse line one with placeholder chords above
-D                 A              G  D/F# Em7 D
-Sample verse line two with chords
-Em7              A7              Dm7  G   Cmaj7
-Sample chorus with more harmonic movement
-D              A                 Bm    Bm/A
-Sample verse ending line
-D                 A              G  D/F# Em7 D
-Final resolution back to D major`;
+        let defaultData = `C              G                 Am    Am/G Fmaj7    F6
+She used to be mine
+Dm7        G    Cmaj7
+She still is to me
+F       Em    Dm    C
+In another life
 
-        // Load any saved data from localStorage
-        function loadSavedData() {
-            const saved = localStorage.getItem('piano_sample_data');
-            if (saved) {
-                sampleData += '\n\n' + saved;
-                document.getElementById('sample-display').textContent = sampleData;
-                document.getElementById('data-info').textContent = 'Sample data + ' + (saved.split('\n').length) + ' additional lines loaded';
-            }
+Em                    Am
+She's comin' out of the woods
+D                 Gmaj7
+And into the sun
+C              G              Dm
+She was lost in the darkness, forgot she was a daughter
+C/E         F    G
+She is lost in the darkness, she can't even remember
+Cmaj7                    Am
+Just how capable she is
+F                 G
+How much she'll miss nobody
+C
+Loving is a witch`;
+
+        let entryToDelete = null;
+
+        function loadDefaultData() {
+            document.getElementById('sample-display').value = defaultData;
         }
 
-        function loadSample() {
-            // Post data to parent frame (Piano app)
-            if (window.parent !== window) {
-                window.parent.postMessage({
-                    type: 'SAMPLE_DATA_LOAD',
-                    data: sampleData
-                }, '*');
-                alert('Sample data sent to Piano app!');
-            } else {
-                alert('This must be opened within the Piano app frame.');
+        function loadSavedEntries() {
+            const entriesContainer = document.getElementById('saved-entries');
+            const entries = JSON.parse(localStorage.getItem('piano_sample_entries') || '[]');
+
+            if (entries.length === 0) {
+                entriesContainer.innerHTML = '<div class="no-entries">No saved entries yet. Click "+ Add New Data" to get started!</div>';
+                return;
             }
+
+            entriesContainer.innerHTML = entries.map((entry, index) => {
+                const date = new Date(entry.timestamp);
+                const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                const preview = entry.data.substring(0, 100) + (entry.data.length > 100 ? '...' : '');
+                
+                return `
+                    <div class="entry">
+                        <div class="entry-header">
+                            <span class="entry-timestamp">${dateStr}</span>
+                        </div>
+                        <div class="entry-content">${escapeHtml(preview)}</div>
+                        <div class="entry-actions">
+                            <button class="delete-btn" onclick="openDeleteModal(${index}, '${escapeAttr(entry.data)}')">🗑️ Delete</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
 
-        function copyToClipboard() {
-            navigator.clipboard.writeText(sampleData).then(() => {
-                alert('Sample data copied to clipboard!');
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        function escapeAttr(text) {
+            return text.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        }
+
+        function openDeleteModal(index, data) {
+            entryToDelete = index;
+            document.getElementById('deletePassword').value = '';
+            document.getElementById('deleteModal').classList.add('active');
+            document.getElementById('deletePassword').focus();
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('active');
+            entryToDelete = null;
+        }
+
+        function confirmDelete() {
+            const password = document.getElementById('deletePassword').value;
+            const storedPassword = 'piano'; // Default password
+            
+            // Check password
+            if (password !== storedPassword) {
+                alert('❌ Incorrect password');
+                document.getElementById('deletePassword').value = '';
+                document.getElementById('deletePassword').focus();
+                return;
+            }
+
+            // Delete entry
+            const entries = JSON.parse(localStorage.getItem('piano_sample_entries') || '[]');
+            if (entryToDelete >= 0 && entryToDelete < entries.length) {
+                entries.splice(entryToDelete, 1);
+                localStorage.setItem('piano_sample_entries', JSON.stringify(entries));
+                console.log(`[Sample] Deleted entry ${entryToDelete}`);
+                alert('✅ Entry deleted successfully');
+                loadSavedEntries();
+            }
+            
+            closeDeleteModal();
+        }
+
+        function openAddDialog() {
+            window.open('AddData.html', 'addData', 'width=650,height=500');
+        }
+
+        function copyAllData() {
+            const defaultText = document.getElementById('sample-display').value;
+            const entries = JSON.parse(localStorage.getItem('piano_sample_entries') || '[]');
+            const allText = defaultText + (entries.length > 0 ? '\n\n' + entries.map(e => e.data).join('\n\n') : '');
+            
+            navigator.clipboard.writeText(allText).then(() => {
+                alert('✅ All data copied to clipboard');
             }).catch(() => {
-                alert('Copy failed. Try manual selection.');
+                alert('Failed to copy');
             });
         }
 
-        function openAddData() {
-            window.open('AddData.html', 'adddata', 'width=650,height=500');
+        function loadIntoR2A() {
+            const defaultText = document.getElementById('sample-display').value;
+            const entries = JSON.parse(localStorage.getItem('piano_sample_entries') || '[]');
+            const allData = defaultText + (entries.length > 0 ? '\n\n' + entries.map(e => e.data).join('\n\n') : '');
+
+            // Post to R2A if available
+            if (window.opener && window.opener.document.querySelector('iframe[id="r2a"]')) {
+                window.opener.postMessage({
+                    type: 'LOAD_CHORD_DATA',
+                    data: allData
+                }, '*');
+                alert('✅ Data sent to R2A');
+            } else {
+                alert('⚠️ R2A window not found. Data copied to clipboard instead.');
+                navigator.clipboard.writeText(allData);
+            }
         }
 
-        // Listen for new data from AddData dialog
-        window.addEventListener('message', (event) => {
-            if (event.data.type === 'CHORD_DATA_ADDED') {
-                loadSavedData();
-                console.log('[Sample] New data added, refreshing display');
+        // Listen for new data added
+        window.addEventListener('message', (e) => {
+            if (e.data && e.data.type === 'CHORD_DATA_ADDED') {
+                console.log('[Sample] Received notification of new data');
+                loadSavedEntries();
             }
         });
 
-        // Initialize on load
-        document.addEventListener('DOMContentLoaded', loadSavedData);
+        // Allow ENTER to close modal if focused
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && entryToDelete !== null) {
+                e.preventDefault();
+                confirmDelete();
+            }
+            if (e.key === 'Escape' && document.getElementById('deleteModal').classList.contains('active')) {
+                closeDeleteModal();
+            }
+        });
 
-        console.log('Sample.html loaded. Use "Load to R2A" button or copy data manually.');
+        // Load on startup
+        loadDefaultData();
+        loadSavedEntries();
+        
+        console.log('Sample data page loaded');
     </script>
 </body>
 </html>
