@@ -580,6 +580,15 @@
         }
 
         function loadDefaultData() {
+            // FORCE CLEAR old corrupted Beatles data (one-time cleanup v2.1.0-dev)
+            const clearVersion = localStorage.getItem('sample-clear-version');
+            if (clearVersion !== '2.1.0') {
+                console.log('[Sample] Force clearing old default data');
+                localStorage.removeItem('piano_default_data');
+                localStorage.removeItem('custom_default_data');
+                localStorage.setItem('sample-clear-version', '2.1.0');
+            }
+            
             // Check if user has custom default data
             const customDefault = localStorage.getItem('piano_default_data');
             if (customDefault) {
