@@ -327,17 +327,26 @@ Are you gonna drop the bomb or not?`;
         }
         
         const entry = entries[index];
+        
+        // Validate entry has required properties
+        if (!entry || typeof entry.data !== 'string') {
+            console.error('[R2A] Corrupt sample data at index:', index);
+            alert('⚠️ Sample data is corrupt. Clear samples and reload.');
+            return;
+        }
+        
         const titleInput = document.getElementById('r2a-title');
         const textarea = document.getElementById('r2a-main-textarea');
         
         if (textarea) {
             textarea.value = entry.data;
-            console.log('[R2A] Loaded sample', index + 1, ':', entry.title);
+            console.log('[R2A] Loaded sample', index + 1, ':', entry.title || 'Untitled');
         }
         if (titleInput) {
             // Extract title from first line or use entry title
             const firstLine = entry.data.split('\n')[0];
-            titleInput.value = firstLine.startsWith('#') ? firstLine : '# ' + entry.title;
+            const title = entry.title || entry.name || 'Untitled';
+            titleInput.value = firstLine.startsWith('#') ? firstLine : '# ' + title;
         }
         
         saveToStorage();
