@@ -27,17 +27,17 @@
             border: 1px solid #444;
             padding: 12px;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             height: 100%;
             overflow-y: auto;
             gap: 8px;
             align-content: start;
         }
 
-        /* Tablet: 4 columns */
+        /* Tablet: 3 columns */
         @media (max-width: 1024px) {
             #r3-panel {
-                grid-template-columns: repeat(4, 1fr);
+                grid-template-columns: repeat(3, 1fr);
             }
         }
 
