@@ -99,6 +99,11 @@
             min-width: 80px;
         }
 
+        .r2b-btn-compact {
+            min-width: 55px;
+            padding: 8px 10px;
+        }
+
         .r2b-btn:hover {
             opacity: 0.8;
         }
@@ -136,19 +141,13 @@
         <div class="r2b-piano-label">
             Chord: <span id="r2b-chord-name">–</span>
         </div>
-        <button class="r2b-btn r2b-btn-play" id="r2b-b12">B12</button>
+        <button class="r2b-btn r2b-btn-play r2b-btn-compact" id="r2b-b12">B12</button>
         <button class="r2b-btn r2b-btn-clear" id="r2b-b13">B13</button>
         
         <div id="r2b-duration-control" style="display: inline-block; padding: 10px 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin-left: 15px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
             <label style="font-weight: bold; margin-right: 10px; color: white; font-size: 15px;">🔊 <span id="duration-display">2.0s</span></label>
             <label style="margin-left: 8px; color: white; font-size: 12px; cursor: pointer;">
-                <input type="radio" name="chord-duration" value="0.5" style="cursor: pointer;"> 0.5s
-            </label>
-            <label style="margin-left: 8px; color: white; font-size: 12px; cursor: pointer;">
                 <input type="radio" name="chord-duration" value="1.0" style="cursor: pointer;"> 1.0s
-            </label>
-            <label style="margin-left: 8px; color: white; font-size: 12px; cursor: pointer;">
-                <input type="radio" name="chord-duration" value="1.5" style="cursor: pointer;"> 1.5s
             </label>
             <label style="margin-left: 8px; color: white; font-size: 12px; cursor: pointer;">
                 <input type="radio" name="chord-duration" value="2.0" checked style="cursor: pointer;"> 2.0s

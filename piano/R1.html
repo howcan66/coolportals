@@ -91,7 +91,8 @@
             font-size: 0.9rem;
             background-color: #ffffff;
             color: #000;
-            max-width: 100px;
+            width: 8ch;
+            max-width: 8ch;
             transition: border-color 0.2s;
         }
 
@@ -110,8 +111,8 @@
         }
 
         .r1-btn {
-            width: 28px;
-            height: 28px;
+            width: 26px;
+            height: 26px;
             padding: 0;
             border: none;
             border-radius: 3px;
@@ -149,6 +150,10 @@
             margin-bottom: 10px;
             padding-bottom: 10px;
             border-bottom: 1px solid #444;
+        }
+
+        .r1-btn-compact {
+            width: 55px;
         }
 
         .r1-btn-global {
@@ -209,7 +214,7 @@
 
 <section id="r1-panel">
     <div class="r1-global-buttons">
-        <button class="r1-btn-global r1-btn-load-all" id="r1-b3" aria-label="Load All to R3">LR3</button>
+        <button class="r1-btn-global r1-btn-load-all r1-btn-compact" id="r1-b3" aria-label="Load All to R3">LR3</button>
         <button class="r1-btn-global r1-btn-clear-all" id="r1-b4" aria-label="Clear All">XR1</button>
     </div>
 
