@@ -170,14 +170,6 @@
             background-color: #ffb74d;
         }
 
-        .r3-btn-invert {
-            background-color: #ba68c8;
-        }
-
-        .r3-btn-send {
-            background-color: #4db6ac;
-        }
-
         .r3-btn-chord {
             background-color: #4fc3f7 !important;
             cursor: default !important;
@@ -299,8 +291,6 @@
                 <button class="r3-btn r3-btn-play" onclick="handleButton(${rowIndex}, 'play')" title="Play">B7</button>
                 <button class="r3-btn r3-btn-triad" onclick="handleButton(${rowIndex}, 'triad')" title="Triad">B8</button>
                 <button class="r3-btn r3-btn-tetrad" onclick="handleButton(${rowIndex}, 'tetrad')" title="Tetrad">B9</button>
-                <button class="r3-btn r3-btn-invert" onclick="handleButton(${rowIndex}, 'invert')" title="Inversion">B10</button>
-                <button class="r3-btn r3-btn-send" onclick="handleButton(${rowIndex}, 'send')" title="Send to R2B">B11</button>
             `;
             
             group.appendChild(controls);
@@ -497,15 +487,6 @@
                 state.notes = computeVoicing(state.chordName, 'tetrad', 0);
                 console.log('[R3] Tetrad notes:', state.notes);
                 updateChordDisplay(rowIndex);
-                sendToR2B(rowIndex);
-                break;
-            case 'invert':
-                state.inversion = (state.inversion + 1) % 4;
-                state.notes = computeVoicing(state.chordName, state.mode, state.inversion);
-                updateChordDisplay(rowIndex);
-                sendToR2B(rowIndex);
-                break;
-            case 'send':
                 sendToR2B(rowIndex);
                 break;
         }
