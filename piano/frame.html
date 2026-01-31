@@ -372,8 +372,8 @@
             console.log('[Frame] Navigation to:', navNum);
             
             if (navNum === '0') {
-                // Main Piano app (frame.html)
-                console.log('[Frame] Main app - already here');
+                // Main Piano app (frame.html) - open AddData dialog
+                window.open('AddData.html', 'adddata', 'width=650,height=500');
             } else if (navNum === '1') {
                 // Sample data
                 window.open('Sample.html', 'sample', 'width=700,height=600');

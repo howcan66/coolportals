@@ -89,7 +89,7 @@
     <div class="container">
         <h1>🎹 Piano Sample Data</h1>
         
-        <div class="sample-data">D              A                 Bm    Bm/A Gmaj7   G6
+        <div class="sample-data" id="sample-display">D              A                 Bm    Bm/A Gmaj7   G6
 Sample verse line one with placeholder chords above
 
 D                 A              G  D/F# Em7 D
@@ -108,15 +108,16 @@ Final resolution back to D major
         <div class="button-group">
             <button onclick="loadSample()">Load to R2A</button>
             <button onclick="copyToClipboard()">Copy Data</button>
+            <button onclick="openAddData()" style="border-color: #ffb74d; color: #ffb74d;">+ Add Data</button>
         </div>
 
-        <div class="info">
+        <div class="info" id="data-info">
             This sample contains 6 chord/lyric lines ready to import into the Piano app.
         </div>
     </div>
 
     <script>
-        const sampleData = `D              A                 Bm    Bm/A Gmaj7   G6
+        let sampleData = `D              A                 Bm    Bm/A Gmaj7   G6
 Sample verse line one with placeholder chords above
 D                 A              G  D/F# Em7 D
 Sample verse line two with chords
@@ -126,6 +127,16 @@ D              A                 Bm    Bm/A
 Sample verse ending line
 D                 A              G  D/F# Em7 D
 Final resolution back to D major`;
+
+        // Load any saved data from localStorage
+        function loadSavedData() {
+            const saved = localStorage.getItem('piano_sample_data');
+            if (saved) {
+                sampleData += '\n\n' + saved;
+                document.getElementById('sample-display').textContent = sampleData;
+                document.getElementById('data-info').textContent = 'Sample data + ' + (saved.split('\n').length) + ' additional lines loaded';
+            }
+        }
 
         function loadSample() {
             // Post data to parent frame (Piano app)
@@ -147,6 +158,21 @@ Final resolution back to D major`;
                 alert('Copy failed. Try manual selection.');
             });
         }
+
+        function openAddData() {
+            window.open('AddData.html', 'adddata', 'width=650,height=500');
+        }
+
+        // Listen for new data from AddData dialog
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'CHORD_DATA_ADDED') {
+                loadSavedData();
+                console.log('[Sample] New data added, refreshing display');
+            }
+        });
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', loadSavedData);
 
         console.log('Sample.html loaded. Use "Load to R2A" button or copy data manually.');
     </script>
