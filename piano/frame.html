@@ -502,6 +502,20 @@ R1 (single row input) → R3 (display)">
         e.preventDefault();
     });
 
+    // Touch support for drag on handheld devices
+    divider.addEventListener('touchstart', (e) => {
+        isDragging = true;
+        divider.classList.add('dragging');
+        document.body.style.userSelect = 'none';
+        
+        // Disable pointer events on iframes
+        document.querySelectorAll('iframe').forEach(iframe => {
+            iframe.style.pointerEvents = 'none';
+        });
+        
+        e.preventDefault();
+    });
+
     document.addEventListener('mousemove', (e) => {
         if (!isDragging) return;
         
@@ -524,11 +538,56 @@ R1 (single row input) → R3 (display)">
         document.documentElement.style.setProperty('--row2-height', row2 + 'fr');
     });
 
+    // Touch support for drag movement
+    document.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        
+        e.preventDefault();
+        
+        const touch = e.touches[0];
+        const containerRect = container.getBoundingClientRect();
+        const touchY = touch.clientY - containerRect.top;
+        const containerHeight = containerRect.height;
+        
+        // Calculate percentage position
+        let percentage = touchY / containerHeight;
+        
+        // Clamp between 5% and 95%
+        percentage = Math.max(0.05, Math.min(0.95, percentage));
+        
+        const row1 = percentage;
+        const row2 = 1 - percentage;
+        
+        document.documentElement.style.setProperty('--row1-height', row1 + 'fr');
+        document.documentElement.style.setProperty('--row2-height', row2 + 'fr');
+    });
+
     document.addEventListener('mouseup', () => {
         if (isDragging) {
             isDragging = false;
             divider.classList.remove('dragging');
             document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+            
+            // Save position
+            const row1Value = getComputedStyle(document.documentElement).getPropertyValue('--row1-height');
+            const percentage = parseFloat(row1Value);
+            if (!isNaN(percentage)) {
+                saveDividerPosition(percentage);
+            }
+            
+            // Re-enable pointer events on iframes
+            document.querySelectorAll('iframe').forEach(iframe => {
+                iframe.style.pointerEvents = '';
+            });
+        }
+    });
+
+    // Touch support for drag end
+    document.addEventListener('touchend', () => {
+        if (isDragging) {
+            isDragging = false;
+            divider.classList.remove('dragging');
             document.body.style.userSelect = '';
             
             // Save position
