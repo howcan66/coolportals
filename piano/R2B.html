@@ -161,6 +161,7 @@
 
     <div class="r2b-footer">
         R2B: Receive from R3 → Mark chord notes → Play interactive notes
+        <span id="r2b-timestamp"></span>
     </div>
 </section>
 
@@ -292,14 +293,17 @@
         }
 
         currentChord = chordData;
-        markChordNotes(chordData.notes);
+        console.log('[R2B] setChord mode:', chordData.mode, 'tetrad?', chordData.mode === 'tetrad');
+        const highlightColor = chordData.mode === 'tetrad' ? '#4fc3f7' : '#ff6b6b';
+        console.log('[R2B] Using color:', highlightColor);
+        markChordNotes(chordData.notes, highlightColor);
         playChord(chordData.notes);
         updateAnalysis(chordData);
     }
 
     // ===== CHORD MARKING ON PIANO =====
     
-    function markChordNotes(notes) {
+    function markChordNotes(notes, color = '#ff6b6b') {
         // Clear previous markings
         const svg = document.getElementById('r2b-piano');
         svg.querySelectorAll('.piano-key').forEach(key => {
@@ -312,7 +316,7 @@
         notes.forEach(note => {
             const key = svg.querySelector(`[data-note="${note}"]`);
             if (key) {
-                key.setAttribute('fill', '#ff6b6b');
+                key.setAttribute('fill', color);
             }
         });
     }

@@ -392,9 +392,11 @@
                 sendToR2B(rowIndex);
                 break;
             case 'tetrad':
+                console.log('[R3] B9 (tetrad) pressed for row', rowIndex);
                 state.mode = 'tetrad';
                 state.inversion = 0;
                 state.notes = computeVoicing(state.chordName, 'tetrad', 0);
+                console.log('[R3] Tetrad notes:', state.notes);
                 updateChordDisplay(rowIndex);
                 sendToR2B(rowIndex);
                 break;
@@ -648,11 +650,12 @@
         const invNames = ['', '1st inv', '2nd inv', '3rd inv'];
         const displayName = `${state.chordName} (${invNames[state.inversion]})`;
 
-        console.log(`[R3] Sending to R2B: ${displayName}`);
+        console.log(`[R3] Sending to R2B: ${displayName}, mode: ${state.mode}`);
         window.parent.postMessage({
             type: 'R3_SEND_TO_R2B',
             payload: {
                 chordName: displayName,
+                mode: state.mode,
                 notes: state.notes,
                 rowIndex: rowIndex
             }
