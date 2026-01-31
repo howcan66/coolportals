@@ -251,6 +251,21 @@
             .frame-nav-buttons {
                 gap: 3px;  /* Tighter button spacing */
             }
+
+            /* Hide R2B and h-divider on mobile/tablet */
+            .frame-r2b,
+            .h-resize-divider {
+                display: none;
+            }
+
+            /* Adjust grid for mobile/tablet (R1 | R2A on top, R1 | R3 on bottom) */
+            .frame-container {
+                grid-template-columns: 0.125fr 1fr;
+                grid-template-areas:
+                    "r1 r2a"
+                    "r1 divider"
+                    "r1 r3";
+            }
         }
     </style>
 </head>
