@@ -224,8 +224,8 @@
             color: #0d47a1;
         }
 
-        /* === QUICK MOBILE/TABLET FIX === */
-        @media (max-width: 768px) {
+        /* === MOBILE/TABLET FIX: Hide R2B on ≤1024px === */
+        @media (max-width: 1024px) {
             .frame-header {
                 padding: 4px;
             }
@@ -252,13 +252,13 @@
                 gap: 3px;  /* Tighter button spacing */
             }
 
-            /* Hide R2B and h-divider on mobile/tablet */
+            /* Hide R2B and h-divider on tablet/mobile */
             .frame-r2b,
             .h-resize-divider {
                 display: none;
             }
 
-            /* Adjust grid for mobile/tablet (R1 | R2A on top, R1 | R3 on bottom) */
+            /* Adjust grid for tablet/mobile (R1 | R2A on top, R1 | R3 on bottom) */
             .frame-container {
                 grid-template-columns: 0.125fr 1fr;
                 grid-template-areas:
