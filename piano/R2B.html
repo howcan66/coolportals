@@ -220,7 +220,7 @@
                 text.setAttribute('x', xPos + whiteKeyWidth / 2);
                 text.setAttribute('y', whiteKeyHeight - 8);
                 text.setAttribute('text-anchor', 'middle');
-                text.setAttribute('font-size', '10');
+                text.setAttribute('font-size', '12');
                 text.setAttribute('fill', '#333');
                 text.setAttribute('pointer-events', 'none');
                 text.textContent = note; // Just note name, no octave number
@@ -257,7 +257,7 @@
                 // Add black key label (without octave number)
                 const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
                 text.setAttribute('x', x + (whiteKeyWidth * 0.25));
-                text.setAttribute('y', 75);
+                text.setAttribute('y', 50);
                 text.setAttribute('text-anchor', 'middle');
                 text.setAttribute('font-size', '8');
                 text.setAttribute('fill', '#fff');
