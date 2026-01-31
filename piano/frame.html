@@ -168,7 +168,7 @@
 
         .frame-nav-buttons {
             display: flex;
-            gap: 6px;
+            gap: 2px;
             justify-content: flex-end;
             align-items: center;
             margin-top: 4px;
@@ -193,7 +193,7 @@
         }
 
         .frame-nav-btn i {
-            font-size: 1.2rem;
+            font-size: 0.9rem;
         }
 
         .frame-nav-btn:hover::after {
@@ -283,7 +283,7 @@
             .frame-r2a-controls {
                 display: flex;
                 gap: 4px;
-                flex-wrap: wrap;
+                flex-wrap: nowrap;
                 padding: 4px 8px;
                 background-color: #1a4d7f;
                 border-radius: 2px;
@@ -294,7 +294,7 @@
                 display: flex;
                 align-items: center;
                 gap: 4px;
-                padding: 6px 10px;
+                padding: 4px 6px;
                 border: 1px solid #4fc3f7;
                 border-radius: 3px;
                 background-color: transparent;
@@ -312,7 +312,7 @@
             }
 
             .frame-r2a-btn i {
-                font-size: 1rem;
+                font-size: 0.9rem;
             }
 
             .frame-r2a-sample-nav {
@@ -346,7 +346,7 @@
             }
 
             .frame-r2a-sample-display {
-                min-width: 45px;
+                min-width: 25px;
                 text-align: center;
                 color: #888;
                 font-size: 0.85rem;
@@ -357,10 +357,13 @@
 <body>
 
 <div class="frame-header">
-    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-        <h1 style="margin: 0; cursor: help; font-size: 1.2rem; display: flex; align-items: center; gap: 4px;" title="R2A (input) → R1 (validation) → R3 (display) → R2B (analysis)
+    <div style="display: flex; justify-content: flex-start; align-items: center; width: 100%; gap: 8px;">
+        <h1 style="margin: 0; cursor: help; font-size: 1.2rem; display: flex; align-items: center; gap: 0px;" title="R2A (input) → R1 (validation) → R3 (display) → R2B (analysis)
 R1 (single row input) → R3 (display)">
-            <span style="font-size: 1.2rem;">🎹</span> <span>"Cool" PA</span>
+            <span style="font-size: 0.9rem;">🎹</span>
+            <button id="frame-r2a-prev-sample" style="width: 20px; height: 20px; padding: 0; border: none; background: transparent; color: inherit; cursor: pointer; font-size: 0.9rem;">«</button>
+            <span class="frame-r2a-sample-display" id="frame-r2a-sample-display">1/4</span>
+            <button id="frame-r2a-next-sample" style="width: 20px; height: 20px; padding: 0; border: none; background: transparent; color: inherit; cursor: pointer; font-size: 0.9rem;">»</button>
         </h1>
         <div class="frame-nav-buttons" id="frame-nav-buttons">
             <button class="frame-nav-btn active" data-nav="0" title="Ultimate Guitar">
@@ -390,21 +393,21 @@ R1 (single row input) → R3 (display)">
     <!-- Handheld R2A controls (visible on ≤1024px) -->
     <div class="frame-r2a-controls">
         <button class="frame-r2a-btn" id="frame-r2a-b5" title="Load All to R3">
-            <i class="fa-solid fa-upload"></i> B5
+            <i class="fa-solid fa-upload"></i>
         </button>
         <button class="frame-r2a-btn" id="frame-r2a-b6" title="Clear R2A">
-            <i class="fa-solid fa-trash"></i> B6
+            <i class="fa-solid fa-trash"></i>
         </button>
         <button class="frame-r2a-btn" id="frame-r2a-er" title="Error Log" style="border-color: #ffb74d; color: #ffb74d;">
-            <i class="fa-solid fa-circle-exclamation"></i> ER
+            <i class="fa-solid fa-circle-exclamation"></i>
         </button>
         <button class="frame-r2a-btn" id="frame-r2a-clearlog" title="Reset Log" style="border-color: #f4a6a6; color: #f4a6a6;">
-            <i class="fa-solid fa-circle-xmark"></i> --
+            <i class="fa-solid fa-circle-xmark"></i>
         </button>
-        <div class="frame-r2a-sample-nav">
-            <button id="frame-r2a-prev-sample">«</button>
-            <span class="frame-r2a-sample-display" id="frame-r2a-sample-display">1/4</span>
-            <button id="frame-r2a-next-sample">»</button>
+        <div class="frame-r2a-sample-nav" style="display: none;">
+            <button id="frame-r2a-prev-sample-backup">«</button>
+            <span class="frame-r2a-sample-display" id="frame-r2a-sample-display-backup">1/4</span>
+            <button id="frame-r2a-next-sample-backup">»</button>
         </div>
     </div>
 </div>
@@ -664,7 +667,21 @@ R1 (single row input) → R3 (display)">
         // Route messages between iframes
         console.log('[Frame Router] Received message:', event.data.type);
         
-        if (event.data.type === 'R2A_LOAD_CHORDS') {
+        if (event.data.type === 'R2A_LOAD_TO_R3') {
+            // B5: Direct R2A→R3 (bypasses R1)
+            const convertedMessage = {
+                type: 'R1_LOAD_ALL',
+                chords: event.data.chords
+                // titleLine discarded (R3 doesn't display title)
+            };
+            
+            const r3Frame = document.getElementById('r3-frame');
+            if (r3Frame && r3Frame.contentWindow) {
+                r3Frame.contentWindow.postMessage(convertedMessage, '*');
+                console.log('[Frame Router] R2A→R3 direct: sent', event.data.chords.length, 'chords');
+            }
+        }
+        else if (event.data.type === 'R2A_LOAD_CHORDS') {
             // Device-aware routing: R2A B5
             // Tablet (≤1024px): Convert to R1_LOAD_ALL format, route to R3
             // Desktop (>1024px): Route to R1 as-is

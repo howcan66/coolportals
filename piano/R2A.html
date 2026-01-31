@@ -85,6 +85,30 @@
             box-shadow: 0 0 4px rgba(143, 214, 148, 0.3);
         }
 
+        .r2a-chord-preview {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #0f1419;
+            border: 1px solid #4fc3f7;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: #4fc3f7;
+            max-height: 120px;
+            overflow-y: auto;
+            line-height: 1.4;
+        }
+
+        .r2a-chord-preview-row {
+            display: inline-block;
+            margin-right: 15px;
+            margin-bottom: 5px;
+            padding: 3px 6px;
+            background-color: #1a4d7f;
+            border-radius: 2px;
+            white-space: nowrap;
+        }
+
         .r2a-global-buttons {
             display: flex;
             justify-content: space-between;
@@ -195,6 +219,7 @@ C G Am F
 Mother Mary comes to me"
             rows="20"
         ></textarea>
+        <div id="r2a-chord-preview" class="r2a-chord-preview"></div>
     </div>
 </section>
 
@@ -371,7 +396,12 @@ Are you gonna drop the bomb or not?`;
         
         // Auto-save on blur for both title and textarea
         if (titleInput) titleInput.addEventListener('blur', saveToStorage);
-        if (textarea) textarea.addEventListener('blur', saveToStorage);
+        if (textarea) {
+            textarea.addEventListener('blur', saveToStorage);
+            // Update preview on input
+            textarea.addEventListener('input', updateChordPreview);
+            textarea.addEventListener('change', updateChordPreview);
+        }
         
         // Global buttons
         if (b5Button) {
@@ -394,6 +424,34 @@ Are you gonna drop the bomb or not?`;
         }
     }
 
+    // ===== CHORD PREVIEW DISPLAY =====
+    
+    function updateChordPreview() {
+        console.log('[R2A] updateChordPreview called');
+        const allChords = parseAllChords();
+        console.log('[R2A] Chords found:', allChords.length, allChords);
+        const preview = document.getElementById('r2a-chord-preview');
+        console.log('[R2A] Preview element:', preview);
+        
+        if (!preview) {
+            console.error('[R2A] Preview div not found!');
+            return;
+        }
+        
+        if (allChords.length === 0) {
+            preview.innerHTML = '<span style="color: #999;">No chords detected</span>';
+            console.log('[R2A] No chords, showing empty message');
+            return;
+        }
+        
+        const html = allChords
+            .map((chord, index) => `<span class="r2a-chord-preview-row">Row ${index + 1}: ${chord}</span>`)
+            .join('');
+        
+        preview.innerHTML = html;
+        console.log('[R2A] Preview updated with', allChords.length, 'chords');
+    }
+
     // ===== CHORD PARSING & VALIDATION =====
     
     function parseAllChords() {
@@ -403,17 +461,21 @@ Are you gonna drop the bomb or not?`;
         let dataLineIndex = 0;
 
         // Extract odd lines (0-indexed: 0, 2, 4... = lines 1, 3, 5...)
+        // Empty lines and comments are skipped WITHOUT affecting the count
         lines.forEach((line, originalIndex) => {
             const trimmed = line.trim();
 
-            // Skip empty or header/comment lines without shifting the alternation
+            // Skip empty lines completely (don't count them)
             if (!trimmed) {
                 return;
             }
+            
+            // Skip header/comment lines completely (don't count them)
             if (trimmed.startsWith('#') || trimmed.startsWith('<!--')) {
                 return;
             }
 
+            // Only non-empty, non-comment lines count in the alternation
             if (dataLineIndex % 2 === 0) { // Chord line
                 const tokens = trimmed.split(/\s+/);
 
@@ -492,26 +554,42 @@ Are you gonna drop the bomb or not?`;
         const trimmed = chord.trim();
         if (!trimmed) return { valid: false, reason: 'empty' };
         
+        // Reject single notes (must have at least 2 characters: note + something)
+        if (trimmed.length < 2) {
+            console.log(`[R2A] Chord validation failed for "${trimmed}" - too short (single character)`);
+            return { valid: false, reason: 'too-short' };
+        }
+        
+        // Normalize enharmonic equivalents BEFORE validation
+        // Bb→A#, Eb→D#, Ab→G#, Db→C#, Gb→F#, Cb→B
+        let normalized = trimmed
+            .replace(/Bb/g, 'A#')
+            .replace(/Eb/g, 'D#')
+            .replace(/Ab/g, 'G#')
+            .replace(/Db/g, 'C#')
+            .replace(/Gb/g, 'F#')
+            .replace(/Cb/g, 'B');
+        
         // Check regex
-        if (!CHORD_REGEX.test(trimmed)) {
-            console.log(`[R2A] Chord validation failed for "${trimmed}" - regex mismatch`);
+        if (!CHORD_REGEX.test(normalized)) {
+            console.log(`[R2A] Chord validation failed for "${trimmed}" → "${normalized}" - regex mismatch`);
             return { valid: false, reason: 'regex' };
         }
 
         // Check for duplicate add/extension
-        const match = trimmed.match(/(\d+).*add(\d+)/i);
+        const match = normalized.match(/(\d+).*add(\d+)/i);
         if (match && match[1] === match[2]) {
-            console.log(`[R2A] Chord validation failed for "${trimmed}" - duplicate add`);
+            console.log(`[R2A] Chord validation failed for "${normalized}" - duplicate add`);
             return { valid: false, reason: 'duplicate-add' };
         }
 
         // Normalize H→B (including slash bass)
-        const normalized = trimmed.replace(/^H/i, 'B').replace(/\/(H)/i, '/B');
-        console.log(`[R2A] Chord validation passed for "${trimmed}" → "${normalized}"`);
+        const final = normalized.replace(/^H/i, 'B').replace(/\/(H)/i, '/B');
+        console.log(`[R2A] Chord validation passed for "${trimmed}" → "${final}"`);
         
         return {
             valid: true,
-            value: normalized
+            value: final
         };
     }
 
@@ -591,6 +669,21 @@ Are you gonna drop the bomb or not?`;
         console.log('[R2A] postMessage sent to parent');
     }
 
+    function sendToR3(chords, titleLine = '') {
+        console.log('[R2A] sendToR3 called with:', chords.length, 'chords');
+        console.log('[R2A] Chords array:', chords);
+        console.log('[R2A] Title:', titleLine);
+        
+        // Send directly to parent frame, which will route to R3
+        window.parent.postMessage({
+            type: 'R2A_LOAD_TO_R3',
+            chords: chords,
+            titleLine: titleLine
+        }, '*');
+        
+        console.log('[R2A] postMessage sent to parent for R3');
+    }
+
     // ===== B5: LOAD ALL =====
     
     function handleB5Click() {
@@ -612,9 +705,10 @@ Are you gonna drop the bomb or not?`;
             return;
         }
 
-        console.log('[R2A] Sending to R1 via parent:', allChords.length, 'chords');
-        sendToR1(allChords, titleLine);
-        alert('✅ Sent ' + allChords.length + ' chords to R1');
+        console.log('[R2A] Sending directly to R3:', allChords.length, 'chords');
+        sendToR3(allChords, titleLine);
+        const maxRows = Math.min(allChords.length, 24);
+        alert('✅ Sent ' + allChords.length + ' chords to R3\n(Rows 1–' + maxRows + ')');
     }
 
     // ===== B6: CLEAR ALL (R2A ONLY) =====

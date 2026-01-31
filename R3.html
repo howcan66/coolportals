@@ -26,52 +26,22 @@
             background-color: #2b2b2b;
             border: 1px solid #444;
             padding: 12px;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            display: flex;
+            flex-direction: column;
             height: 100%;
             overflow-y: auto;
             gap: 8px;
-            align-content: start;
-        }
-
-        /* Linear: 1 column (24 rows stacked) */
-        body.layout-linear #r3-panel {
-            grid-template-columns: 1fr;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Force layout based on query parameter */
-        body.layout-tablet #r3-panel {
-            grid-template-columns: repeat(3, 1fr);
-        }
-
-        body.layout-mobile #r3-panel {
-            grid-template-columns: repeat(2, 1fr);
-        }
-
-        /* Tablet: 3 columns */
-        @media (max-width: 1024px) {
-            #r3-panel {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        /* Mobile: 2 columns */
-        @media (max-width: 600px) {
-            #r3-panel {
-                grid-template-columns: repeat(2, 1fr);
-            }
         }
 
         .r3-pianogroup {
             display: flex;
             flex-direction: column;
-            gap: 2px;
-            padding: 6px;
+            gap: 4px;
+            padding: 8px;
             background: #1a1a1a;
             border-radius: 4px;
             border-left: 3px solid #444;
+            margin-bottom: 8px;
         }
 
         .r3-pianogroup.active {
@@ -113,36 +83,30 @@
 
         .r3-piano-svg {
             width: 100%;
-            height: 50px;
+            height: 80px;
             border: 1px solid #444;
             background-color: #fff;
         }
 
-        /* Linear layout: larger piano keys */
-        body.layout-linear .r3-piano-svg {
-            height: 150px;
-        }
-
         .r3-controls {
             display: flex;
-            gap: 2px;
+            gap: 3px;
             justify-content: flex-start;
             align-items: center;
             flex-wrap: wrap;
         }
 
         .r3-btn {
-            width: 22px;
-            height: 20px;
+            width: 28px;
+            height: 24px;
             padding: 0;
             border: 1px solid #333;
-            border-radius: 2px;
+            border-radius: 3px;
             cursor: pointer;
             transition: opacity 0.2s, transform 0.05s;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 10px;
         }
 
         .r3-btn:hover {
@@ -162,8 +126,20 @@
             background-color: #8fd694;
         }
 
+        .r3-btn-triad {
+            background-color: #4fc3f7;
+        }
+
         .r3-btn-tetrad {
             background-color: #ffb74d;
+        }
+
+        .r3-btn-invert {
+            background-color: #ba68c8;
+        }
+
+        .r3-btn-send {
+            background-color: #4db6ac;
         }
 
         .r3-btn-chord {
@@ -172,9 +148,7 @@
             opacity: 1 !important;
             color: #01579b;
             font-weight: bold;
-            min-width: 40px;
-            font-size: 9px;
-            height: 20px;
+            min-width: 50px;
         }
 
         .r3-btn-chord:hover {
@@ -185,11 +159,10 @@
             background-color: #ff9800 !important;
             cursor: default !important;
             opacity: 1 !important;
-            min-width: 28px;
-            font-size: 9px;
+            min-width: 40px;
+            font-size: 1rem;
             font-weight: bold;
             color: black;
-            height: 20px;
         }
 
         .r3-btn-rownum:hover {
@@ -213,18 +186,6 @@
 </section>
 
 <script>
-    // ===== DURATION CONTROL =====
-    // Global duration variable accessible from R2B
-    window.chordDuration = 2.0;  // Default to 2.0 seconds
-    
-    // Listen for duration changes from R2B
-    window.addEventListener('message', (event) => {
-        if (event.data && event.data.type === 'SET_CHORD_DURATION') {
-            window.chordDuration = event.data.duration;
-            console.log(`[R3] Chord duration set to ${window.chordDuration}s`);
-        }
-    });
-
     // ===== R3 STATE - 24 ROWS =====
     
     const groupStates = Array(24).fill(null).map((_, i) => ({
@@ -239,10 +200,10 @@
     // ===== NOTE FREQUENCIES =====
     
     const NOTE_FREQUENCIES = {
-        'C4': 261.63, 'C#4': 277.18, 'Db4': 277.18, 'D4': 293.66, 'D#4': 311.13, 'Eb4': 311.13, 'E4': 329.63, 'F4': 349.23,
-        'F#4': 369.99, 'Gb4': 369.99, 'G4': 391.99, 'G#4': 415.30, 'Ab4': 415.30, 'A4': 440.00, 'A#4': 466.16, 'Bb4': 466.16, 'B4': 493.88,
-        'C5': 523.25, 'C#5': 554.37, 'Db5': 554.37, 'D5': 587.33, 'D#5': 622.25, 'Eb5': 622.25, 'E5': 659.25, 'F5': 698.46,
-        'F#5': 739.99, 'Gb5': 739.99, 'G5': 783.99, 'G#5': 830.61, 'Ab5': 830.61, 'A5': 880.00, 'A#5': 932.33, 'Bb5': 932.33, 'B5': 987.77
+        'C4': 261.63, 'C#4': 277.18, 'D4': 293.66, 'D#4': 311.13, 'E4': 329.63, 'F4': 349.23,
+        'F#4': 369.99, 'G4': 391.99, 'G#4': 415.30, 'A4': 440.00, 'A#4': 466.16, 'B4': 493.88,
+        'C5': 523.25, 'C#5': 554.37, 'D5': 587.33, 'D#5': 622.25, 'E5': 659.25, 'F5': 698.46,
+        'F#5': 739.99, 'G5': 783.99, 'G#5': 830.61, 'A5': 880.00, 'A#5': 932.33, 'B5': 987.77
     };
 
     // ===== R3 INITIALIZATION =====
@@ -283,9 +244,12 @@
             controls.id = `r3-controls-${rowIndex}`;
             controls.innerHTML = `
                 <button class="r3-btn r3-btn-rownum" disabled title="Row">#${rowIndex}</button>
-                <button class="r3-btn r3-btn-chord" onclick="handleButton(${rowIndex}, 'play')" title="Click to play chord" id="r3-chord-${rowIndex}">–</button>
+                <button class="r3-btn r3-btn-chord" disabled title="Chord" id="r3-chord-${rowIndex}">–</button>
                 <button class="r3-btn r3-btn-play" onclick="handleButton(${rowIndex}, 'play')" title="Play">B7</button>
+                <button class="r3-btn r3-btn-triad" onclick="handleButton(${rowIndex}, 'triad')" title="Triad">B8</button>
                 <button class="r3-btn r3-btn-tetrad" onclick="handleButton(${rowIndex}, 'tetrad')" title="Tetrad">B9</button>
+                <button class="r3-btn r3-btn-invert" onclick="handleButton(${rowIndex}, 'invert')" title="Inversion">B10</button>
+                <button class="r3-btn r3-btn-send" onclick="handleButton(${rowIndex}, 'send')" title="Send to R2B">B11</button>
             `;
             
             group.appendChild(controls);
@@ -307,9 +271,6 @@
         initR3();
     }
 
-    // Detect layout mode
-    const layoutMode = new URLSearchParams(window.location.search).get('layout') || 'desktop';
-
     // ===== PIANO RENDERING =====
     
     function renderPianoKeysForGroup(svg, rowIndex) {
@@ -318,7 +279,7 @@
         
         let xPos = 0;
         const whiteKeyWidth = 200 / 7;
-        const whiteKeyHeight = layoutMode === 'linear' ? 65 : 100;
+        const whiteKeyHeight = 100;
         
         // Draw white keys
         notes.forEach((note, idx) => {
@@ -352,13 +313,12 @@
 
         // Draw black keys
         blackNotes.forEach((position) => {
-            const x = Math.ceil(position) * (200 / 7) - ((200 / 7) * 0.275);
+            const x = (position * (200 / 7)) - ((200 / 7) * 0.275);
             const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
             rect.setAttribute('x', x);
             rect.setAttribute('y', 0);
             rect.setAttribute('width', (200 / 7) * 0.55);
-            const blackKeyHeight = layoutMode === 'linear' ? 32 : 50;
-            rect.setAttribute('height', blackKeyHeight);
+            rect.setAttribute('height', 50);
             rect.setAttribute('fill', '#1a1a1a');
             rect.setAttribute('stroke', '#000');
             rect.setAttribute('class', 'piano-key');
@@ -376,11 +336,9 @@
 
             const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
             text.setAttribute('x', x + ((200 / 7) * 0.25));
-            const blackKeyTextY = layoutMode === 'linear' ? 28 : 40;
-            text.setAttribute('y', blackKeyTextY);
+            text.setAttribute('y', 40);
             text.setAttribute('text-anchor', 'middle');
-            const blackKeyFontSize = layoutMode === 'linear' ? '10' : '14';
-            text.setAttribute('font-size', blackKeyFontSize);
+            text.setAttribute('font-size', '14');
             text.setAttribute('font-weight', 'bold');
             text.setAttribute('fill', '#fff');
             text.setAttribute('pointer-events', 'none');
@@ -396,18 +354,6 @@
     function receiveChordFromR1(chordName, rowIndex) {
         if (!chordName || !rowIndex || rowIndex < 1 || rowIndex > 24) {
             console.warn('[R3] Invalid input:', chordName, rowIndex);
-            // Log invalid chord from R1
-            const logEntry = {
-                ts: new Date().toISOString(),
-                source: 'R3',
-                chord: chordName,
-                rowIndex: rowIndex,
-                action: 'rejected',
-                reason: 'invalid_input'
-            };
-            const parseLog = JSON.parse(localStorage.getItem('r2a-parse-log') || '[]');
-            parseLog.push(logEntry);
-            localStorage.setItem('r2a-parse-log', JSON.stringify(parseLog));
             return;
         }
 
@@ -421,36 +367,6 @@
         state.mode = /[679]|11|13/.test(state.chordName) ? 'tetrad' : 'triad';
         state.inversion = 0;
         state.notes = computeVoicing(state.chordName, state.mode, state.inversion);
-        
-        // Check if notes were computed successfully
-        if (!state.notes || state.notes.length === 0) {
-            console.error('[R3] Failed to compute notes for:', chordName);
-            // Log failed chord computation
-            const logEntry = {
-                ts: new Date().toISOString(),
-                source: 'R3',
-                chord: chordName,
-                rowIndex: rowIndex,
-                action: 'failed',
-                reason: 'no_notes_computed'
-            };
-            const parseLog = JSON.parse(localStorage.getItem('r2a-parse-log') || '[]');
-            parseLog.push(logEntry);
-            localStorage.setItem('r2a-parse-log', JSON.stringify(parseLog));
-        } else {
-            // Log successful processing
-            const logEntry = {
-                ts: new Date().toISOString(),
-                source: 'R3',
-                chord: chordName,
-                rowIndex: rowIndex,
-                action: 'processed',
-                notes: state.notes.length
-            };
-            const parseLog = JSON.parse(localStorage.getItem('r2a-parse-log') || '[]');
-            parseLog.push(logEntry);
-            localStorage.setItem('r2a-parse-log', JSON.stringify(parseLog));
-        }
 
         updateChordDisplay(rowIndex);
         playChord(state.notes);
@@ -462,25 +378,33 @@
 
         switch (action) {
             case 'play':
-                console.log('[R3] B7 play button clicked, rowIndex:', rowIndex);
-                console.log('[R3] state.isEmpty:', state.isEmpty);
-                console.log('[R3] state.notes:', state.notes);
-                console.log('[R3] state.chordName:', state.chordName);
-                console.log('[R3] window.chordDuration:', window.chordDuration);
-                
                 const playSvg = document.getElementById(`r3-piano-${rowIndex}`);
                 if (playSvg) {
                     highlightChordKeys(playSvg, state.notes, '#ff0000');
                 }
-                playChord(state.notes, window.chordDuration);  // Use global duration
+                playChord(state.notes);
+                break;
+            case 'triad':
+                state.mode = 'triad';
+                state.inversion = 0;
+                state.notes = computeVoicing(state.chordName, 'triad', 0);
+                updateChordDisplay(rowIndex);
+                sendToR2B(rowIndex);
                 break;
             case 'tetrad':
-                console.log('[R3] B9 (tetrad) pressed for row', rowIndex);
                 state.mode = 'tetrad';
                 state.inversion = 0;
                 state.notes = computeVoicing(state.chordName, 'tetrad', 0);
-                console.log('[R3] Tetrad notes:', state.notes);
                 updateChordDisplay(rowIndex);
+                sendToR2B(rowIndex);
+                break;
+            case 'invert':
+                state.inversion = (state.inversion + 1) % 4;
+                state.notes = computeVoicing(state.chordName, state.mode, state.inversion);
+                updateChordDisplay(rowIndex);
+                sendToR2B(rowIndex);
+                break;
+            case 'send':
                 sendToR2B(rowIndex);
                 break;
         }
@@ -512,10 +436,9 @@
         // Update chord button text
         chordBtn.textContent = state.isEmpty ? '–' : state.chordName;
 
-        // Update piano highlighting (mode-aware)
+        // Update piano highlighting (default green)
         if (!state.isEmpty) {
-            const modeColor = state.mode === 'tetrad' ? '#4fc3f7' : '#8fd694';
-            highlightChordKeys(svg, state.notes, modeColor);
+            highlightChordKeys(svg, state.notes, '#8fd694');
         }
     }
 
@@ -548,18 +471,6 @@
       'Am':  {tri: ['A4','C5','E5'],   tet: ['A4','C5','E5','G5']},
       'A#m': {tri: ['A#4','C#5','E#5'], tet: ['A#4','C#5','E#5','G#5']},
       'Bm':  {tri: ['B4','D5','F#5'],  tet: ['B4','D5','F#5','A5']},
-      'Cdim': {tri: ['C4','Eb4','Gb4'], tet: ['C4','Eb4','Gb4','A4']},
-      'C#dim': {tri: ['C#4','E4','G4'], tet: ['C#4','E4','G4','A#4']},
-      'Ddim': {tri: ['D4','F4','Ab4'], tet: ['D4','F4','Ab4','B4']},
-      'D#dim': {tri: ['D#4','F#4','A4'], tet: ['D#4','F#4','A4','C5']},
-      'Edim': {tri: ['E4','G4','Bb4'], tet: ['E4','G4','Bb4','C#5']},
-      'Fdim': {tri: ['F4','Ab4','B4'], tet: ['F4','Ab4','B4','D5']},
-      'F#dim': {tri: ['F#4','A4','C5'], tet: ['F#4','A4','C5','D#5']},
-      'Gdim': {tri: ['G4','Bb4','Db5'], tet: ['G4','Bb4','Db5','E5']},
-      'G#dim': {tri: ['G#4','B4','D5'], tet: ['G#4','B4','D5','F5']},
-      'Adim': {tri: ['A4','C5','Eb5'], tet: ['A4','C5','Eb5','F#5']},
-      'A#dim': {tri: ['A#4','C#5','E5'], tet: ['A#4','C#5','E5','G5']},
-      'Bdim': {tri: ['B4','D5','F5'], tet: ['B4','D5','F5','G#5']},
       'C7':  {tri: ['C4','E4','G4'],   tet: ['C4','E4','G4','Bb4']},
       'C#7': {tri: ['C#4','E#4','G#4'], tet: ['C#4','E#4','G#4','B4']},
       'D7':  {tri: ['D4','F#4','A4'],  tet: ['D4','F#4','A4','C5']},
@@ -687,7 +598,7 @@
         let [, ltr, acc, oct] = m; oct = parseInt(oct, 10);
         const name = ltr.toUpperCase() === 'H' ? 'B' : ltr.toUpperCase();
         const key = (name + (acc || '')).toUpperCase();
-        const semis = { C:0,'C#':1,DB:1,D:2,'D#':3,EB:3,E:4,F:5,'F#':6,GB:6,G:7,'G#':8,AB:8,A:9,'A#':10,BB:10,'Bb':10,B:11 };
+        const semis = { C:0,'C#':1,DB:1,D:2,'D#':3,EB:3,E:4,F:5,'F#':6,GB:6,G:7,'G#':8,AB:8,A:9,'A#':10,BB:10,B:11 };
         const semi = semis[key];
         if (semi === undefined) return 440;
         const midi = (oct + 1) * 12 + semi;
@@ -711,20 +622,20 @@
 
     // ===== AUDIO PLAYBACK =====
     
-    function playChord(notes, duration = 1.5) {
+    function playChord(notes) {
         if (!Array.isArray(notes) || !notes.length) return;
-        console.log(`[R3] Playing chord: ${notes.join(', ')} with duration ${duration}s`);
+        console.log(`[R3] Playing chord: ${notes.join(', ')}`);
         notes.forEach((n, idx) => {
             const f = noteToFreq(n);
             const detune = (idx - (notes.length - 1) / 2) * 4; // slight spread
-            triggerTone(f, duration, 0, detune);
+            triggerTone(f, 1.0, 0, detune);
         });
     }
 
-    function playNote(note, duration = 1.5) {
-        console.log(`[R3] Playing note: ${note} with duration ${duration}s`);
+    function playNote(note) {
+        console.log(`[R3] Playing note: ${note}`);
         const f = noteToFreq(note);
-        triggerTone(f, duration, 0, 0);
+        triggerTone(f, 0.5, 0, 0);
     }
 
     // ===== BUTTON HANDLERS =====
@@ -737,7 +648,7 @@
         const invNames = ['', '1st inv', '2nd inv', '3rd inv'];
         const displayName = `${state.chordName} (${invNames[state.inversion]})`;
 
-        console.log(`[R3] Sending to R2B: ${displayName}, mode: ${state.mode}`);
+        console.log(`[R3] Sending to R2B: ${displayName}`);
         window.parent.postMessage({
             type: 'R3_SEND_TO_R2B',
             payload: {
@@ -760,26 +671,6 @@
                 receiveChordFromR1(chord, rowIndex);
             }
         }
-        else if (event.data.type === 'R1_LOAD_ALL') {
-            // Handle bulk load from R2A (via frame router) - load sequentially with delay
-            const { chords } = event.data;
-            if (chords && Array.isArray(chords)) {
-                console.log('[R3] R1_LOAD_ALL: receiving', chords.length, 'chords from R2A');
-                const delayMs = 400; // 400ms delay between each chord
-                
-                chords.forEach((chord, index) => {
-                    const rowIndex = index + 1;
-                    if (rowIndex <= 24) {
-                        // Stagger loading with delay
-                        setTimeout(() => {
-                            receiveChordFromR1(chord, rowIndex);
-                            console.log(`[R3] Loaded chord ${index + 1}/${chords.length}: ${chord}`);
-                        }, index * delayMs);
-                    }
-                });
-                console.log('[R3] Loaded', Math.min(chords.length, 24), 'chords to R3 (sequentially)');
-            }
-        }
         else if (event.data.type === 'R3_FOCUS_AND_PLAY') {
             const { rowIndex } = event.data;
             if (rowIndex !== undefined && groupStates[rowIndex] && !groupStates[rowIndex].isEmpty) {
@@ -794,27 +685,6 @@
             }
         }
     });
-
-    // Apply layout from query parameter
-    function applyLayout() {
-        const params = new URLSearchParams(window.location.search);
-        const layout = params.get('layout');
-        
-        if (layout === 'linear') {
-            document.body.classList.add('layout-linear');
-            console.log('[R3] Applied linear layout (1 row × 24)');
-        } else if (layout === 'tablet') {
-            document.body.classList.add('layout-tablet');
-            console.log('[R3] Applied tablet layout (3 columns)');
-        } else if (layout === 'mobile') {
-            document.body.classList.add('layout-mobile');
-            console.log('[R3] Applied mobile layout (2 columns)');
-        } else {
-            console.log('[R3] Using desktop layout (4 columns)');
-        }
-    }
-
-    applyLayout();
     
     console.log('[R3] Script loaded');
 </script>
