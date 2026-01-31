@@ -199,7 +199,7 @@
         let xPos = 0;
         const totalWhiteKeys = notes.length * octaves.length;
         const whiteKeyWidth = 300 / totalWhiteKeys;
-        const whiteKeyHeight = 90;
+        const whiteKeyHeight = 120;
 
         // Draw white keys (all 14 across 2 octaves)
         octaves.forEach(octave => {
@@ -245,7 +245,7 @@
                 rect.setAttribute('x', x);
                 rect.setAttribute('y', 0);
                 rect.setAttribute('width', whiteKeyWidth * 0.6);
-                rect.setAttribute('height', 90);
+                rect.setAttribute('height', 72);
                 rect.setAttribute('fill', '#1a1a1a');
                 rect.setAttribute('stroke', '#000');
                 rect.setAttribute('class', 'piano-key');
