@@ -63,14 +63,14 @@
         .r1-rows-container {
             display: flex;
             flex-direction: column;
-            gap: 1px;
+            gap: 5px;
             margin-bottom: 10px;
             align-items: center;
         }
 
         .r1-row {
             display: flex;
-            gap: 1px;
+            gap: 3px;
             align-items: center;
         }
 
@@ -111,7 +111,7 @@
 
         .r1-btn {
             width: 28px;
-            height: 24px;
+            height: 28px;
             padding: 0;
             border: none;
             border-radius: 3px;
@@ -134,25 +134,17 @@
 
         .r1-btn-load {
             background-color: #8fd694;
-            color: black;
+            color: white;
         }
 
         .r1-btn-clear {
             background-color: #f4a6a6;
-            color: black;
-        }
-
-        .r1-btn-focus {
-            background-color: #87ceeb;
-            color: black;
+            color: white;
         }
 
         .r1-global-buttons {
             display: flex;
             justify-content: center;
-            align-items: center;
-            width: 100%;
-            padding-left: 0;
             gap: 10px;
             margin-bottom: 10px;
             padding-bottom: 10px;
@@ -160,7 +152,7 @@
         }
 
         .r1-btn-global {
-            padding: 6px 12px;
+            padding: 8px 12px;
             border: 2px solid;
             border-radius: 4px;
             font-size: 0.85rem;
@@ -186,7 +178,7 @@
         .r1-btn-clear-all {
             background-color: #f4a6a6;
             border-color: #f4a6a6;
-            color: black;
+            color: white;
         }
 
         .r1-footer {
@@ -314,6 +306,7 @@
     // ===== R1 INITIALIZATION =====
     
     function initR1() {
+        alert('R1 initializing...');
         console.log('initR1 starting');
         generateRows();
         console.log('Rows generated');
@@ -344,7 +337,6 @@
                 <div class="r1-btn-row">
                     <button class="r1-btn r1-btn-load" data-row="${i}" data-action="load" aria-label="Load Row ${i} to R3">L</button>
                     <button class="r1-btn r1-btn-clear" data-row="${i}" data-action="clear" aria-label="Clear Row ${i}">X</button>
-                    <button class="r1-btn r1-btn-focus" onclick="handleB25Click(${i})" aria-label="Focus and play Row ${i} in R3">></button>
                 </div>
             `;
             container.appendChild(row);
@@ -431,6 +423,18 @@
         }, '*');
         console.log('[R1] Sent to R3 via postMessage:', { chord: validated, rowIndex });
         
+        // Log to R2A parse log for debugging
+        const logEntry = {
+            ts: new Date().toISOString(),
+            source: 'R1',
+            chord: validated,
+            rowIndex: rowIndex,
+            action: 'sent_to_R3'
+        };
+        const parseLog = JSON.parse(localStorage.getItem('r2a-parse-log') || '[]');
+        parseLog.push(logEntry);
+        localStorage.setItem('r2a-parse-log', JSON.stringify(parseLog));
+        
         // No sound here (R3 handles audio)
     };
 
@@ -452,37 +456,6 @@
 
     // ===== B3: LOAD ALL TO R3 =====
     
-    window.handleB25Click = function(rowIndex) {
-        console.log('[R1] B25 clicked, rowIndex:', rowIndex);
-        const input = document.getElementById(`r1-textform-${rowIndex}`);
-        if (!input) {
-            console.warn('Input not found:', rowIndex);
-            return;
-        }
-
-        const chord = input.value.trim();
-        console.log('[R1] B25 chord value:', chord);
-        
-        if (!chord) {
-            console.log('[R1] B25: Empty chord, ignoring');
-            return;
-        }
-        
-        const validated = validateChord(chord);
-        console.log('[R1] B25 validated chord:', validated);
-        if (!validated) {
-            console.log('[R1] B25: Invalid chord, ignoring');
-            return;
-        }
-        
-        // Send focus+play command to R3 via postMessage
-        window.parent.postMessage({
-            type: 'R3_FOCUS_AND_PLAY',
-            rowIndex: rowIndex
-        }, '*');
-        console.log('[R1] B25 sent to R3 via postMessage:', { rowIndex });
-    };
-
     function handleB3Click() {
         // Collect all 24 chords
         const chordArray = [];
@@ -580,6 +553,7 @@
     // ===== INITIALIZATION =====
     
     function initR1() {
+        alert('R1 initializing...');
         console.log('initR1 starting');
         generateRows();
         console.log('Rows generated');

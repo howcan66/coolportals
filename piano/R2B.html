@@ -46,10 +46,7 @@
             color: #000;
         }
 
-        .r2b-timestamp {
-            font-size: 0.75rem;
-            color: #888;
-        }
+
 
         .r2b-content {
             display: flex;
@@ -119,15 +116,7 @@
         .r2b-btn-clear {
             background-color: #f4a6a6;
             border-color: #f4a6a6;
-            color: white;
-        }
-
-        .r2b-footer {
-            font-size: 0.7rem;
-            color: #666;
-            text-align: center;
-            padding-top: 8px;
-            border-top: 1px solid #444;
+            color: black;
         }
 
         .piano-key {
@@ -149,6 +138,30 @@
         </div>
         <button class="r2b-btn r2b-btn-play" id="r2b-b12">B12</button>
         <button class="r2b-btn r2b-btn-clear" id="r2b-b13">B13</button>
+        
+        <div id="r2b-duration-control" style="display: inline-block; padding: 10px 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin-left: 15px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+            <label style="font-weight: bold; margin-right: 10px; color: white; font-size: 15px;">🔊 <span id="duration-display">2.0s</span></label>
+            <label style="margin-left: 8px; color: white; font-size: 12px; cursor: pointer;">
+                <input type="radio" name="chord-duration" value="0.5" style="cursor: pointer;"> 0.5s
+            </label>
+            <label style="margin-left: 8px; color: white; font-size: 12px; cursor: pointer;">
+                <input type="radio" name="chord-duration" value="1.0" style="cursor: pointer;"> 1.0s
+            </label>
+            <label style="margin-left: 8px; color: white; font-size: 12px; cursor: pointer;">
+                <input type="radio" name="chord-duration" value="1.5" style="cursor: pointer;"> 1.5s
+            </label>
+            <label style="margin-left: 8px; color: white; font-size: 12px; cursor: pointer;">
+                <input type="radio" name="chord-duration" value="2.0" checked style="cursor: pointer;"> 2.0s
+            </label>
+            <label style="margin-left: 8px; color: white; font-size: 12px; cursor: pointer;">
+                <input type="radio" name="chord-duration" value="3.0" style="cursor: pointer;"> 3.0s
+            </label>
+        </div>
+        
+        <div id="r2b-volume-control" style="display: inline-block; padding: 10px 14px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); margin-left: 15px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+            <label style="font-weight: bold; margin-right: 10px; color: white; font-size: 15px;">🔉 <span id="volume-display">80%</span></label>
+            <input type="range" name="chord-volume" id="chord-volume-slider" min="0" max="100" value="80" style="cursor: pointer; vertical-align: middle; margin-left: 8px; width: 120px;">
+        </div>
     </div>
 
     <div class="r2b-content">
@@ -158,11 +171,6 @@
             </svg>
         </div>
     </div>
-
-    <div class="r2b-footer">
-        R2B: Receive from R3 → Mark chord notes → Play interactive notes
-        <span id="r2b-timestamp"></span>
-    </div>
 </section>
 
 <script>
@@ -170,6 +178,73 @@
     
     let currentChord = null;
     let isChordPlaying = false;
+    let chordDuration = 2.0;  // Default duration
+    let chordVolume = 0.8;    // Default volume (0-1 scale)
+    
+    // Set up duration control listeners
+    document.addEventListener('DOMContentLoaded', () => {
+        const durationRadios = document.querySelectorAll('input[name="chord-duration"]');
+        const durationDisplay = document.getElementById('duration-display');
+        const volumeSlider = document.getElementById('chord-volume-slider');
+        const volumeDisplay = document.getElementById('volume-display');
+        
+        console.log('[R2B] Found duration radios:', durationRadios.length);
+        console.log('[R2B] Default duration:', chordDuration, 's');
+        console.log('[R2B] Default volume:', chordVolume * 100, '%');
+        
+        durationRadios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                chordDuration = parseFloat(e.target.value);
+                console.log(`[R2B] ⭐ Chord duration CHANGED to ${chordDuration}s`);
+                
+                // Update display
+                if (durationDisplay) {
+                    durationDisplay.textContent = chordDuration + 's';
+                    durationDisplay.style.backgroundColor = '#ffeb3b';
+                    durationDisplay.style.color = '#000';
+                    durationDisplay.style.padding = '2px 6px';
+                    durationDisplay.style.borderRadius = '3px';
+                    
+                    setTimeout(() => {
+                        durationDisplay.style.backgroundColor = 'transparent';
+                        durationDisplay.style.color = 'white';
+                    }, 500);
+                }
+                
+                alert(`Duration changed to ${chordDuration}s`);
+                
+                // Notify R3 via parent frame
+                window.parent.postMessage({
+                    type: 'SET_CHORD_DURATION',
+                    duration: chordDuration
+                }, '*');
+            });
+        });
+        
+        console.log('[R2B] Current duration on load:', chordDuration);
+        
+        // Volume control listener
+        if (volumeSlider) {
+            volumeSlider.addEventListener('input', (e) => {
+                chordVolume = parseFloat(e.target.value) / 100;
+                console.log(`[R2B] ⭐ Chord volume CHANGED to ${chordVolume.toFixed(2)} (${e.target.value}%)`);
+                
+                // Update display
+                if (volumeDisplay) {
+                    volumeDisplay.textContent = e.target.value + '%';
+                    volumeDisplay.style.backgroundColor = '#ffeb3b';
+                    volumeDisplay.style.color = '#000';
+                    volumeDisplay.style.padding = '2px 6px';
+                    volumeDisplay.style.borderRadius = '3px';
+                    
+                    setTimeout(() => {
+                        volumeDisplay.style.backgroundColor = 'transparent';
+                        volumeDisplay.style.color = 'white';
+                    }, 500);
+                }
+            });
+        }
+    });
     
     // ===== NOTE FREQUENCIES =====
     
@@ -186,7 +261,7 @@
         renderPiano();
         attachButtonListeners();
         exposePublicAPI();
-        updateTimestamp();
+
     }
 
     // ===== PIANO RENDERING (2 OCTAVES: C4-B5) =====
@@ -232,15 +307,13 @@
 
         // Draw black keys (10 total: no key after E and B in each octave)
         xPos = 0;
-        octaves.forEach(octave => {
+        octaves.forEach((octave, octaveIdx) => {
             const octaveNotes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-            octaveNotes.forEach((note, idx) => {
-                if (note === 'E' || note === 'B') {
-                    xPos += whiteKeyWidth;
-                    return;
-                }
-
-                const x = xPos + (whiteKeyWidth * 0.75) - (whiteKeyWidth * 0.3);
+            const blackNotes = [0.5, 1.5, 3.5, 4.5, 5.5];
+            
+            blackNotes.forEach((position) => {
+                const octaveOffset = octaveIdx * 7 * whiteKeyWidth;
+                const x = Math.ceil(position) * whiteKeyWidth - (whiteKeyWidth * 0.275) + octaveOffset;
                 const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
                 rect.setAttribute('x', x);
                 rect.setAttribute('y', 0);
@@ -250,7 +323,8 @@
                 rect.setAttribute('stroke', '#000');
                 rect.setAttribute('class', 'piano-key');
                 
-                let blackNote = note + '#' + octave;
+                const whiteNote = octaveNotes[Math.floor(position)];
+                let blackNote = whiteNote + '#' + octave;
                 rect.setAttribute('data-note', blackNote);
                 svg.appendChild(rect);
 
@@ -262,10 +336,8 @@
                 text.setAttribute('font-size', '8');
                 text.setAttribute('fill', '#fff');
                 text.setAttribute('pointer-events', 'none');
-                text.textContent = note + '#'; // Just note name with sharp, no octave
+                text.textContent = whiteNote + '#';
                 svg.appendChild(text);
-
-                xPos += whiteKeyWidth;
             });
         });
 
@@ -345,7 +417,7 @@
         let [, ltr, acc, oct] = m; oct = parseInt(oct, 10);
         const name = ltr.toUpperCase() === 'H' ? 'B' : ltr.toUpperCase();
         const key = (name + (acc || '')).toUpperCase();
-        const semis = { C:0,'C#':1,DB:1,D:2,'D#':3,EB:3,E:4,F:5,'F#':6,GB:6,G:7,'G#':8,AB:8,A:9,'A#':10,BB:10,B:11 };
+        const semis = { C:0,'C#':1,DB:1,D:2,'D#':3,EB:3,E:4,F:5,'F#':6,GB:6,G:7,'G#':8,AB:8,A:9,'A#':10,BB:10,'Bb':10,B:11 };
         const semi = semis[key];
         if (semi === undefined) return 440;
         const midi = (oct + 1) * 12 + semi;
@@ -360,7 +432,7 @@
         osc.frequency.value = freq;
         osc.detune.value = detune;
         gain.gain.setValueAtTime(0.0001, ctx.currentTime + when);
-        gain.gain.exponentialRampToValueAtTime(1.0, ctx.currentTime + when + 0.01);
+        gain.gain.exponentialRampToValueAtTime(chordVolume, ctx.currentTime + when + 0.01);
         gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + when + dur);
         osc.connect(gain).connect(master);
         osc.start(ctx.currentTime + when);
@@ -374,24 +446,25 @@
         if (!Array.isArray(notes) || !notes.length) return;
 
         isChordPlaying = true;
-        console.log(`[R2B] Playing chord: ${notes.join(', ')}`);
+        console.log(`[R2B] ⭐ Playing chord with duration: ${chordDuration}s`);
+        console.log(`[R2B] Notes: ${notes.join(', ')}`);
         
         notes.forEach((n, idx) => {
             const f = noteToFreq(n);
             const detune = (idx - (notes.length - 1) / 2) * 4; // slight spread
-            triggerTone(f, 1.0, 0, detune);
+            triggerTone(f, chordDuration, 0, detune);
         });
         
         // Reset debounce after chord duration
         setTimeout(() => {
             isChordPlaying = false;
-        }, 1500);
+        }, chordDuration * 1000 + 100);
     }
 
     function playNote(note) {
         console.log(`[R2B] Playing note: ${note}`);
         const f = noteToFreq(note);
-        triggerTone(f, 0.5, 0, 0);
+        triggerTone(f, chordDuration, 0, 0);
     }
 
     // ===== ANALYSIS DISPLAY =====
@@ -454,18 +527,7 @@
         };
     }
 
-    // ===== TIMESTAMP =====
-    
-    function updateTimestamp() {
-        const now = new Date();
-        const yy = String(now.getFullYear()).slice(-2);
-        const mm = String(now.getMonth() + 1).padStart(2, '0');
-        const dd = String(now.getDate()).padStart(2, '0');
-        const hh = String(now.getHours()).padStart(2, '0');
-        const mins = String(now.getMinutes()).padStart(2, '0');
-        
-        document.getElementById('r2b-timestamp').textContent = `${yy}.${mm}.${dd} • ${hh}.${mins}`;
-    }
+
 
     // ===== INITIALIZATION =====
     

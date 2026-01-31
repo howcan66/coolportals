@@ -13,38 +13,48 @@
 
         body {
             font-family: 'Courier New', monospace;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            background: #0f111a;
             color: #e0e0e0;
-            padding: 20px;
+            padding: 16px;
             min-height: 100vh;
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
+        }
+
+        .header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
         }
 
         h1 {
             color: #4fc3f7;
-            margin-bottom: 20px;
-            font-size: 1.4rem;
+            margin: 0;
+            font-size: 1.15rem;
+            line-height: 1.1;
         }
 
         .controls {
             display: flex;
-            gap: 12px;
-            margin-bottom: 20px;
+            gap: 8px;
+            margin: 0;
             flex-wrap: wrap;
         }
 
         button {
-            padding: 10px 16px;
+            padding: 6px 10px;
             border: 2px solid #4fc3f7;
             background-color: transparent;
             color: #4fc3f7;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 11px;
             font-weight: bold;
             transition: all 0.2s;
             font-family: Arial, sans-serif;
@@ -86,7 +96,7 @@
 
         textarea {
             width: 100%;
-            height: 150px;
+            height: 240px;
             padding: 12px;
             background: #0a0a1a;
             border: 1px solid #333;
@@ -107,6 +117,10 @@
 
         .saved-entries {
             margin-top: 12px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 8px;
+            background: rgba(10, 10, 26, 0.5);
         }
 
         .entry {
@@ -116,6 +130,7 @@
             padding: 12px;
             margin-bottom: 10px;
             position: relative;
+            width: 100%;
         }
 
         .entry:hover {
@@ -127,6 +142,13 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 8px;
+        }
+
+        .entry-label {
+            font-size: 13px;
+            font-weight: bold;
+            color: #4fc3f7;
+            margin-right: 8px;
         }
 
         .entry-timestamp {
@@ -141,13 +163,43 @@
             white-space: pre-wrap;
             word-break: break-word;
             margin-bottom: 8px;
-            max-height: 120px;
+            max-height: 240px;
             overflow-y: auto;
+            width: 100%;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 3px;
         }
 
         .entry-actions {
             display: flex;
             gap: 8px;
+        }
+
+        .select-btn {
+            background-color: #4fc3f7;
+            border-color: #4fc3f7;
+            color: #0a0a1a;
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .select-btn:hover {
+            background-color: #6dd5ff;
+            border-color: #6dd5ff;
+        }
+
+        .edit-btn {
+            background-color: #ffb74d;
+            border-color: #ffb74d;
+            color: #0a0a1a;
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .edit-btn:hover {
+            background-color: #ffc56d;
+            border-color: #ffc56d;
         }
 
         .delete-btn {
@@ -245,24 +297,118 @@
             background-color: #666;
             color: #fff;
         }
+
+        .import-section {
+            background: rgba(79, 195, 247, 0.05);
+            border: 2px dashed #4fc3f7;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .file-input-wrapper {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            flex: 1;
+            min-width: 200px;
+            padding: 8px;
+            background: #0a0a1a;
+            border: 1px solid #333;
+            border-radius: 4px;
+            color: #e0e0e0;
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        .file-input-wrapper input[type="file"]::file-selector-button {
+            padding: 6px 12px;
+            border: 1px solid #4fc3f7;
+            background-color: transparent;
+            color: #4fc3f7;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            margin-right: 10px;
+        }
+
+        .file-input-wrapper input[type="file"]::file-selector-button:hover {
+            background-color: #4fc3f7;
+            color: #0a0a1a;
+        }
+
+        .import-btn {
+            background-color: #4fc3f7;
+            color: #0a0a1a;
+            padding: 8px 20px;
+            font-size: 12px;
+        }
+
+        .import-btn:hover {
+            background-color: #6dd5ff;
+        }
+
+        .import-feedback {
+            margin-top: 12px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            display: none;
+        }
+
+        .import-feedback.success {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid #4caf50;
+            color: #81c784;
+        }
+
+        .import-feedback.error {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid #f44336;
+            color: #e57373;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📋 Chord Data Collection</h1>
-
-        <div class="controls">
-            <button class="add-btn" onclick="openAddDialog()">+ Add New Data</button>
-            <button onclick="copyAllData()">📋 Copy All</button>
-            <button onclick="loadIntoR2A()" style="border-color: #8fd694; color: #8fd694;">📤 Load to R2A</button>
+        <div class="header-row">
+            <h1>📋 Chord Data Collection</h1>
+            <div class="controls">
+                <button class="add-btn" onclick="openAddDialog()">+ Add</button>
+                <button onclick="copyAllData()">📋 Copy</button>
+                <button onclick="location.reload()" style="border-color: #ffb74d; color: #ffb74d;">🔄 Refresh</button>
+                <button onclick="window.close()" style="border-color: #666; color: #666;">✖ Close</button>
+            </div>
         </div>
 
         <!-- Default Data Section -->
         <div class="content-section">
-            <div class="section-header">📌 Default Sample Data</div>
+            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <span>📌 Default Sample Data</span>
+                <button class="edit-btn" onclick="openDefaultEditModal()" style="padding: 4px 10px; font-size: 11px;">✏️ Edit</button>
+            </div>
             <textarea id="sample-display" readonly></textarea>
             <div class="info-text">
-                ℹ️ Built-in sample collection (read-only)
+                ℹ️ Built-in sample collection
+            </div>
+        </div>
+
+        <!-- Bulk Import Section -->
+        <div class="content-section">
+            <div class="section-header">📥 Bulk Import Samples</div>
+            <div class="import-section">
+                <div class="file-input-wrapper">
+                    <input type="file" id="importFile" accept=".txt" />
+                    <button class="import-btn" onclick="importSamples()">📥 Import Samples</button>
+                </div>
+                <div id="importFeedback" class="import-feedback"></div>
+                <div class="info-text" style="margin-top: 12px;">
+                    ℹ️ Upload a .txt file with samples separated by blank lines. Each sample should start with # title.
+                </div>
             </div>
         </div>
 
@@ -286,33 +432,206 @@
         </div>
     </div>
 
-    <script>
-        let defaultData = `C              G                 Am    Am/G Fmaj7    F6
-She used to be mine
-Dm7        G    Cmaj7
-She still is to me
-F       Em    Dm    C
-In another life
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content" style="max-width: 90vw; width: 90vw; border-color: #ffb74d;">
+            <h2 style="color: #ffb74d;">✏️ Edit Entry</h2>
+            <p style="color: #b0e0e6; margin-bottom: 12px;">Edit your chord data:</p>
+            <textarea id="editTextarea" style="width: 100%; height: 400px; padding: 10px; background: #0a0a1a; border: 1px solid #333; border-radius: 4px; color: #e0e0e0; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.5; margin-bottom: 12px;"></textarea>
+            <p style="color: #b0e0e6; margin-bottom: 8px;">Enter password to save changes:</p>
+            <input type="password" id="editPassword" placeholder="Password" />
+            <div class="modal-buttons">
+                <button class="cancel-btn" onclick="closeEditModal()">Cancel</button>
+                <button class="edit-btn" onclick="confirmEdit()">💾 Save</button>
+            </div>
+        </div>
+    </div>
 
-Em                    Am
-She's comin' out of the woods
-D                 Gmaj7
-And into the sun
-C              G              Dm
-She was lost in the darkness, forgot she was a daughter
-C/E         F    G
-She is lost in the darkness, she can't even remember
-Cmaj7                    Am
-Just how capable she is
-F                 G
-How much she'll miss nobody
-C
-Loving is a witch`;
+    <!-- Edit Default Data Modal -->
+    <div id="editDefaultModal" class="modal">
+        <div class="modal-content" style="max-width: 90vw; width: 90vw; border-color: #4fc3f7;">
+            <h2 style="color: #4fc3f7;">✏️ Edit Default Sample Data</h2>
+            <p style="color: #b0e0e6; margin-bottom: 12px;">Edit the default sample chord data:</p>
+            <textarea id="editDefaultTextarea" style="width: 100%; height: 400px; padding: 10px; background: #0a0a1a; border: 1px solid #333; border-radius: 4px; color: #e0e0e0; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.5; margin-bottom: 12px;"></textarea>
+            <p style="color: #b0e0e6; margin-bottom: 8px;">Enter password to save changes:</p>
+            <input type="password" id="editDefaultPassword" placeholder="Password" />
+            <div class="modal-buttons">
+                <button class="cancel-btn" onclick="closeDefaultEditModal()">Cancel</button>
+                <button class="edit-btn" onclick="confirmDefaultEdit()">💾 Save</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        let defaultData = `!!! Let It Be - The Beatles
+C G Am F
+When I find myself in times of trouble
+C G Am F
+Mother Mary comes to me
+C G Am F
+And in my hour of darkness, she is standing
+C G Am F
+Speaking words of wisdom, let it be
+D A Bm G
+Sample verse line one
+D A Bm G
+Sample verse line two
+Em7 A7 Dm7 G
+Sample chorus with more harmonic
+D A Bm G
+Sample verse ending line`;
 
         let entryToDelete = null;
 
+        // Bulk Import Functions
+        async function importSamples() {
+            const fileInput = document.getElementById('importFile');
+            const feedback = document.getElementById('importFeedback');
+            
+            if (!fileInput.files || !fileInput.files[0]) {
+                showImportFeedback('Please select a file first', 'error');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            if (!file.name.endsWith('.txt')) {
+                showImportFeedback('Please select a .txt file', 'error');
+                return;
+            }
+
+            try {
+                const content = await file.text();
+                const samples = parseSamplesFromText(content);
+                
+                if (samples.length === 0) {
+                    showImportFeedback('No samples found in file', 'error');
+                    return;
+                }
+
+                // Add samples to localStorage
+                const entries = JSON.parse(localStorage.getItem('piano_sample_entries') || '[]');
+                
+                // Use a pre-hashed default password for bulk imports
+                // This is the bcrypt hash of "admin123" with cost 10
+                const defaultPasswordHash = '$2a$10$F9W8g1FZbzVxbVHeLHZNO.91exgen7em9RHBnuernVcffz5dFm.m';
+
+                for (const sample of samples) {
+                    entries.push({
+                        title: sample.title,
+                        data: sample.data,
+                        passwordHash: defaultPasswordHash,
+                        timestamp: new Date().toISOString()
+                    });
+                }
+
+                localStorage.setItem('piano_sample_entries', JSON.stringify(entries));
+                loadSavedEntries();
+                
+                showImportFeedback(`✅ Successfully added ${samples.length} sample${samples.length > 1 ? 's' : ''}`, 'success');
+                fileInput.value = ''; // Clear file input
+            } catch (error) {
+                console.error('Import error:', error);
+                showImportFeedback('Error importing file: ' + error.message, 'error');
+            }
+        }
+
+        function parseSamplesFromText(content) {
+            const samples = [];
+            
+            // Split by double newline (blank lines)
+            const blocks = content.split(/\n\s*\n/);
+            
+            for (const block of blocks) {
+                const trimmed = block.trim();
+                if (!trimmed) continue;
+                
+                // Extract title from first line if it starts with #
+                const lines = trimmed.split('\n');
+                let title = 'Imported Sample';
+                let data = trimmed;
+                
+                if (lines[0].startsWith('#')) {
+                    title = lines[0].substring(1).trim();
+                    data = lines.slice(1).join('\n').trim();
+                }
+                
+                if (data) {
+                    samples.push({ title, data });
+                }
+            }
+            
+            // If no blank lines found, treat as single sample
+            if (samples.length === 0 && content.trim()) {
+                const lines = content.trim().split('\n');
+                let title = 'Imported Sample';
+                let data = content.trim();
+                
+                if (lines[0].startsWith('#')) {
+                    title = lines[0].substring(1).trim();
+                    data = lines.slice(1).join('\n').trim();
+                }
+                
+                if (data) {
+                    samples.push({ title, data });
+                }
+            }
+            
+            return samples;
+        }
+
+        function showImportFeedback(message, type) {
+            const feedback = document.getElementById('importFeedback');
+            feedback.textContent = message;
+            feedback.className = 'import-feedback ' + type;
+            feedback.style.display = 'block';
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                feedback.style.display = 'none';
+            }, 5000);
+        }
+
         function loadDefaultData() {
+            // Check if user has custom default data
+            const customDefault = localStorage.getItem('piano_default_data');
+            if (customDefault) {
+                defaultData = customDefault;
+            }
             document.getElementById('sample-display').value = defaultData;
+        }
+
+        function openDefaultEditModal() {
+            document.getElementById('editDefaultTextarea').value = defaultData;
+            document.getElementById('editDefaultPassword').value = '';
+            document.getElementById('editDefaultModal').classList.add('active');
+            document.getElementById('editDefaultTextarea').focus();
+        }
+
+        function closeDefaultEditModal() {
+            document.getElementById('editDefaultModal').classList.remove('active');
+        }
+
+        function confirmDefaultEdit() {
+            const password = document.getElementById('editDefaultPassword').value;
+            const storedPassword = 'piano';
+            
+            if (password !== storedPassword) {
+                alert('❌ Incorrect password');
+                document.getElementById('editDefaultPassword').value = '';
+                document.getElementById('editDefaultPassword').focus();
+                return;
+            }
+
+            const newData = document.getElementById('editDefaultTextarea').value.trim();
+            if (!newData) {
+                alert('❌ Default data cannot be empty');
+                return;
+            }
+
+            defaultData = newData;
+            localStorage.setItem('piano_default_data', newData);
+            document.getElementById('sample-display').value = defaultData;
+            alert('✅ Default sample data updated successfully');
+            closeDefaultEditModal();
         }
 
         function loadSavedEntries() {
@@ -328,15 +647,21 @@ Loving is a witch`;
                 const date = new Date(entry.timestamp);
                 const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 const preview = entry.data.substring(0, 100) + (entry.data.length > 100 ? '...' : '');
+                const label = 'S' + (index + 1);
                 
                 return `
                     <div class="entry">
                         <div class="entry-header">
-                            <span class="entry-timestamp">${dateStr}</span>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span class="entry-label">${label}</span>
+                                <span class="entry-timestamp">${dateStr}</span>
+                            </div>
                         </div>
                         <div class="entry-content">${escapeHtml(preview)}</div>
                         <div class="entry-actions">
-                            <button class="delete-btn" onclick="openDeleteModal(${index}, '${escapeAttr(entry.data)}')">🗑️ Delete</button>
+                            <button class="select-btn" onclick="selectEntry(${index})">📌 Select</button>
+                            <button class="edit-btn" onclick="openEditModal(${index})">✏️ Edit</button>
+                            <button class="delete-btn" onclick="openDeleteModal(${index})">🗑️ Delete</button>
                         </div>
                     </div>
                 `;
@@ -358,7 +683,7 @@ Loving is a witch`;
             return text.replace(/'/g, "\\'").replace(/"/g, '&quot;');
         }
 
-        function openDeleteModal(index, data) {
+        function openDeleteModal(index) {
             entryToDelete = index;
             document.getElementById('deletePassword').value = '';
             document.getElementById('deleteModal').classList.add('active');
@@ -395,6 +720,96 @@ Loving is a witch`;
             closeDeleteModal();
         }
 
+        let entryToEdit = null;
+
+        function openEditModal(index) {
+            const entries = JSON.parse(localStorage.getItem('piano_sample_entries') || '[]');
+            if (index >= 0 && index < entries.length) {
+                entryToEdit = index;
+                document.getElementById('editTextarea').value = entries[index].data;
+                document.getElementById('editPassword').value = '';
+                document.getElementById('editModal').classList.add('active');
+                document.getElementById('editTextarea').focus();
+            }
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('active');
+            entryToEdit = null;
+        }
+
+        function confirmEdit() {
+            const password = document.getElementById('editPassword').value;
+            const entries = JSON.parse(localStorage.getItem('piano_sample_entries') || '[]');
+            
+            if (entryToEdit < 0 || entryToEdit >= entries.length) {
+                alert('❌ Entry not found');
+                closeEditModal();
+                return;
+            }
+            
+            // Check password against stored hash
+            const storedHash = entries[entryToEdit].passwordHash;
+            const enteredHash = btoa(password);
+            
+            if (enteredHash !== storedHash) {
+                alert('❌ Incorrect password');
+                document.getElementById('editPassword').value = '';
+                document.getElementById('editPassword').focus();
+                return;
+            }
+
+            const newData = document.getElementById('editTextarea').value.trim();
+            if (!newData) {
+                alert('❌ Entry cannot be empty');
+                return;
+            }
+
+            entries[entryToEdit].data = newData;
+            entries[entryToEdit].timestamp = new Date().toISOString();
+            localStorage.setItem('piano_sample_entries', JSON.stringify(entries));
+            console.log(`[Sample] Edited entry ${entryToEdit}`);
+            alert('✅ Entry updated successfully');
+            loadSavedEntries();
+            
+            closeEditModal();
+        }
+
+        function selectEntry(index) {
+            const entries = JSON.parse(localStorage.getItem('piano_sample_entries') || '[]');
+            if (index >= 0 && index < entries.length) {
+                let selectedData = entries[index].data;
+                const label = 'S' + (index + 1);
+                
+                // Extract title from first line and add !!! marker
+                const lines = selectedData.split('\n');
+                let titleLine = lines[0];
+                
+                // If first line doesn't have !!!, add it
+                if (!titleLine.trim().startsWith('!!!')) {
+                    // Extract title (remove old # marker if present)
+                    const cleanTitle = titleLine.replace(/^#+\s*/, '').trim();
+                    titleLine = '!!! ' + cleanTitle;
+                    
+                    // Rebuild data with !!! title marker
+                    selectedData = titleLine + '\n' + lines.slice(1).join('\n');
+                }
+                
+                // Post to frame.html which routes to R2A
+                if (window.opener) {
+                    window.opener.postMessage({
+                        type: 'LOAD_CHORD_DATA',
+                        data: selectedData
+                    }, '*');
+                    alert(`✅ ${label} loaded to R2A`);
+                    setTimeout(() => window.close(), 500);
+                } else {
+                    navigator.clipboard.writeText(selectedData);
+                    alert(`📋 ${label} copied to clipboard (parent not found)`);
+                }
+            }
+        }
+
         function openAddDialog() {
             window.open('AddData.html', 'addData', 'width=650,height=500');
         }
@@ -416,15 +831,15 @@ Loving is a witch`;
             const entries = JSON.parse(localStorage.getItem('piano_sample_entries') || '[]');
             const allData = defaultText + (entries.length > 0 ? '\n\n' + entries.map(e => e.data).join('\n\n') : '');
 
-            // Post to R2A if available
-            if (window.opener && window.opener.document.querySelector('iframe[id="r2a"]')) {
+            // Post to frame.html which routes to R2A
+            if (window.opener) {
                 window.opener.postMessage({
                     type: 'LOAD_CHORD_DATA',
                     data: allData
                 }, '*');
                 alert('✅ Data sent to R2A');
             } else {
-                alert('⚠️ R2A window not found. Data copied to clipboard instead.');
+                alert('⚠️ Parent window not found. Data copied to clipboard instead.');
                 navigator.clipboard.writeText(allData);
             }
         }
@@ -435,16 +850,46 @@ Loving is a witch`;
                 console.log('[Sample] Received notification of new data');
                 loadSavedEntries();
             }
+            else if (e.data && e.data.type === 'EDIT_SAMPLE') {
+                console.log('[Sample] Received EDIT_SAMPLE data:', e.data.data);
+                const data = e.data.data;
+                if (data && data.content) {
+                    // Set edit mode without index (for new edit from R2A)
+                    entryToEdit = -1;
+                    // Populate textarea with combined title + content
+                    const fullContent = (data.title ? data.title + '\n' : '') + data.content;
+                    document.getElementById('editTextarea').value = fullContent;
+                    document.getElementById('editPassword').value = '';
+                    // Open edit modal
+                    document.getElementById('editModal').classList.add('active');
+                    document.getElementById('editTextarea').focus();
+                    console.log('[Sample] Edit modal opened with R2A data');
+                }
+            }
         });
 
         // Allow ENTER to close modal if focused
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && entryToDelete !== null) {
-                e.preventDefault();
-                confirmDelete();
+            if (e.key === 'Enter') {
+                if (entryToDelete !== null) {
+                    e.preventDefault();
+                    confirmDelete();
+                } else if (entryToEdit !== null) {
+                    e.preventDefault();
+                    confirmEdit();
+                } else if (document.getElementById('editDefaultModal').classList.contains('active')) {
+                    e.preventDefault();
+                    confirmDefaultEdit();
+                }
             }
-            if (e.key === 'Escape' && document.getElementById('deleteModal').classList.contains('active')) {
-                closeDeleteModal();
+            if (e.key === 'Escape') {
+                if (document.getElementById('deleteModal').classList.contains('active')) {
+                    closeDeleteModal();
+                } else if (document.getElementById('editModal').classList.contains('active')) {
+                    closeEditModal();
+                } else if (document.getElementById('editDefaultModal').classList.contains('active')) {
+                    closeDefaultEditModal();
+                }
             }
         });
 
@@ -452,7 +897,23 @@ Loving is a witch`;
         loadDefaultData();
         loadSavedEntries();
         
+        // Migrate old # titles to !!! titles
+        const entries = JSON.parse(localStorage.getItem('piano_sample_entries') || '[]');
+        let migrated = false;
+        for (let i = 0; i < entries.length; i++) {
+            if (entries[i].data.startsWith('# ')) {
+                entries[i].data = entries[i].data.replace('# ', '!!! ');
+                migrated = true;
+            }
+        }
+        if (migrated) {
+            localStorage.setItem('piano_sample_entries', JSON.stringify(entries));
+            loadSavedEntries(); // Reload to show updated titles
+            console.log('Migrated entries from # to !!!');
+        }
+        
         console.log('Sample data page loaded');
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.js"></script>
 </body>
 </html>

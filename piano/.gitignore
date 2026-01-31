@@ -1,0 +1,50 @@
+# OS Files
+.DS_Store
+Thumbs.db
+*.lnk
+
+# Development & Temporary
+*.tmp
+*.bak
+*~
+.vscode/
+.idea/
+
+# Development Archive (backup folders)
+Piano Backup/
+Piano Design/
+Piano Investigate/
+Piano test/
+
+# Old/Duplicate Files
+R3_*.html
+*_backup.html
+*_old.html
+*_test.html
+*_duplicate.html
+*_draft.html
+*- kopia.*
+*.lnk
+AddData.html
+integration.html
+Piano Fault ANalyse
+create-distribution.ps1
+samples_add1.txt
+
+# Node.js (if used in future)
+node_modules/
+npm-debug.log
+package-lock.json
+
+# Distribution (temporary folder - include zip)
+piano-distribution/
+!Piano-Chord-App-*.zip
+
+# Environment files
+.env
+.env.local
+
+# Editor backups
+*.swp
+*.swo
+*.*~

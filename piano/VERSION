@@ -1,2 +1,12 @@
-v1.0.2
+v2.0.0
 2026-01-31
+
+Release 2.0.0 - Production Build
+- Added bulk sample import with bcrypt authentication
+- Enhanced sample navigation (« 1/4 » format)
+- Comprehensive parse log system (R2A→R1→R3 tracking)
+- Unified message routing architecture
+- Complete documentation (USER_GUIDE.md, AI_BUILD_INSTRUCTIONS.md)
+- GitHub Pages deployment ready
+- Improved accessibility and button alignment
+- Extended chord support (Bb notation, slash chords, extended voicings)

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Piano Chord Application - Technical Description</title>
+<style>
+body {
+  font-family: Calibri, Arial, sans-serif;
+  line-height: 1.5;
+  margin: 1in;
+  color: #333;
+}
+h1 {
+  font-size: 18pt;
+  font-weight: bold;
+  margin-bottom: 6pt;
+  border-bottom: 2pt solid #000;
+  padding-bottom: 6pt;
+}
+h2 {
+  font-size: 13pt;
+  font-weight: bold;
+  margin-top: 12pt;
+  margin-bottom: 6pt;
+  color: #1a1a1a;
+}
+p {
+  font-size: 11pt;
+  margin-bottom: 6pt;
+  text-align: justify;
+}
+.header {
+  text-align: center;
+  margin-bottom: 24pt;
+}
+.version {
+  font-size: 10pt;
+  color: #666;
+  margin-top: 6pt;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+<h1>PIANO CHORD APPLICATION</h1>
+<h2>Technical Description</h2>
+<p class="version"><strong>Version 2.0.0 | January 31, 2026</strong></p>
+</div>
+
+<h2>OVERVIEW</h2>
+<p>Piano Chord Application is a multi-panel web-based music education and analysis tool designed for chord learning, voicing computation, and batch processing of musical notation. The application provides an interactive piano interface with real-time audio synthesis and comprehensive chord validation framework.</p>
+
+<h2>CORE FEATURES</h2>
+<p>The application consists of five primary functional panels integrated through a message-passing architecture. The R2A Panel handles batch chord input with sample navigation and parsing validation, providing token-based chord recognition with line-by-line error detection. The R1 Panel implements a 24-row validation matrix allowing chord editing, global operations, and row-level state management. The R3 Panel features a dynamic SVG-based 88-key piano keyboard with real-time voicing computation, Web Audio API synthesis, and multi-note chord playback at configurable duration and volume levels. The R2B Panel provides analysis controls including duration adjustment (0.5 to 3.0 seconds), volume control (0-100%), and statistical feedback. The Sample.html module implements CRUD operations for chord sample management with bcrypt-based password authentication and bulk import functionality supporting batch sample ingestion from delimited text files.</p>
+
+<h2>TECHNOLOGY STACK</h2>
+<p>The application is built entirely in vanilla JavaScript without framework dependencies, utilizing HTML5, CSS3, and native browser APIs. Core technologies include the Web Audio API for real-time audio synthesis and frequency computation, SVG graphics for piano keyboard rendering, localStorage for persistent data storage, and the postMessage API for cross-origin iframe communication. The message routing system implements nine distinct message types: SEND_CHORD, VALIDATE_CHORD, UPDATE_DURATION, UPDATE_VOLUME, LOAD_SAMPLE, REQUEST_SAMPLE_COUNT, PARSE_LOG_ENTRY, CLEAR_PARSE_LOG, and ACKNOWLEDGE. Data persistence utilizes JSON serialization in localStorage with keys for sample entries, parse logs, user preferences, and state management across browser sessions.</p>
+
+<h2>TECHNICAL SPECIFICATIONS</h2>
+<p>The chord parsing engine employs regex-based tokenization supporting standard music notation including root notes (A-G), accidentals (♯/♭), chord qualities (major, minor, 7th, 9th, sus, add, slash notation), and extended alterations. The piano synthesis engine computes equal temperament frequencies for all 88 keys (A0 to C8), implementing note-to-frequency conversion through the formula f = 440 × 2<sup>((n-49)/12)</sup>. The voicing algorithm processes chord tokens against a comprehensive voicing library, computing optimal note distributions across octaves with root position and inversion support. Audio playback uses OscillatorNode synthesis with linear amplitude envelopes, implementing attack-decay shapes for natural note articulation. The parse log system maintains unified tracking across all three processing stages (R2A validation, R1 transmission, R3 processing) using structured JSON entries with timestamps, source attribution, chord data, and operation status indicators.</p>
+
+<h2>DEPLOYMENT & REQUIREMENTS</h2>
+<p>The application requires an HTTP/HTTPS server for proper functionality due to same-origin policy constraints affecting iframe communication. File protocol (file://) execution is incompatible as it assigns null origin to each iframe, preventing postMessage functionality. The application is compatible with all modern browsers supporting ES6 JavaScript, Web Audio API, and SVG rendering. Server-side components are optional; the entire application executes client-side within the browser runtime. For production deployment, GitHub Pages or equivalent HTTPS hosting is recommended. For local development, any HTTP server (Python, Node.js, PHP) supports full functionality. The application supports responsive layouts and functions across desktop browsers; mobile support requires additional viewport optimization.</p>
+
+</body>
+</html>

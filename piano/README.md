@@ -2,6 +2,51 @@
 
 A web-based piano chord visualization and analysis tool with multi-panel interface for chord input, validation, display, and harmonic analysis.
 
+**Version 2.0.0 | Released January 31, 2026**
+
+## 🚀 Live Demo (Production)
+
+**[Live Application](https://username.github.io/piano/frame.html)** *(Update with your GitHub Pages URL)*
+
+> ⚠️ **Important**: Must open via HTTP/HTTPS URL. Opening as local file (file://) will NOT work due to same-origin policy restrictions.
+
+## Quick Start
+
+### Run Locally (30 seconds)
+
+**Option 1: Python** (Recommended - No Installation)
+```bash
+python -m http.server 8000
+# Then open: http://localhost:8000/frame.html
+```
+
+**Option 2: Node.js**
+```bash
+npm install -g http-server
+http-server -p 8000
+# Then open: http://localhost:8000/frame.html
+```
+
+**Option 3: Windows Batch File**
+- Unzip distribution folder
+- Double-click `START_WINDOWS.bat`
+- Automatically opens browser
+
+### Share on Local Network
+```bash
+python -m http.server 8000 --bind 0.0.0.0
+# Share URL: http://YOUR_IP:8000/frame.html (e.g., http://192.168.1.100:8000/frame.html)
+```
+
+## 📦 Distribution Package
+
+Download **Piano-Chord-App-v2.0.zip** containing:
+- Complete application (all HTML files)
+- Quick start launchers for Windows/Mac/Linux
+- Full user documentation
+- Sample data
+- No installation required
+
 ## Features
 
 ### Core Functionality

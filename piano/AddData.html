@@ -158,14 +158,6 @@
                 </div>
             </div>
 
-            <div class="form-group">
-                <label for="password">Password (default: "piano"):</label>
-                <input type="password" id="password" placeholder="Leave empty for default">
-                <div class="info-text">
-                    ℹ️ Required to edit/delete data later. Default password is "piano".
-                </div>
-            </div>
-
             <div id="preview-section">
                 <h3>📋 Preview (click Add to confirm):</h3>
                 <div id="preview-text"></div>
@@ -204,25 +196,24 @@
             e.preventDefault();
             
             const chordData = document.getElementById('chordData').value.trim();
-            const password = document.getElementById('password').value || 'piano';
 
             if (!chordData) {
                 alert('Please enter some chord data');
                 return;
             }
 
-            // Save to localStorage with timestamp and password hash
+            // Save to localStorage with timestamp and default password
             const entry = {
                 data: chordData,
                 timestamp: new Date().toISOString(),
-                passwordHash: btoa(password) // Simple encoding (not secure, just to prevent casual viewing)
+                passwordHash: btoa('piano') // Default password for all new entries
             };
 
             let savedEntries = JSON.parse(localStorage.getItem('piano_sample_entries') || '[]');
             savedEntries.push(entry);
             localStorage.setItem('piano_sample_entries', JSON.stringify(savedEntries));
 
-            console.log('[AddData] Saved entry with password protection');
+            console.log('[AddData] Saved entry');
             
             // Notify parent
             if (window.opener) {

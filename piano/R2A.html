@@ -46,10 +46,7 @@
             color: #ffffff;
         }
 
-        .r2a-timestamp {
-            font-size: 0.8rem;
-            color: #888;
-        }
+
 
         .r2a-help-text {
             font-size: 0.85rem;
@@ -74,7 +71,7 @@
             border-radius: 4px;
             font-family: monospace;
             font-size: 0.95rem;
-            line-height: 1.6;
+            line-height: 1.0;
             background-color: #ffffff;
             color: #000;
             resize: none;
@@ -90,12 +87,36 @@
 
         .r2a-global-buttons {
             display: flex;
-            justify-content: flex-start;
+            justify-content: space-between;
             gap: 10px;
             margin-bottom: 10px;
             padding-bottom: 10px;
             border-bottom: 1px solid #444;
         }
+
+        .r2a-btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .r2a-title-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .r2a-title-input {
+            flex: 1;
+            padding: 8px 10px;
+            border: 1px solid #555;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            background-color: #ffffff;
+            color: #000;
+        }
+
 
         .r2a-btn-global {
             padding: 8px 16px;
@@ -127,23 +148,27 @@
             border-color: #f4a6a6;
             color: black;
         }
-
-        .r2a-footer {
-            margin-top: 8px;
-            padding-top: 8px;
-            border-top: 1px solid #444;
-            font-size: 0.7rem;
-            color: #666;
-            text-align: center;
-        }
     </style>
 </head>
 <body>
 
 <section id="r2a-panel">
     <div class="r2a-global-buttons">
-        <button class="r2a-btn-global r2a-btn-load-all" id="r2a-b5" aria-label="Load All">B5 LR1 (All)</button>
-        <button class="r2a-btn-global r2a-btn-clear-all" id="r2a-b6" aria-label="Clear All">B6 XR2A</button>
+        <div class="r2a-btn-group">
+            <button class="r2a-btn-global r2a-btn-load-all" id="r2a-b5" aria-label="Load All">B5 LR1</button>
+            <button class="r2a-btn-global r2a-btn-clear-all" id="r2a-b6" aria-label="Clear All">B6 XR2A</button>
+            <button class="r2a-btn-global" id="r2a-prev-sample" style="min-width: 50px; border-color: #666; color: #ccc; background-color: #2b2b2b; font-size: 1.1rem; font-weight: bold;">«</button>
+            <span id="r2a-sample-display" style="min-width: 50px; text-align: center; color: #888; font-size: 1.1rem; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; padding: 8px 16px;">1/4</span>
+            <button class="r2a-btn-global" id="r2a-next-sample" style="min-width: 50px; border-color: #666; color: #ccc; background-color: #2b2b2b; font-size: 1.1rem; font-weight: bold;">»</button>
+        </div>
+        <div class="r2a-btn-group">
+            <button class="r2a-btn-global" id="r2a-b7" aria-label="Download Parse Log" style="border-color: #ffb74d; color: #ffb74d;">Log</button>
+            <button class="r2a-btn-global" id="r2a-b8-clearlog" aria-label="Clear Log" style="border-color: #f4a6a6; color: #f4a6a6;">XLog</button>
+        </div>
+    </div>
+
+    <div class="r2a-title-row">
+        <input class="r2a-title-input" id="r2a-title" placeholder="# Song Title - Artist" />
     </div>
 
     <div class="r2a-main-container">
@@ -151,40 +176,201 @@
             class="r2a-main-textarea" 
             id="r2a-main-textarea"
             placeholder="Example:
+# Let It Be - The Beatles
 C G Am F
-Twinkle twinkle little star
-Dm G C Am
-How I wonder what you are"
+When I find myself in times of trouble
+C G Am F
+Mother Mary comes to me"
             rows="20"
         ></textarea>
-    </div>
-
-    <div class="r2a-footer">
-        R2A → R1 → R3 (pianogroups) → R2B (analysis)
-        <span id="r2a-timestamp"></span>
     </div>
 </section>
 
 <script>
+    console.log('[R2A SCRIPT] Starting execution');
+    
     // ===== R2A INITIALIZATION =====
 
+    const DEFAULT_TITLE = '!!! Let It Be - The Beatles';
+    const DEFAULT_CHORDS = `C                G                      Am
+  Let's dance in style, let's dance for a while
+           F                            G
+Heaven can wait we're only watching the skies
+               Dm                      F
+Hoping for the best, but expecting the worst
+                       G6   Fmaj7   G6   C
+Are you gonna drop the bomb or not?`;
+
     function initR2A() {
+        console.log('[R2A] initR2A() called');
+        const textarea = document.getElementById('r2a-main-textarea');
+        if (!textarea) {
+            console.error('[R2A] Textarea not found!');
+            return;
+        }
+        console.log('[R2A] Textarea found');
+
+        // Clear old format data from localStorage
+        const oldData = localStorage.getItem('r2a-data');
+        if (oldData) {
+            console.log('[R2A] Found old r2a-data format, clearing it');
+            localStorage.removeItem('r2a-data');
+        }
+
+        // Migrate old data from # to !!!
+        const savedTitle = localStorage.getItem('r2a-title');
+        if (savedTitle && savedTitle.startsWith('# ')) {
+            const newTitle = savedTitle.replace('# ', '!!! ');
+            localStorage.setItem('r2a-title', newTitle);
+            console.log('[R2A] Migrated title from # to !!!');
+        }
+
+        // Always load from storage first
+        console.log('[R2A] Calling loadFromStorage()');
+        try {
+            loadFromStorage();
+            console.log('[R2A] loadFromStorage() completed');
+        } catch (e) {
+            console.error('[R2A] Error in loadFromStorage():', e);
+        }
+        
+        // If still empty after loading, use defaults
+        if (!textarea.value.trim()) {
+            console.log('[R2A] Textarea empty, setting defaults');
+            textarea.value = DEFAULT_TITLE + '\n' + DEFAULT_CHORDS;
+            console.log('[R2A] Calling saveToStorage()');
+            try {
+                saveToStorage();
+                console.log('[R2A] saveToStorage() completed');
+            } catch (e) {
+                console.error('[R2A] Error in saveToStorage():', e);
+            }
+        }
+        
+        console.log('[R2A] About to call attachGlobalListeners()');
         attachGlobalListeners();
-        loadFromStorage();
-        updateTimestamp();
+        console.log('[R2A] attachGlobalListeners() done');
+        
+        // Initialize sample navigation
+        initSampleNavigation();
+
+        console.log('[R2A] initR2A() completed successfully');
+    }
+
+    // ===== SAMPLE NAVIGATION =====
+    
+    let currentSampleIndex = 0;
+    
+    function initSampleNavigation() {
+        const prevBtn = document.getElementById('r2a-prev-sample');
+        const nextBtn = document.getElementById('r2a-next-sample');
+        
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => navigateSample(-1));
+            prevBtn.addEventListener('mouseenter', function() { this.style.background = '#3b3b3b'; });
+            prevBtn.addEventListener('mouseleave', function() { this.style.background = '#2b2b2b'; });
+        }
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => navigateSample(1));
+            nextBtn.addEventListener('mouseenter', function() { this.style.background = '#3b3b3b'; });
+            nextBtn.addEventListener('mouseleave', function() { this.style.background = '#2b2b2b'; });
+        }
+        updateSampleDisplay();
+    }
+    
+    function navigateSample(direction) {
+        const entries = JSON.parse(localStorage.getItem('piano_sample_entries') || '[]');
+        if (entries.length === 0) {
+            alert('⚠️ No samples available');
+            return;
+        }
+        
+        currentSampleIndex += direction;
+        
+        // Wrap around
+        if (currentSampleIndex < 0) {
+            currentSampleIndex = entries.length - 1;
+        } else if (currentSampleIndex >= entries.length) {
+            currentSampleIndex = 0;
+        }
+        
+        updateSampleDisplay();
+        loadSampleByIndex(currentSampleIndex);
+    }
+    
+    function updateSampleDisplay() {
+        const display = document.getElementById('r2a-sample-display');
+        const entries = JSON.parse(localStorage.getItem('piano_sample_entries') || '[]');
+        const total = entries.length > 0 ? entries.length : '?';
+        if (display) {
+            display.textContent = (currentSampleIndex + 1) + '/' + total;
+        }
+    }
+    
+    function loadSampleByIndex(index) {
+        const entries = JSON.parse(localStorage.getItem('piano_sample_entries') || '[]');
+        if (index < 0 || index >= entries.length) {
+            console.error('[R2A] Invalid sample index:', index);
+            return;
+        }
+        
+        const entry = entries[index];
+        const titleInput = document.getElementById('r2a-title');
+        const textarea = document.getElementById('r2a-main-textarea');
+        
+        if (textarea) {
+            textarea.value = entry.data;
+            console.log('[R2A] Loaded sample', index + 1, ':', entry.title);
+        }
+        if (titleInput) {
+            // Extract title from first line or use entry title
+            const firstLine = entry.data.split('\n')[0];
+            titleInput.value = firstLine.startsWith('#') ? firstLine : '# ' + entry.title;
+        }
+        
+        saveToStorage();
     }
 
     // ===== EVENT LISTENERS =====
     
     function attachGlobalListeners() {
-        const textarea = document.getElementById('r2a-main-textarea');
+        console.log('[R2A] attachGlobalListeners called');
         
-        // Auto-save on blur
-        textarea.addEventListener('blur', saveToStorage);
+        const titleInput = document.getElementById('r2a-title');
+        const textarea = document.getElementById('r2a-main-textarea');
+        const b5Button = document.getElementById('r2a-b5');
+        const b6Button = document.getElementById('r2a-b6');
+        const b7Button = document.getElementById('r2a-b7');
+        
+        console.log('[R2A] titleInput found:', !!titleInput);
+        console.log('[R2A] textarea found:', !!textarea);
+        console.log('[R2A] b5Button found:', !!b5Button);
+        console.log('[R2A] b6Button found:', !!b6Button);
+        console.log('[R2A] b7Button found:', !!b7Button);
+        
+        // Auto-save on blur for both title and textarea
+        if (titleInput) titleInput.addEventListener('blur', saveToStorage);
+        if (textarea) textarea.addEventListener('blur', saveToStorage);
         
         // Global buttons
-        document.getElementById('r2a-b5').addEventListener('click', handleB5Click);
-        document.getElementById('r2a-b6').addEventListener('click', handleB6Click);
+        if (b5Button) {
+            b5Button.addEventListener('click', handleB5Click);
+            console.log('[R2A] B5 listener attached');
+        }
+        if (b6Button) {
+            b6Button.addEventListener('click', handleB6Click);
+            console.log('[R2A] B6 listener attached');
+        }
+        if (b7Button) {
+            b7Button.addEventListener('click', downloadParseLog);
+            console.log('[R2A] B7 listener attached');
+        }
+        
+        const clearLogButton = document.getElementById('r2a-b8-clearlog');
+        if (clearLogButton) {
+            clearLogButton.addEventListener('click', clearParseLog);
+            console.log('[R2A] Clear Log listener attached');
+        }
     }
 
     // ===== CHORD PARSING & VALIDATION =====
@@ -193,24 +379,80 @@ How I wonder what you are"
         const textarea = document.getElementById('r2a-main-textarea');
         const lines = textarea.value.split('\n');
         const allChords = [];
-        
+        let dataLineIndex = 0;
+
         // Extract odd lines (0-indexed: 0, 2, 4... = lines 1, 3, 5...)
-        lines.forEach((line, index) => {
-            if (index % 2 === 0) { // Odd line number (1st, 3rd, 5th...)
-                const chords = line
-                    .trim()
-                    .split(/\s+/)
-                    .map(validateChord)
-                    .filter(c => c !== null);
-                allChords.push(...chords);
+        lines.forEach((line, originalIndex) => {
+            const trimmed = line.trim();
+
+            // Skip empty or header/comment lines without shifting the alternation
+            if (!trimmed) {
+                return;
             }
-            // Even lines (index % 2 === 1) are lyrics - ignored
+            if (trimmed.startsWith('#') || trimmed.startsWith('<!--')) {
+                return;
+            }
+
+            if (dataLineIndex % 2 === 0) { // Chord line
+                const tokens = trimmed.split(/\s+/);
+
+                tokens.forEach((token) => {
+                    const result = validateChordDetailed(token);
+                    if (result.valid) {
+                        const absoluteIndex = allChords.length + 1;
+                        console.log(`[R2A Parse] #${absoluteIndex}: ${result.value} (line: ${trimmed})`);
+                        allChords.push(result.value);
+                        // Log valid chords too for debugging
+                        appendParseLog({
+                            ts: new Date().toISOString(),
+                            token,
+                            normalized: result.value,
+                            status: 'valid',
+                            lineNumber: originalIndex + 1,
+                            lineText: trimmed
+                        });
+                    } else {
+                        appendParseLog({
+                            ts: new Date().toISOString(),
+                            token,
+                            reason: result.reason,
+                            status: 'invalid',
+                            lineNumber: originalIndex + 1,
+                            lineText: trimmed
+                        });
+                    }
+                });
+            }
+
+            // Next non-header, non-empty line
+            dataLineIndex += 1;
         });
         
         return allChords;
     }
 
-    const CHORD_REGEX = /^(?=.{1,10}$)[A-GH](?:#|b)?(?:maj|m|dim|aug|sus)?(?:2|4|5|6|7|9|11|13)?(?:(?:#|b)(?:5|9|11|13))?(?:add(?:9|11|13))?(?:\/[A-GH](?:#|b)?)?$/i;
+    function extractTitleLine() {
+        const titleInput = document.getElementById('r2a-title');
+        
+        // First try to get from title input field
+        if (titleInput && titleInput.value.trim()) {
+            return titleInput.value.trim();
+        }
+        
+        // Fallback: search in textarea
+        const textarea = document.getElementById('r2a-main-textarea');
+        const lines = textarea.value.split('\n');
+        
+        for (const line of lines) {
+            const trimmed = line.trim();
+            if (trimmed.startsWith('#') || trimmed.startsWith('!!!')) {
+                return trimmed;
+            }
+        }
+        return '';
+    }
+
+    const CHORD_REGEX = /^(?=.{1,10}$)[A-GH](?:#|b)?(?:maj|m|dim|aug|sus(?:2|4)?)?(?:2|4|5|6|7|9|11|13)?(?:(?:#|b)(?:5|9|11|13))?(?:add(?:9|11|13))?(?:\/[A-GH](?:#|b)?)?$/i;
 
     function validateChord(chord) {
         const trimmed = chord.trim();
@@ -225,98 +467,268 @@ How I wonder what you are"
         return trimmed.replace(/^H/i, 'B').replace(/\/(H)/i, '/B');
     }
 
+    function validateChordDetailed(chord) {
+        const trimmed = chord.trim();
+        if (!trimmed) return { valid: false, reason: 'empty' };
+        
+        // Check regex
+        if (!CHORD_REGEX.test(trimmed)) {
+            console.log(`[R2A] Chord validation failed for "${trimmed}" - regex mismatch`);
+            return { valid: false, reason: 'regex' };
+        }
+
+        // Check for duplicate add/extension
+        const match = trimmed.match(/(\d+).*add(\d+)/i);
+        if (match && match[1] === match[2]) {
+            console.log(`[R2A] Chord validation failed for "${trimmed}" - duplicate add`);
+            return { valid: false, reason: 'duplicate-add' };
+        }
+
+        // Normalize H→B (including slash bass)
+        const normalized = trimmed.replace(/^H/i, 'B').replace(/\/(H)/i, '/B');
+        console.log(`[R2A] Chord validation passed for "${trimmed}" → "${normalized}"`);
+        
+        return {
+            valid: true,
+            value: normalized
+        };
+    }
+
+    const PARSE_LOG_KEY = 'r2a-parse-log';
+
+    function appendParseLog(entry) {
+        const log = JSON.parse(localStorage.getItem(PARSE_LOG_KEY) || '[]');
+        log.push(entry);
+        localStorage.setItem(PARSE_LOG_KEY, JSON.stringify(log));
+    }
+
+    function downloadParseLog() {
+        const log = JSON.parse(localStorage.getItem(PARSE_LOG_KEY) || '[]');
+        if (!log.length) {
+            alert('No chords logged yet.');
+            return;
+        }
+
+        const content = log.map(item => {
+            // R2A validation logs
+            if (item.status === 'valid') {
+                return `[${item.ts}] R2A | line ${item.lineNumber} | ✓ VALID | token="${item.token}" → "${item.normalized}" | lineText="${item.lineText}"`;
+            } else if (item.status === 'invalid') {
+                return `[${item.ts}] R2A | line ${item.lineNumber} | ✗ INVALID | token="${item.token}" | reason=${item.reason} | lineText="${item.lineText}"`;
+            }
+            // R1→R3 flow logs
+            else if (item.source === 'R1') {
+                return `[${item.ts}] R1 | row ${item.rowIndex} | → SENT TO R3 | chord="${item.chord}"`;
+            } else if (item.source === 'R3' && item.action === 'processed') {
+                return `[${item.ts}] R3 | row ${item.rowIndex} | ✓ PROCESSED | chord="${item.chord}" | notes=${item.notes}`;
+            } else if (item.source === 'R3' && item.action === 'rejected') {
+                return `[${item.ts}] R3 | row ${item.rowIndex} | ✗ REJECTED | chord="${item.chord}" | reason=${item.reason}`;
+            } else if (item.source === 'R3' && item.action === 'failed') {
+                return `[${item.ts}] R3 | row ${item.rowIndex} | ✗ FAILED | chord="${item.chord}" | reason=${item.reason}`;
+            }
+            return `[${item.ts}] UNKNOWN | ${JSON.stringify(item)}`;
+        }).join('\n');
+
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'r2a-parse-log.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    function clearParseLog() {
+        const log = JSON.parse(localStorage.getItem(PARSE_LOG_KEY) || '[]');
+        if (!log.length) {
+            alert('Log is already empty.');
+            return;
+        }
+        
+        if (confirm(`Clear ${log.length} log entries?`)) {
+            localStorage.removeItem(PARSE_LOG_KEY);
+            alert('✓ Log cleared');
+        }
+    }
+
     // ===== R1 COMMUNICATION (via parent frame) =====
     
-    function sendToR1(chords) {
+    function sendToR1(chords, titleLine = '') {
+        console.log('[R2A] sendToR1 called with:', chords.length, 'chords');
+        console.log('[R2A] Chords array:', chords);
+        console.log('[R2A] Title:', titleLine);
+        
         // Send to parent frame, which will route to R1
         window.parent.postMessage({
             type: 'R2A_LOAD_CHORDS',
-            chords: chords
+            chords: chords,
+            titleLine: titleLine
         }, '*');
-        console.log('R2A: Sent chords via parent:', chords);
+        
+        console.log('[R2A] postMessage sent to parent');
     }
 
     // ===== B5: LOAD ALL =====
     
     function handleB5Click() {
+        console.log('[R2A] B5 clicked');
+        const textarea = document.getElementById('r2a-main-textarea');
+        console.log('[R2A] Textarea value length:', textarea.value.length);
+        console.log('[R2A] Textarea first 100 chars:', textarea.value.substring(0, 100));
+        
         const allChords = parseAllChords();
+        const titleLine = extractTitleLine();
+        
+        console.log('[R2A] Parsed chords count:', allChords.length);
+        console.log('[R2A] Parsed chords:', allChords);
+        console.log('[R2A] Title line:', titleLine);
         
         if (allChords.length === 0) {
-            console.log('R2A: No valid chords found');
+            console.log('[R2A] ERROR: No valid chords found');
+            alert('❌ No valid chords found in textarea');
             return;
         }
 
-        console.log('R2A: Loading chords to R1:', allChords);
-        sendToR1(allChords);
+        console.log('[R2A] Sending to R1 via parent:', allChords.length, 'chords');
+        sendToR1(allChords, titleLine);
+        alert('✅ Sent ' + allChords.length + ' chords to R1');
     }
 
     // ===== B6: CLEAR ALL (R2A ONLY) =====
     
     function handleB6Click() {
+        const titleInput = document.getElementById('r2a-title');
         const textarea = document.getElementById('r2a-main-textarea');
         if (textarea) {
             textarea.value = '';
-            saveToStorage();
         }
+        if (titleInput) {
+            titleInput.value = '';
+        }
+        // Clear localStorage
+        localStorage.removeItem('r2a-title');
+        localStorage.removeItem('r2a-chords');
+        console.log('[R2A] B6: Cleared title, textarea, and localStorage');
     }
 
     // ===== STORAGE (PERSISTENCE) =====
     
     function saveToStorage() {
-        const textarea = document.getElementById('r2a-main-textarea');
-        if (textarea) {
-            localStorage.setItem('r2a-data', textarea.value);
-        }
-    }
-
-    function loadFromStorage() {
-        const stored = localStorage.getItem('r2a-data');
-        if (!stored) return;
-
+        const titleInput = document.getElementById('r2a-title');
         const textarea = document.getElementById('r2a-main-textarea');
         if (!textarea) return;
 
-        // Check if it's old JSON format (migrate from old multi-row version)
-        if (stored.startsWith('{')) {
-            try {
-                const oldData = JSON.parse(stored);
-                // Convert old format to new format (extract chord lines only)
-                const lines = [];
-                for (let i = 1; i <= 10; i++) {
-                    const rowData = oldData[`row-${i}`];
-                    if (rowData && rowData.trim()) {
-                        lines.push(rowData.trim());
-                    }
-                }
-                textarea.value = lines.join('\n');
-                // Save in new format
-                saveToStorage();
-            } catch (e) {
-                console.warn('R2A: Failed to migrate old data', e);
-                localStorage.removeItem('r2a-data');
-            }
-        } else {
-            // New format - plain text
-            textarea.value = stored;
+        // Get title from input field, clean it up
+        let titleLine = '';
+        if (titleInput && titleInput.value.trim()) {
+            let title = titleInput.value.trim();
+            // Remove # prefix if present
+            title = title.replace(/^#+\s*/, '').trim();
+            titleLine = '!!! ' + title;
+        }
+
+        // Get chord lines from textarea
+        const chordLines = textarea.value.trim();
+        
+        // Always ensure title exists
+        if (!titleLine) {
+            titleLine = DEFAULT_TITLE;
+        }
+        
+        // Save title and chords separately
+        localStorage.setItem('r2a-title', titleLine);
+        localStorage.setItem('r2a-chords', chordLines);
+    }
+
+    function loadFromStorage() {
+        const titleInput = document.getElementById('r2a-title');
+        const textarea = document.getElementById('r2a-main-textarea');
+        if (!textarea) return;
+
+        const savedTitle = localStorage.getItem('r2a-title');
+        const savedChords = localStorage.getItem('r2a-chords');
+
+        // Load title to input field
+        if (titleInput && savedTitle) {
+            let displayTitle = savedTitle.replace(/^!!!\s*/, '');
+            titleInput.value = '# ' + displayTitle;
+        }
+        
+        // Load chords to textarea
+        if (savedChords) {
+            textarea.value = savedChords;
         }
     }
 
     // ===== TIMESTAMP =====
-    
-    function updateTimestamp() {
-        const now = new Date();
-        const yy = String(now.getFullYear()).slice(-2);
-        const mm = String(now.getMonth() + 1).padStart(2, '0');
-        const dd = String(now.getDate()).padStart(2, '0');
-        const hh = String(now.getHours()).padStart(2, '0');
-        const mins = String(now.getMinutes()).padStart(2, '0');
-        
-        document.getElementById('r2a-timestamp').textContent = `${yy}.${mm}.${dd} • ${hh}.${mins}`;
-    }
+    // ===== MESSAGE LISTENER (from Sample.html or frame) =====
+    window.addEventListener('message', (event) => {
+        if (event.data && event.data.type === 'LOAD_CHORD_DATA') {
+            console.log('[R2A] Message received');
+            const titleInput = document.getElementById('r2a-title');
+            const textarea = document.getElementById('r2a-main-textarea');
+            
+            if (titleInput && textarea) {
+                const raw = event.data.data || '';
+                console.log('[R2A] Raw data:', raw.substring(0, 50));
+                
+                const lines = raw.split('\n');
+                let titleLine = '';
+                const chordLines = [];
+
+                // Look for !!! marker or use first non-empty line as title
+                let titleFound = false;
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i];
+                    const trimmed = line.trim();
+                    
+                    if (trimmed.startsWith('!!!') && !titleFound) {
+                        titleLine = trimmed.replace(/^!!!\s*/, '');
+                        titleFound = true;
+                        console.log('[R2A] Found !!! marker:', titleLine);
+                    } else if (!titleFound && trimmed && !trimmed.startsWith('<!--')) {
+                        // Use first non-empty line as title if no !!! marker
+                        titleLine = trimmed;
+                        titleFound = true;
+                        console.log('[R2A] Using first line as title:', titleLine);
+                    } else if (titleFound) {
+                        // After title found, everything else is chords/lyrics
+                        chordLines.push(line);
+                    }
+                }
+
+                // Use default title if nothing found
+                if (!titleLine) {
+                    titleLine = 'Let It Be - The Beatles';
+                    console.log('[R2A] No title found, using default');
+                }
+
+                console.log('[R2A] Title:', titleLine);
+                console.log('[R2A] Chord lines:', chordLines.length);
+
+                // Put title in the title input field (top row)
+                titleInput.value = '# ' + titleLine;
+                
+                // Put chords/lyrics in the textarea
+                textarea.value = chordLines.join('\n');
+                console.log('[R2A] Title input updated:', titleInput.value);
+                
+                saveToStorage();
+            }
+        }
+    });
+
+
 
     // ===== INITIALIZATION =====
     
-    document.addEventListener('DOMContentLoaded', initR2A);
+    console.log('[R2A] Adding DOMContentLoaded listener');
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('[R2A] DOMContentLoaded fired, calling initR2A()');
+        initR2A();
+    });
 </script>
 
 </body>

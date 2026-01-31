@@ -60,16 +60,46 @@
 
         .frame-container {
             display: grid;
-            grid-template-columns: 0.125fr 0.30fr 0.575fr;
+            grid-template-columns: 0.125fr 0.33fr 6px 0.545fr;
             grid-template-rows: var(--row1-height, 0.3fr) 8px var(--row2-height, 0.7fr);
             grid-template-areas:
-                "r1 r2a r2b"
-                "r1 divider divider"
-                "r1 r3 r3";
+                "r1 r2a h-divider r2b"
+                "r1 divider divider divider"
+                "r1 r3 r3 r3";
             gap: 6px;
             flex: 1;
             min-height: 0;
             position: relative;
+        }
+
+        .h-resize-divider {
+            grid-area: h-divider;
+            background: transparent;
+            cursor: ew-resize;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
+
+        .h-resize-divider::before {
+            content: '';
+            width: 4px;
+            height: 100%;
+            background: #0d47a1;
+            border-radius: 2px;
+            transition: background 0.2s, width 0.2s;
+        }
+
+        .h-resize-divider:hover::before {
+            background: #4dd0e1;
+            width: 6px;
+        }
+
+        .h-resize-divider.dragging::before {
+            background: #4dd0e1;
+            width: 6px;
         }
 
         .resize-divider {
@@ -144,8 +174,8 @@
         }
 
         .frame-nav-btn {
-            width: 28px;
-            height: 24px;
+            width: 44px;
+            height: 36px;
             padding: 0;
             border: 1px solid #4fc3f7;
             border-radius: 3px;
@@ -153,8 +183,30 @@
             color: #4fc3f7;
             cursor: pointer;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 18px;
             transition: all 0.2s;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .frame-nav-btn:hover::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #0d47a1;
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            white-space: nowrap;
+            z-index: 1000;
+            pointer-events: none;
+            border: 1px solid #4fc3f7;
+            margin-bottom: 4px;
         }
 
         .frame-nav-btn:hover {
@@ -178,12 +230,12 @@
             <span id="frame-timestamp" style="font-size:0.75rem; color:#888; margin-left:8px; display:inline-block;"></span>
         </h1>
         <div class="frame-nav-buttons" id="frame-nav-buttons">
-            <button class="frame-nav-btn active" data-nav="0">0</button>
-            <button class="frame-nav-btn" data-nav="1">1</button>
-            <button class="frame-nav-btn" data-nav="2">2</button>
-            <button class="frame-nav-btn" data-nav="3">3</button>
-            <button class="frame-nav-btn" data-nav="4">4</button>
-            <button class="frame-nav-btn" data-nav="5">5</button>
+            <button class="frame-nav-btn active" data-nav="0" title="Note">🎵</button>
+            <button class="frame-nav-btn" data-nav="1" title="Sheet">🎼</button>
+            <button class="frame-nav-btn" data-nav="2" title="Linear">①</button>
+            <button class="frame-nav-btn" data-nav="3" title="Desktop">🖥️</button>
+            <button class="frame-nav-btn" data-nav="4" title="Tablet">📱</button>
+            <button class="frame-nav-btn" data-nav="5" title="Phone">📵</button>
         </div>
     </div>
     <div class="data-flow" aria-label="Data flow">
@@ -196,6 +248,12 @@
         <iframe id="r2a-frame" name="r2a-frame" src="R2A.html?v=1.0.2"></iframe>
     </div>
 
+    <div class="h-resize-divider" id="h-resize-divider"></div>
+
+    <div class="frame-wrapper frame-r2b">
+        <iframe id="r2b-frame" name="r2b-frame" src="R2B.html?v=1.0.2"></iframe>
+    </div>
+
     <div class="frame-wrapper frame-r1">
         <iframe id="r1-frame" name="r1-frame" src="R1.html?v=1.0.2"></iframe>
     </div>
@@ -204,10 +262,6 @@
 
     <div class="frame-wrapper frame-r3">
         <iframe id="r3-frame" name="r3-frame" src="R3.html?v=1.0.2"></iframe>
-    </div>
-
-    <div class="frame-wrapper frame-r2b">
-        <iframe id="r2b-frame" name="r2b-frame" src="R2B.html?v=1.0.2"></iframe>
     </div>
 </div>
 
@@ -292,6 +346,63 @@
         }
     });
 
+    // ===== HORIZONTAL RESIZE DIVIDER (R2A/R2B) =====
+    const hDivider = document.getElementById('h-resize-divider');
+    let isHDragging = false;
+    let startR2aWidth = 0.33;
+    let startR2bWidth = 0.545;
+
+    hDivider.addEventListener('mousedown', (e) => {
+        isHDragging = true;
+        hDivider.classList.add('dragging');
+        document.body.style.cursor = 'ew-resize';
+        document.body.style.userSelect = 'none';
+        
+        document.querySelectorAll('iframe').forEach(iframe => {
+            iframe.style.pointerEvents = 'none';
+        });
+        
+        e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isHDragging) return;
+        
+        e.preventDefault();
+        
+        const containerRect = container.getBoundingClientRect();
+        const mouseX = e.clientX - containerRect.left;
+        const containerWidth = containerRect.width;
+        
+        // Account for R1 (12.5%) and gaps
+        const r1Width = 0.125;
+        const gap = 0.03; // approximate gap
+        const availableWidth = containerWidth * (1 - r1Width - gap);
+        
+        // New R2A width relative to available space
+        const newR2aWidth = mouseX / containerWidth - r1Width - gap;
+        const newR2bWidth = 1 - r1Width - gap - newR2aWidth;
+        
+        // Clamp between 20% and 80%
+        const clampedR2a = Math.max(0.2, Math.min(0.6, newR2aWidth));
+        const clampedR2b = 1 - r1Width - gap - clampedR2a;
+        
+        container.style.gridTemplateColumns = `0.125fr ${clampedR2a}fr 6px ${clampedR2b}fr`;
+    });
+
+    document.addEventListener('mouseup', () => {
+        if (isHDragging) {
+            isHDragging = false;
+            hDivider.classList.remove('dragging');
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+            
+            document.querySelectorAll('iframe').forEach(iframe => {
+                iframe.style.pointerEvents = '';
+            });
+        }
+    });
+
     // ===== IFRAME MESSAGE ROUTING =====
     window.addEventListener('message', (event) => {
         // Route messages between iframes
@@ -345,6 +456,30 @@
                 console.log('[Frame Router] R1→R3: focus and play', event.data.rowIndex);
             }
         }
+        else if (event.data.type === 'LOAD_CHORD_DATA') {
+            // Route Sample.html→R2A (Load chord data into R2A)
+            const r2aFrame = document.getElementById('r2a-frame');
+            if (r2aFrame && r2aFrame.contentWindow) {
+                r2aFrame.contentWindow.postMessage(event.data, '*');
+                console.log('[Frame Router] Sample→R2A: chord data loaded');
+            }
+        }
+        else if (event.data.type === 'SET_CHORD_DURATION') {
+            // Route R2B→R3 (Set chord duration)
+            const r3Frame = document.getElementById('r3-frame');
+            if (r3Frame && r3Frame.contentWindow) {
+                r3Frame.contentWindow.postMessage(event.data, '*');
+                console.log('[Frame Router] R2B→R3: duration set to', event.data.duration);
+            }
+        }
+        else if (event.data.type === 'EDIT_SAMPLE') {
+            // Route R2A→Sample (Edit existing sample)
+            const sampleFrame = document.getElementById('sample-frame');
+            if (sampleFrame && sampleFrame.contentWindow) {
+                sampleFrame.contentWindow.postMessage(event.data, '*');
+                console.log('[Frame Router] R2A→Sample: Edit mode with data:', event.data.data);
+            }
+        }
     });
 
     // ===== TIMESTAMP =====
@@ -364,6 +499,19 @@
 
     // ===== NAVIGATION BUTTONS =====
     const navButtons = document.querySelectorAll('.frame-nav-btn');
+    
+    function resetR3Frame() {
+        const r3Frame = document.getElementById('r3-frame');
+        if (r3Frame) {
+            // Clear iframe by reloading it fresh
+            r3Frame.src = 'about:blank';
+            // Small delay to ensure clear, then reload
+            setTimeout(() => {
+                r3Frame.src = 'R3.html?v=1.0.2';
+            }, 50);
+        }
+    }
+    
     navButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             navButtons.forEach(b => b.classList.remove('active'));
@@ -372,23 +520,47 @@
             console.log('[Frame] Navigation to:', navNum);
             
             if (navNum === '0') {
-                // Main Piano app (frame.html) - open AddData dialog
-                window.open('AddData.html', 'adddata', 'width=650,height=500');
+                // Open Ultimate Guitar Explore
+                window.open('https://www.ultimate-guitar.com/explore', 'ultimateGuitar');
             } else if (navNum === '1') {
                 // Sample data
-                window.open('Sample.html', 'sample', 'width=700,height=600');
+                window.open('Sample.html', 'sample', 'width=1400,height=720');
             } else if (navNum === '2') {
-                // R3 Linear (1 chord per row, 24 rows)
-                window.open('R3_Linear.html', 'r3linear', 'width=900,height=800');
+                // R3 Linear (1 row × 24) - load in iframe
+                resetR3Frame();
+                setTimeout(() => {
+                    const r3Frame = document.getElementById('r3-frame');
+                    if (r3Frame) {
+                        r3Frame.src = 'R3.html?v=1.0.2&layout=linear';
+                    }
+                }, 100);
             } else if (navNum === '3') {
-                // R3 Desktop (4 columns)
-                window.open('R3.html?v=1.0.2', 'r3desktop', 'width=1400,height=800');
+                // R3 Desktop (4 columns) - load in iframe
+                resetR3Frame();
+                setTimeout(() => {
+                    const r3Frame = document.getElementById('r3-frame');
+                    if (r3Frame) {
+                        r3Frame.src = 'R3.html?v=1.0.2&layout=desktop';
+                    }
+                }, 100);
             } else if (navNum === '4') {
-                // R3 Tablet (3 columns)
-                window.open('R3.html?v=1.0.2', 'r3tablet', 'width=800,height=800');
+                // R3 Tablet (3 columns) - load in iframe
+                resetR3Frame();
+                setTimeout(() => {
+                    const r3Frame = document.getElementById('r3-frame');
+                    if (r3Frame) {
+                        r3Frame.src = 'R3.html?v=1.0.2&layout=tablet';
+                    }
+                }, 100);
             } else if (navNum === '5') {
-                // R3 Mobile (2 columns)
-                window.open('R3.html?v=1.0.2', 'r3mobile', 'width=500,height=800');
+                // R3 Mobile (2 columns) - load in iframe
+                resetR3Frame();
+                setTimeout(() => {
+                    const r3Frame = document.getElementById('r3-frame');
+                    if (r3Frame) {
+                        r3Frame.src = 'R3.html?v=1.0.2&layout=mobile';
+                    }
+                }, 100);
             }
         });
     });
