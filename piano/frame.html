@@ -667,6 +667,16 @@ R1 (single row input) → R3 (display)">
         // Route messages between iframes
         console.log('[Frame Router] Received message:', event.data.type);
         
+        // Route SAMPLES_UPDATED from Sample.html to R2A
+        if (event.data.type === 'SAMPLES_UPDATED') {
+            const r2aFrame = document.getElementById('r2a-frame');
+            if (r2aFrame && r2aFrame.contentWindow) {
+                r2aFrame.contentWindow.postMessage(event.data, '*');
+                console.log('[Frame Router] Sample.html→R2A: samples updated');
+            }
+            return;
+        }
+        
         if (event.data.type === 'R2A_LOAD_TO_R3') {
             // B5: Direct R2A→R3 (bypasses R1)
             const convertedMessage = {
@@ -740,6 +750,14 @@ R1 (single row input) → R3 (display)">
             if (r2bFrame && r2bFrame.contentWindow) {
                 r2bFrame.contentWindow.postMessage(event.data, '*');
                 console.log('[Frame Router] R3→R2B: chord sent for analysis');
+            }
+        }
+        else if (event.data.type === 'R3_CLEAR_ALL') {
+            // Route R2A→R3 (B6: Clear all)
+            const r3Frame = document.getElementById('r3-frame');
+            if (r3Frame && r3Frame.contentWindow) {
+                r3Frame.contentWindow.postMessage(event.data, '*');
+                console.log('[Frame Router] R2A→R3: clear all chords');
             }
         }
         else if (event.data.type === 'R3_FOCUS_AND_PLAY') {

@@ -780,6 +780,32 @@
                 console.log('[R3] Loaded', Math.min(chords.length, 24), 'chords to R3 (sequentially)');
             }
         }
+        else if (event.data.type === 'R3_CLEAR_ALL') {
+            // Clear all chord groups
+            console.log('[R3] Clearing all chord groups');
+            for (let i = 0; i < 24; i++) {
+                const state = groupStates[i];
+                state.chordName = '';
+                state.isEmpty = true;
+                state.mode = 'triad';
+                state.inversion = 0;
+                state.notes = [];
+                
+                // Update display
+                const chordBtn = document.getElementById(`r3-chord-${i + 1}`);
+                if (chordBtn) chordBtn.textContent = '–';
+                
+                // Clear piano highlighting
+                const svg = document.getElementById(`r3-piano-${i + 1}`);
+                if (svg) {
+                    svg.querySelectorAll('.piano-key').forEach(key => {
+                        const isBlack = key.getAttribute('fill') === '#1a1a1a';
+                        key.setAttribute('fill', isBlack ? '#1a1a1a' : '#f5f5f5');
+                    });
+                }
+            }
+            console.log('[R3] All chord groups cleared');
+        }
         else if (event.data.type === 'R3_FOCUS_AND_PLAY') {
             const { rowIndex } = event.data;
             if (rowIndex !== undefined && groupStates[rowIndex] && !groupStates[rowIndex].isEmpty) {

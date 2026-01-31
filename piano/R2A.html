@@ -212,11 +212,11 @@
             class="r2a-main-textarea" 
             id="r2a-main-textarea"
             placeholder="Example:
-# Let It Be - The Beatles
+# Sample Song Title
 C G Am F
-When I find myself in times of trouble
+First line of lyrics
 C G Am F
-Mother Mary comes to me"
+Second line of lyrics"
             rows="20"
         ></textarea>
         <div id="r2a-chord-preview" class="r2a-chord-preview"></div>
@@ -228,15 +228,8 @@ Mother Mary comes to me"
     
     // ===== R2A INITIALIZATION =====
 
-    const DEFAULT_TITLE = '!!! Let It Be - The Beatles';
-    const DEFAULT_CHORDS = `C                G                      Am
-  Let's dance in style, let's dance for a while
-           F                            G
-Heaven can wait we're only watching the skies
-               Dm                      F
-Hoping for the best, but expecting the worst
-                       G6   Fmaj7   G6   C
-Are you gonna drop the bomb or not?`;
+    const DEFAULT_TITLE = '';
+    const DEFAULT_CHORDS = '';
 
     function initR2A() {
         console.log('[R2A] initR2A() called');
@@ -252,6 +245,16 @@ Are you gonna drop the bomb or not?`;
         if (oldData) {
             console.log('[R2A] Found old r2a-data format, clearing it');
             localStorage.removeItem('r2a-data');
+        }
+
+        // FORCE CLEAR old corrupted data (one-time cleanup v2.1.0-dev)
+        const clearVersion = localStorage.getItem('r2a-clear-version');
+        if (clearVersion !== '2.1.0') {
+            console.log('[R2A] Force clearing old data');
+            localStorage.removeItem('r2a-title');
+            localStorage.removeItem('r2a-chords');
+            localStorage.removeItem('custom_default_data');
+            localStorage.setItem('r2a-clear-version', '2.1.0');
         }
 
         // Migrate old data from # to !!!
@@ -554,12 +557,6 @@ Are you gonna drop the bomb or not?`;
         const trimmed = chord.trim();
         if (!trimmed) return { valid: false, reason: 'empty' };
         
-        // Reject single notes (must have at least 2 characters: note + something)
-        if (trimmed.length < 2) {
-            console.log(`[R2A] Chord validation failed for "${trimmed}" - too short (single character)`);
-            return { valid: false, reason: 'too-short' };
-        }
-        
         // Normalize enharmonic equivalents BEFORE validation
         // Bb→A#, Eb→D#, Ab→G#, Db→C#, Gb→F#, Cb→B
         let normalized = trimmed
@@ -726,6 +723,12 @@ Are you gonna drop the bomb or not?`;
         localStorage.removeItem('r2a-title');
         localStorage.removeItem('r2a-chords');
         console.log('[R2A] B6: Cleared title, textarea, and localStorage');
+        
+        // Also clear R3 chord groups
+        window.parent.postMessage({
+            type: 'R3_CLEAR_ALL',
+        }, '*');
+        console.log('[R2A] B6: Sent clear command to R3');
     }
 
     // ===== STORAGE (PERSISTENCE) =====
@@ -795,6 +798,13 @@ Are you gonna drop the bomb or not?`;
             return;
         }
 
+        // Handle sample count update from Sample.html
+        if (event.data && event.data.type === 'SAMPLES_UPDATED') {
+            console.log('[R2A] Samples updated, refreshing display');
+            updateSampleDisplay();
+            return;
+        }
+
         if (event.data && event.data.type === 'LOAD_CHORD_DATA') {
             console.log('[R2A] Message received');
             const titleInput = document.getElementById('r2a-title');
@@ -831,7 +841,7 @@ Are you gonna drop the bomb or not?`;
 
                 // Use default title if nothing found
                 if (!titleLine) {
-                    titleLine = 'Let It Be - The Beatles';
+                    titleLine = 'Sample Song';
                     console.log('[R2A] No title found, using default');
                 }
 

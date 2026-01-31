@@ -462,23 +462,7 @@
         </div>
     </div>
     <script>
-        let defaultData = `!!! Let It Be - The Beatles
-C G Am F
-When I find myself in times of trouble
-C G Am F
-Mother Mary comes to me
-C G Am F
-And in my hour of darkness, she is standing
-C G Am F
-Speaking words of wisdom, let it be
-D A Bm G
-Sample verse line one
-D A Bm G
-Sample verse line two
-Em7 A7 Dm7 G
-Sample chorus with more harmonic
-D A Bm G
-Sample verse ending line`;
+        let defaultData = '';
 
         let entryToDelete = null;
 
@@ -525,6 +509,11 @@ Sample verse ending line`;
 
                 localStorage.setItem('piano_sample_entries', JSON.stringify(entries));
                 loadSavedEntries();
+                
+                // Notify R2A to refresh sample count
+                if (window.opener) {
+                    window.opener.postMessage({ type: 'SAMPLES_UPDATED' }, '*');
+                }
                 
                 showImportFeedback(`✅ Successfully added ${samples.length} sample${samples.length > 1 ? 's' : ''}`, 'success');
                 fileInput.value = ''; // Clear file input
