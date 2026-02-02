@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>R2A - Batch Chord Input Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            padding: 20px;
+        }
+
+        #r2a-panel {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            background-color: #2b2b2b;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .r2a-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .r2a-header h2 {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .r2a-timestamp {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .r2a-help-text {
+            font-size: 0.85rem;
+            color: #ddd;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .r2a-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            align-items: flex-start;
+        }
+
+        .r2a-label {
+            font-size: 0.9rem;
+            color: #aaa;
+            min-width: 45px;
+            padding-top: 8px;
+            text-align: right;
+        }
+
+        .r2a-textarea-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .r2a-textarea {
+            width: 100%;
+            min-height: 60px;
+            padding: 8px;
+            border: 1px solid #555;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.95rem;
+            background-color: #ffffff;
+            color: #000;
+            resize: vertical;
+            transition: border-color 0.2s;
+        }
+
+        .r2a-textarea:focus {
+            outline: none;
+            border-color: #8fd694;
+            box-shadow: 0 0 4px rgba(143, 214, 148, 0.3);
+        }
+
+        .r2a-textarea-buttons {
+            display: flex;
+            gap: 6px;
+        }
+
+        .r2a-btn {
+            flex: 1;
+            padding: 6px 8px;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: normal;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .r2a-btn:hover {
+            opacity: 0.8;
+        }
+
+        .r2a-btn:active {
+            opacity: 0.6;
+        }
+
+        .r2a-btn-load {
+            background-color: #8fd694;
+            color: white;
+        }
+
+        .r2a-btn-clear {
+            background-color: #f4a6a6;
+            color: white;
+        }
+
+        .r2a-global-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #444;
+        }
+
+        .r2a-btn-global {
+            padding: 8px 16px;
+            border: 2px solid;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            min-width: 100px;
+        }
+
+        .r2a-btn-global:hover {
+            opacity: 0.8;
+        }
+
+        .r2a-btn-global:active {
+            opacity: 0.6;
+        }
+
+        .r2a-btn-load-all {
+            background-color: transparent;
+            border-color: #8fd694;
+            color: #8fd694;
+        }
+
+        .r2a-btn-clear-all {
+            background-color: #f4a6a6;
+            border-color: #f4a6a6;
+            color: white;
+        }
+
+        .r2a-footer {
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid #444;
+            font-size: 0.75rem;
+            color: #666;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<section id="r2a-panel">
+    <div class="r2a-header">
+        <h2>R2A Panel</h2>
+        <div class="r2a-timestamp" id="r2a-timestamp">26.01.24 • 14.37</div>
+    </div>
+
+    <div class="r2a-help-text">
+        Ackordladdare: Skriv mellanslag-separerade ackord (ex: "C Dm G7 Am"). Max 200 tecken per rad.
+    </div>
+
+    <div id="r2a-rows-container">
+        <!-- Rows will be generated here -->
+    </div>
+
+    <div class="r2a-global-buttons">
+        <button class="r2a-btn-global r2a-btn-load-all" id="r2a-b7" aria-label="Load All">LR1 (All)</button>
+        <button class="r2a-btn-global r2a-btn-clear-all" id="r2a-b8" aria-label="Clear All">XR2A</button>
+    </div>
+
+    <div class="r2a-footer">
+        R2A → R1 (destructive reset) → R3 (pianogroups) → R2B (analysis)
+    </div>
+</section>
+
+<script>
+    // ===== R2A INITIALIZATION =====
+    
+    let currentR2AData = {};
+
+    function initR2A() {
+        generateRows();
+        attachRowListeners();
+        attachGlobalListeners();
+        loadFromStorage();
+        updateTimestamp();
+    }
+
+    // ===== ROW GENERATION =====
+    
+    function generateRows() {
+        const container = document.getElementById('r2a-rows-container');
+        for (let i = 1; i <= 10; i++) {
+            const row = document.createElement('div');
+            row.className = 'r2a-row';
+            row.innerHTML = `
+                <div class="r2a-label">Row ${i}:</div>
+                <div class="r2a-textarea-container">
+                    <textarea 
+                        class="r2a-textarea" 
+                        id="r2a-textform-${i}"
+                        placeholder="Ex: C Dm G7 Am"
+                        maxlength="200"
+                        rows="3"
+                    ></textarea>
+                    <div class="r2a-textarea-buttons">
+                        <button class="r2a-btn r2a-btn-load" data-row="${i}" data-action="load">LR1</button>
+                        <button class="r2a-btn r2a-btn-clear" data-row="${i}" data-action="clear">XR2A</button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(row);
+        }
+    }
+
+    // ===== EVENT LISTENERS =====
+    
+    function attachRowListeners() {
+        document.querySelectorAll('.r2a-textarea-buttons').forEach(container => {
+            container.addEventListener('click', (e) => {
+                if (!e.target.classList.contains('r2a-btn')) return;
+                
+                const rowIndex = parseInt(e.target.dataset.row);
+                const action = e.target.dataset.action;
+                
+                if (action === 'load') {
+                    handleB5Click(rowIndex);
+                } else if (action === 'clear') {
+                    handleB6Click(rowIndex);
+                }
+            });
+        });
+
+        // Save to localStorage on blur
+        document.querySelectorAll('.r2a-textarea').forEach(textarea => {
+            textarea.addEventListener('blur', () => {
+                saveToStorage();
+            });
+        });
+    }
+
+    function attachGlobalListeners() {
+        document.getElementById('r2a-b7').addEventListener('click', handleB7Click);
+        document.getElementById('r2a-b8').addEventListener('click', handleB8Click);
+    }
+
+    // ===== CHORD PARSING & VALIDATION =====
+    
+    function parseChords(textareaValue) {
+        return textareaValue
+            .trim()
+            .split(/\s+/)
+            .filter(chord => chord.length > 0);
+    }
+
+    const CHORD_REGEX = /^(?=.{1,10}$)[A-GH](?:#|b)?(?:maj|m|dim|aug|sus)?(?:2|4|5|6|7|9|11|13)?(?:(?:#|b)(?:5|9|11|13))?(?:add(?:9|11|13))?$/i;
+
+    function validateChord(chord) {
+        const trimmed = chord.trim();
+        if (!trimmed) return null;
+        if (!CHORD_REGEX.test(trimmed)) return null;
+        
+        // Check for duplicate add/extension
+        const match = trimmed.match(/(\d+).*add(\d+)/i);
+        if (match && match[1] === match[2]) return null;
+        
+        // Normalize H→B
+        return trimmed.replace(/^H/i, 'B');
+    }
+
+    // ===== R1 DOM MANIPULATION (OPTION A) =====
+    
+    function resetR1AllRows() {
+        for (let i = 1; i <= 10; i++) {
+            const input = document.getElementById(`r1-textform-${i}`);
+            if (input) input.value = '';
+        }
+    }
+
+    function fillR1Rows(chords) {
+        const clamped = chords.slice(0, 10);
+        clamped.forEach((chord, index) => {
+            const input = document.getElementById(`r1-textform-${index + 1}`);
+            if (input) {
+                input.value = chord;
+            }
+        });
+    }
+
+    function triggerR1Handlers(chordCount) {
+        let soundDelay = 0;
+        for (let i = 1; i <= chordCount; i++) {
+            setTimeout(() => {
+                if (window.handleB1Click) {
+                    window.handleB1Click(i);
+                }
+            }, soundDelay);
+            soundDelay += 400;
+        }
+    }
+
+    // ===== B5: LOAD ROW (DESTRUCTIVE) =====
+    
+    function handleB5Click(rowIndex) {
+        const textarea = document.getElementById(`r2a-textform-${rowIndex}`);
+        if (!textarea) return;
+
+        const chords = parseChords(textarea.value)
+            .map(validateChord)
+            .filter(c => c !== null);
+
+        if (chords.length === 0) return;
+
+        // STEP 1: RESET all R1 rows
+        resetR1AllRows();
+
+        // STEP 2-5: Fill R1 inputs and trigger B1 handlers
+        fillR1Rows(chords);
+        triggerR1Handlers(chords.length);
+    }
+
+    // ===== B6: CLEAR ROW (R2A ONLY) =====
+    
+    function handleB6Click(rowIndex) {
+        const textarea = document.getElementById(`r2a-textform-${rowIndex}`);
+        if (textarea) textarea.value = '';
+        saveToStorage();
+    }
+
+    // ===== B7: LOAD ALL (DESTRUCTIVE) =====
+    
+    function handleB7Click() {
+        // Collect all rows
+        const allChords = [];
+        for (let i = 1; i <= 10; i++) {
+            const textarea = document.getElementById(`r2a-textform-${i}`);
+            if (textarea) {
+                const chords = parseChords(textarea.value)
+                    .map(validateChord)
+                    .filter(c => c !== null);
+                allChords.push(...chords);
+            }
+        }
+
+        if (allChords.length === 0) return;
+
+        // STEP 1: RESET all R1 rows
+        resetR1AllRows();
+
+        // STEP 2-5: Fill R1 inputs and trigger B1 handlers with sequential timing
+        fillR1Rows(allChords);
+        triggerR1Handlers(Math.min(allChords.length, 10));
+    }
+
+    // ===== B8: CLEAR ALL (R2A ONLY) =====
+    
+    function handleB8Click() {
+        for (let i = 1; i <= 10; i++) {
+            const textarea = document.getElementById(`r2a-textform-${i}`);
+            if (textarea) textarea.value = '';
+        }
+        saveToStorage();
+    }
+
+    // ===== STORAGE (PERSISTENCE) =====
+    
+    function saveToStorage() {
+        const data = {};
+        for (let i = 1; i <= 10; i++) {
+            const textarea = document.getElementById(`r2a-textform-${i}`);
+            if (textarea) {
+                data[`row-${i}`] = textarea.value;
+            }
+        }
+        localStorage.setItem('r2a-data', JSON.stringify(data));
+    }
+
+    function loadFromStorage() {
+        const stored = localStorage.getItem('r2a-data');
+        if (!stored) return;
+
+        try {
+            const data = JSON.parse(stored);
+            for (let i = 1; i <= 10; i++) {
+                const textarea = document.getElementById(`r2a-textform-${i}`);
+                if (textarea && data[`row-${i}`]) {
+                    textarea.value = data[`row-${i}`];
+                }
+            }
+        } catch (e) {
+            console.warn('R2A: Failed to load from storage', e);
+        }
+    }
+
+    // ===== TIMESTAMP =====
+    
+    function updateTimestamp() {
+        const now = new Date();
+        const yy = String(now.getFullYear()).slice(-2);
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        const hh = String(now.getHours()).padStart(2, '0');
+        const mins = String(now.getMinutes()).padStart(2, '0');
+        
+        document.getElementById('r2a-timestamp').textContent = `${yy}.${mm}.${dd} • ${hh}.${mins}`;
+    }
+
+    // ===== INITIALIZATION =====
+    
+    document.addEventListener('DOMContentLoaded', initR2A);
+</script>
+
+</body>
+</html>
