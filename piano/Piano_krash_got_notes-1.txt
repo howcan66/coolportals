@@ -1,0 +1,35 @@
+You’re right: don’t force one layout for all devices. Keep separate entry pages and route users based on device width.
+
+Recommended plan (safe + clear):
+
+Keep desktop as main (unchanged).
+Create two separate entry pages:
+tablet version
+mobile version
+Auto‑redirect from a small launcher page based on screen width:
+Desktop → desktop page
+Tablet → tablet page
+Mobile → mobile page
+Test each page separately before merging.
+Merge only when all 3 pages work.
+If you want, I can set up:
+
+a device launcher page
+separate tablet/mobile HTML files
+clean routing with no layout conflicts
+
+Understood. Keep desktop stable on main and do tablet/mobile work only on dev.
+
+Workflow:
+
+Desktop (stable): stay on main
+git checkout main
+
+Tablet/Mobile (dev work): switch to dev
+git checkout dev
+
+
+Test desktop only on main. When ready to work on tablet/mobile, switch to dev.
+
+
+
